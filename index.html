@@ -473,6 +473,7 @@
         let gameStartTime = null;
         let gameEndTime = null;
         let confettiInterval;
+        let isConfettiActive = true;
 
         document.addEventListener('keydown', function(event) {
             if (event.ctrlKey && event.key === 'z') {
@@ -892,10 +893,17 @@
         }
 
         function createConfetti() {
+            if (!isConfettiActive) return;
+
             const colors = ['#ff0000', '#00ff00', '#0000ff', '#ffff00', '#ff00ff', '#00ffff'];
-            const confettiCount = 50; 
+            const confettiCount = 50;
             
             function createSingleConfetti() {
+                if (!isConfettiActive) {
+                    clearInterval(confettiInterval);
+                    return;
+                }
+
                 for (let i = 0; i < confettiCount; i++) {
                     const confetti = document.createElement('div');
                     confetti.className = 'confetti';
@@ -1069,6 +1077,19 @@
             `;
             savePdfButton.onclick = generatePDF;
 
+            const confettiButton = document.createElement('button');
+            confettiButton.textContent = 'Выключить конфетти';
+            confettiButton.style.cssText = `
+                padding: 8px 15px;
+                font-size: 1em;
+                background-color: var(--accent-color);
+                color: white;
+                border: none;
+                border-radius: 5px;
+                cursor: pointer;
+            `;
+            confettiButton.onclick = toggleConfetti;
+
             const closeButton = document.createElement('button');
             closeButton.textContent = 'Закрыть';
             closeButton.style.cssText = `
@@ -1083,6 +1104,7 @@
             closeButton.onclick = closeGameStats;
 
             buttonContainer.appendChild(savePdfButton);
+            buttonContainer.appendChild(confettiButton);
             buttonContainer.appendChild(closeButton);
             content.appendChild(buttonContainer);
 
@@ -1090,11 +1112,27 @@
             document.addEventListener('keydown', handleGameStatsKeyPress);
         }
 
+        function toggleConfetti() {
+            isConfettiActive = !isConfettiActive;
+            const confettiButton = document.querySelector('.button-container button:nth-child(2)');
+            
+            if (isConfettiActive) {
+                confettiButton.textContent = 'Выключить конфетти';
+                createConfetti();
+            } else {
+                confettiButton.textContent = 'Включить конфетти';
+                clearInterval(confettiInterval);
+                const existingConfetti = document.querySelectorAll('.confetti');
+                existingConfetti.forEach(confetti => confetti.remove());
+            }
+        }
+
         function closeGameStats() {
             const modal = document.getElementById('gameStatsModal');
             modal.style.display = 'none';
             
             clearInterval(confettiInterval);
+            isConfettiActive = true; 
             
             const existingConfetti = document.querySelectorAll('.confetti');
             existingConfetti.forEach(confetti => confetti.remove());

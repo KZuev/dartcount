@@ -281,7 +281,27 @@
         .close-stats-button:hover {
             background-color: var(--button-hover);
         }
+        @media print {
+            .modal-content {
+                background: white !important;
+                color: black !important;
+            }
+
+            .player-stats {
+                break-inside: avoid;
+                page-break-inside: avoid;
+                background: white !important;
+                color: black !important;
+                border: 1px solid #ccc;
+                margin-bottom: 15px;
+            }
+
+            .stat-item {
+                color: black !important;
+            }
+        }
     </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 </head>
 <body>
     <div class="container">
@@ -350,6 +370,8 @@
         let nextLegStartPlayer = 0; 
         let legMode = 'bestOf'; 
         let legsToWin = 0; 
+        let gameStartTime = null;
+        let gameEndTime = null;
 
         document.addEventListener('keydown', function(event) {
             if (event.ctrlKey && event.key === 'z') {
@@ -369,6 +391,7 @@
         }
 
         function startGame() {
+            gameStartTime = new Date();
             gameScore = parseInt(document.getElementById('gameType').value);
             playerCount = parseInt(document.getElementById('playerCount').textContent);
             legMode = document.getElementById('legMode').value;
@@ -462,6 +485,7 @@
                 
                 
                 if (checkGameWin(player)) {
+                    gameEndTime = new Date();
                     createConfetti();
                     setTimeout(() => {
                         showGameStats();
@@ -574,6 +598,8 @@
         }
 
         function restartGame() {
+            gameStartTime = null;
+            gameEndTime = null;
             document.querySelector('.settings').style.display = 'flex';
             document.getElementById('scoreInput').style.display = 'none';
             document.getElementById('restartBtn').style.display = 'none';
@@ -649,11 +675,42 @@
             
             const gameInfo = document.createElement('div');
             gameInfo.className = 'player-stats';
+
+            
+            const formatDateTime = (date) => {
+                return date.toLocaleString('ru-RU', {
+                    day: '2-digit',
+                    month: '2-digit',
+                    year: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    second: '2-digit'
+                });
+            };
+
+            
+            const calculateDuration = (start, end) => {
+                const diff = Math.floor((end - start) / 1000); 
+                const hours = Math.floor(diff / 3600);
+                const minutes = Math.floor((diff % 3600) / 60);
+                const seconds = diff % 60;
+                
+                const parts = [];
+                if (hours > 0) parts.push(`${hours} ч`);
+                if (minutes > 0) parts.push(`${minutes} мин`);
+                if (seconds > 0) parts.push(`${seconds} сек`);
+                
+                return parts.join(' ');
+            };
+
             gameInfo.innerHTML = `
                 <h3>Общая информация</h3>
                 <div class="stat-item">Тип игры: ${gameScore}</div>
                 <div class="stat-item">Режим легов: ${legMode === 'bestOf' ? 'Best of' : 'First to'} ${legsCount}</div>
                 <div class="stat-item">Количество игроков: ${playerCount}</div>
+                <div class="stat-item">Начало игры: ${formatDateTime(gameStartTime)}</div>
+                <div class="stat-item">Окончание игры: ${formatDateTime(gameEndTime)}</div>
+                <div class="stat-item">Длительность: ${calculateDuration(gameStartTime, gameEndTime)}</div>
             `;
             content.appendChild(gameInfo);
 
@@ -694,12 +751,28 @@
             });
 
             
-            const closeButtonContainer = document.createElement('div');
-            closeButtonContainer.style.cssText = `
+            const buttonContainer = document.createElement('div');
+            buttonContainer.style.cssText = `
                 text-align: center;
                 margin-top: 20px;
                 grid-column: 1 / -1;
+                display: flex;
+                justify-content: center;
+                gap: 20px;
             `;
+
+            const savePdfButton = document.createElement('button');
+            savePdfButton.textContent = 'Сохранить PDF';
+            savePdfButton.style.cssText = `
+                padding: 8px 15px;
+                font-size: 1em;
+                background-color: var(--accent-color);
+                color: white;
+                border: none;
+                border-radius: 5px;
+                cursor: pointer;
+            `;
+            savePdfButton.onclick = generatePDF;
 
             const closeButton = document.createElement('button');
             closeButton.textContent = 'Закрыть';
@@ -714,8 +787,9 @@
             `;
             closeButton.onclick = closeGameStats;
 
-            closeButtonContainer.appendChild(closeButton);
-            content.appendChild(closeButtonContainer);
+            buttonContainer.appendChild(savePdfButton);
+            buttonContainer.appendChild(closeButton);
+            content.appendChild(buttonContainer);
 
             modal.style.display = 'block';
             document.addEventListener('keydown', handleKeyPress);
@@ -733,6 +807,53 @@
             if (event.key === 'Enter') {
                 closeGameStats();
             }
+        }
+
+        function generatePDF() {
+            
+            const content = document.getElementById('gameStatsContent');
+            const pdfContent = content.cloneNode(true);
+            
+            
+            const tempContainer = document.createElement('div');
+            tempContainer.style.padding = '20px';
+            tempContainer.style.background = 'white';
+            tempContainer.style.color = 'black';
+            
+            
+            const header = document.createElement('h1');
+            header.textContent = 'Статистика игры в дартс';
+            header.style.textAlign = 'center';
+            header.style.color = '#000';
+            header.style.marginBottom = '20px';
+            
+            tempContainer.appendChild(header);
+            tempContainer.appendChild(pdfContent);
+
+            
+            const opt = {
+                margin: 10,
+                filename: `darts_game_stats_${new Date().toLocaleDateString()}.pdf`,
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { 
+                    scale: 2,
+                    useCORS: true,
+                    logging: true
+                },
+                jsPDF: { 
+                    unit: 'mm', 
+                    format: 'a4', 
+                    orientation: 'portrait' 
+                }
+            };
+
+            
+            html2pdf().set(opt).from(tempContainer).save().then(() => {
+                console.log('PDF успешно создан');
+            }).catch(error => {
+                console.error('Ошибка при создании PDF:', error);
+                alert('Произошла ошибка при создании PDF');
+            });
         }
     </script>
     <script>

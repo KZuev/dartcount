@@ -947,6 +947,43 @@
         }
 
         function restartGame() {
+            
+            if (players.length === 0) {
+                performRestart();
+                return;
+            }
+
+            
+            const modal = document.getElementById('throwsModal');
+            const content = modal.querySelector('.modal-content');
+            modal.classList.add('active');
+
+            content.innerHTML = `
+                <h2 style="font-size: 2em; margin-bottom: 20px;">Начать игру заново?</h2>
+                <p style="font-size: 1.2em; margin-bottom: 30px;">Текущий прогресс будет потерян</p>
+                <div style="display: flex; gap: 20px; justify-content: center;">
+                    <button onclick="confirmRestart(true)" 
+                            style="padding: 10px 20px; font-size: 1.2em; background-color: var(--accent-color);">
+                        Да
+                    </button>
+                    <button onclick="confirmRestart(false)" 
+                            style="padding: 10px 20px; font-size: 1.2em; background-color: #ff4444;">
+                        Нет
+                    </button>
+                </div>
+            `;
+        }
+
+        function confirmRestart(confirmed) {
+            const modal = document.getElementById('throwsModal');
+            modal.classList.remove('active');
+
+            if (confirmed) {
+                performRestart();
+            }
+        }
+
+        function performRestart() {
             gameStartTime = null;
             gameEndTime = null;
             document.querySelector('.settings').style.display = 'flex';

@@ -426,7 +426,15 @@
 
         <div class="score-input" id="scoreInput" style="display: none;">
             <label for="score">Очки:</label>
-            <input type="number" id="score" min="1" max="180" autofocus onkeypress="handleEnter(event)">
+            <input type="text" 
+                   id="score" 
+                   pattern="[\d+\s]*" 
+                   inputmode="numeric" 
+                   min="1" 
+                   max="180" 
+                   autofocus 
+                   onkeypress="handleEnter(event)"
+                   style="width: 160px; font-size: 1.5em;">
             <button onclick="submitScore()">Отправить очки</button>
             <button onclick="undoScore()" title="Отменить ввод (Ctrl + Z)">Отменить ввод</button>
         </div>
@@ -505,7 +513,37 @@
 
         function handleEnter(event) {
             if (event.key === 'Enter') {
-                submitScore();
+                event.preventDefault();
+                const scoreInput = document.getElementById('score');
+                const expression = scoreInput.value;
+
+                
+                if (expression.includes('+')) {
+                    try {
+                        
+                        const sum = expression.split('+')
+                            .map(num => parseInt(num.trim()))
+                            .reduce((acc, curr) => {
+                                if (isNaN(curr) || curr < 0 || curr > 60) {
+                                    throw new Error('Каждое число должно быть от 0 до 60');
+                                }
+                                return acc + curr;
+                            }, 0);
+
+                        if (sum > 180) {
+                            showErrorModal('Сумма не может быть больше 180');
+                            return;
+                        }
+
+                        scoreInput.value = sum.toString();
+                        submitScore();
+                    } catch (error) {
+                        showErrorModal(error.message);
+                    }
+                } else {
+                    
+                    submitScore();
+                }
             }
         }
 

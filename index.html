@@ -200,7 +200,7 @@
         .confetti {
             position: fixed;
             pointer-events: none;
-            z-index: 999;
+            z-index: 1001;
             animation: confetti-fall linear forwards;
         }
 
@@ -530,23 +530,61 @@
             });
         }
 
-        function showThrowsModal() {
+        function showThrowsModal(playerNumber, legWins) {
             return new Promise((resolve) => {
                 const modal = document.getElementById('throwsModal');
-                modal.style.display = 'block';
-
-                const buttons = modal.querySelectorAll('.throw-button');
+                const scoreInput = document.getElementById('score');
                 
+                
+                scoreInput.disabled = true;
+                
+                const content = modal.querySelector('.modal-content');
+                modal.classList.add('active');
+
+                content.innerHTML = `
+                    <h2 style="font-size: 2em; margin-bottom: 20px;">За сколько бросков завершена игра?</h2>
+                    <p style="font-size: 1.2em; margin-bottom: 30px;">(Выберите мышью или нажмите 1, 2 или 3 на клавиатуре)</p>
+                    <div class="throws-buttons">
+                        <button class="throw-button" data-throws="1">1</button>
+                        <button class="throw-button" data-throws="2">2</button>
+                        <button class="throw-button" data-throws="3">3</button>
+                    </div>
+                `;
+
                 function handleThrow(throws) {
-                    modal.style.display = 'none';
-                    resolve(throws);
+                    content.innerHTML = `
+                        <h2 style="font-size: 2em; margin-bottom: 20px;">Игрок #${playerNumber} выиграл лег!</h2>
+                        <p style="font-size: 1.5em; margin-bottom: 30px;">Количество выигранных легов: ${legWins}</p>
+                        <button id="continueButton" style="font-size: 1.2em; padding: 10px 20px;">Продолжить</button>
+                    `;
+
+                    function continueGame() {
+                        modal.classList.remove('active');
+                        
+                        scoreInput.disabled = false;
+                        setTimeout(() => {
+                            document.getElementById('score').value = '';
+                        }, 100);
+                        resolve(throws);
+                        document.removeEventListener('keydown', handleEnterPress);
+                    }
+
+                    document.getElementById('continueButton').onclick = continueGame;
+
+                    function handleEnterPress(event) {
+                        if (event.key === 'Enter') {
+                            continueGame();
+                        }
+                    }
+
+                    document.addEventListener('keydown', handleEnterPress);
                 }
 
+                const buttons = modal.querySelectorAll('.throw-button');
                 buttons.forEach(button => {
                     button.onclick = () => handleThrow(parseInt(button.dataset.throws));
                 });
 
-                
                 function handleKeyPress(event) {
                     if (['1', '2', '3'].includes(event.key)) {
                         handleThrow(parseInt(event.key));
@@ -556,7 +594,6 @@
 
                 document.addEventListener('keydown', handleKeyPress);
 
-                
                 modal.addEventListener('click', (event) => {
                     if (event.target === modal) {
                         document.removeEventListener('keydown', handleKeyPress);
@@ -565,69 +602,133 @@
             });
         }
 
+        function showErrorModal(message) {
+            return new Promise((resolve) => {
+                const modal = document.getElementById('throwsModal');
+                const content = modal.querySelector('.modal-content');
+                modal.classList.add('active');
+
+                content.innerHTML = `
+                    <h2 style="font-size: 2em; margin-bottom: 20px; color: #ff4444;">Ошибка</h2>
+                    <p style="font-size: 1.5em; margin-bottom: 30px;">${message}</p>
+                    <button id="continueButton" style="font-size: 1.2em; padding: 10px 20px;">OK</button>
+                `;
+
+                function closeError() {
+                    modal.classList.remove('active');
+                    document.getElementById('score').focus();
+                    resolve();
+                    document.removeEventListener('keydown', handleEnterPress);
+                }
+
+                document.getElementById('continueButton').onclick = closeError;
+
+                function handleEnterPress(event) {
+                    if (event.key === 'Enter') {
+                        event.preventDefault(); 
+                        closeError();
+                    }
+                }
+
+                
+                document.removeEventListener('keydown', handleEnterPress);
+                
+                document.addEventListener('keydown', handleEnterPress);
+
+                
+                modal.addEventListener('click', (event) => {
+                    if (event.target === modal) {
+                        document.removeEventListener('keydown', handleEnterPress);
+                    }
+                });
+            });
+        }
+
         function submitScore() {
             const scoreInput = document.getElementById('score');
             const score = parseInt(scoreInput.value);
-
-            if (isNaN(score) || score < 0 || score > 180) {
-                alert('Введите корректное значение очков (0-180).');
-                return;
-            }
-
             const player = players[currentPlayer];
             const currentTime = new Date();
 
-            if (player.score - score < 0) {
-                alert(`Нельзя набрать больше очков, чем у вас есть. У вас ${player.score}.`);
-                return;
-            } else if (player.score - score === 1) {
-                alert(`Нельзя остаться с 1 очком. Введите меньшее значение.`);
+            
+            if (isNaN(score) || score < 0 || score > 180) {
+                showErrorModal('Введите корректное значение очков (0-180).');
                 return;
             }
-
-            player.score -= score;
-            player.throws += 3; 
-            player.totalPoints += score;
-            player.history[player.history.length - 1].push(score);  
-            player.throwTimes.push(currentTime); 
-            lastScores.push({ playerIndex: currentPlayer, score, legIndex: player.history.length - 1 });
 
             
-            if (player.score === 0) {
-                showThrowsModal().then(throwsToFinish => {
-                    player.throws -= (3 - throwsToFinish);
-                    player.legWins++;
-                    
-                    
-                    if (checkGameWin(player)) {
-                        gameEndTime = new Date();
-                        createConfetti();
-                        setTimeout(() => {
-                            showGameStats();
-                        }, 1000);
-                        return;
-                    }
-                    
-                    alert(`Игрок #${currentPlayer + 1} выиграл лег! (${player.legWins} легов)`);
-                    
-                    
-                    players.forEach(p => {
-                        p.score = gameScore;
-                        p.history.push([]);
+            if (score === player.score) {
+                scoreInput.value = ''; 
+                showThrowsModal(currentPlayer + 1, player.legWins + 1)
+                    .then(throwsToFinish => {
+                        
+                        const legScore = score; 
+                        player.score = 0;
+                        player.throws += throwsToFinish;
+                        player.totalPoints += legScore;
+                        player.history[player.history.length - 1].push(legScore);
+                        player.throwTimes.push(currentTime);
+                        player.legWins++;
+                        lastScores.push({ 
+                            playerIndex: currentPlayer, 
+                            score: legScore, 
+                            legIndex: player.history.length - 1 
+                        });
+
+                        
+                        if (checkGameWin(player)) {
+                            gameEndTime = new Date();
+                            createConfetti();
+                            setTimeout(() => {
+                                showGameStats();
+                            }, 1000);
+                            return;
+                        }
+
+                        
+                        players.forEach(p => {
+                            p.score = gameScore;
+                            p.history.push([]);
+                        });
+                        nextLegStartPlayer = (nextLegStartPlayer + 1) % playerCount;
+                        currentPlayer = nextLegStartPlayer;
+                        
+                        updateScoreBoard();
+                        updateStatsBoard();
                     });
-                    nextLegStartPlayer = (nextLegStartPlayer + 1) % playerCount;
-                    currentPlayer = nextLegStartPlayer;
-                    
-                    updateScoreBoard();
-                    updateStatsBoard();
-                });
-            } else {
-                currentPlayer = (currentPlayer + 1) % playerCount;
-                scoreInput.value = '';
-                updateScoreBoard();
-                updateStatsBoard();
-                scoreInput.focus();
+                return;
             }
+
+            
+            
+            const remainingScore = player.score - score;
+            if (remainingScore < 0) {
+                showErrorModal(`Нельзя набрать больше очков, чем у вас есть. У вас ${player.score}.`);
+                return;
+            }
+            if (remainingScore === 1) {
+                showErrorModal('Нельзя остаться с 1 очком. Введите меньшее значение.');
+                return;
+            }
+
+            
+            player.score = remainingScore;
+            player.throws += 3;
+            player.totalPoints += score;
+            player.history[player.history.length - 1].push(score);
+            player.throwTimes.push(currentTime);
+            lastScores.push({ 
+                playerIndex: currentPlayer, 
+                score, 
+                legIndex: player.history.length - 1 
+            });
+
+            
+            currentPlayer = (currentPlayer + 1) % playerCount;
+            scoreInput.value = '';
+            updateScoreBoard();
+            updateStatsBoard();
+            scoreInput.focus();
         }
 
         function checkGameWin(player) {
@@ -919,15 +1020,30 @@
             content.appendChild(buttonContainer);
 
             modal.style.display = 'block';
-            document.addEventListener('keydown', handleKeyPress);
+            document.addEventListener('keydown', handleGameStatsKeyPress);
         }
 
         function closeGameStats() {
             const modal = document.getElementById('gameStatsModal');
             modal.style.display = 'none';
             
-            document.removeEventListener('keydown', handleKeyPress);
+            document.removeEventListener('keydown', handleGameStatsKeyPress);
             restartGame();
+        }
+
+        
+        function handleGameStatsKeyPress(event) {
+            
+            if (event.key === 'Enter') {
+                event.preventDefault(); 
+            }
+        }
+
+        
+        function handleOtherModalKeyPress(event) {
+            if (event.key === 'Enter') {
+                closeSomeOtherModal(); 
+            }
         }
 
         function handleKeyPress(event) {

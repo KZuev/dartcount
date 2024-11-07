@@ -224,17 +224,22 @@
             z-index: 1000;
         }
 
-        .modal-content {
+
+        .modal.active {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal .modal-content {
             position: relative;
             background-color: var(--bg-color);
-            margin: 5% auto;
-            padding: 20px;
-            width: 80%;
-            max-width: 800px;
-            max-height: 80vh;
-            border-radius: 15px;
+            padding: 40px;
+            border-radius: 20px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
 
         .game-stats {
@@ -346,6 +351,29 @@
             border-radius: 15px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
             overflow-y: auto;
+        }
+        .throws-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin: 30px 0;
+        }
+
+        .throw-button {
+            width: 100px;
+            height: 100px;
+            font-size: 2.5em;
+            border-radius: 50%;
+            border: none;
+            background: var(--accent-color);
+            color: white;
+            cursor: pointer;
+            transition: transform 0.2s, background-color 0.2s;
+        }
+
+        .throw-button:hover {
+            transform: scale(1.1);
+            background: var(--button-hover);
         }
     </style>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
@@ -502,6 +530,41 @@
             });
         }
 
+        function showThrowsModal() {
+            return new Promise((resolve) => {
+                const modal = document.getElementById('throwsModal');
+                modal.style.display = 'block';
+
+                const buttons = modal.querySelectorAll('.throw-button');
+                
+                function handleThrow(throws) {
+                    modal.style.display = 'none';
+                    resolve(throws);
+                }
+
+                buttons.forEach(button => {
+                    button.onclick = () => handleThrow(parseInt(button.dataset.throws));
+                });
+
+                
+                function handleKeyPress(event) {
+                    if (['1', '2', '3'].includes(event.key)) {
+                        handleThrow(parseInt(event.key));
+                        document.removeEventListener('keydown', handleKeyPress);
+                    }
+                }
+
+                document.addEventListener('keydown', handleKeyPress);
+
+                
+                modal.addEventListener('click', (event) => {
+                    if (event.target === modal) {
+                        document.removeEventListener('keydown', handleKeyPress);
+                    }
+                });
+            });
+        }
+
         function submitScore() {
             const scoreInput = document.getElementById('score');
             const score = parseInt(scoreInput.value);
@@ -523,7 +586,7 @@
             }
 
             player.score -= score;
-            player.throws++;
+            player.throws += 3; 
             player.totalPoints += score;
             player.history[player.history.length - 1].push(score);  
             player.throwTimes.push(currentTime); 
@@ -531,35 +594,40 @@
 
             
             if (player.score === 0) {
-                player.legWins++;
-                
-                
-                if (checkGameWin(player)) {
-                    gameEndTime = new Date();
-                    createConfetti();
-                    setTimeout(() => {
-                        showGameStats();
-                    }, 1000);
-                    return;
-                }
-                
-                alert(`Игрок #${currentPlayer + 1} выиграл лег! (${player.legWins} легов)`);
-                
-                
-                players.forEach(p => {
-                    p.score = gameScore;
-                    p.history.push([]);  
+                showThrowsModal().then(throwsToFinish => {
+                    player.throws -= (3 - throwsToFinish);
+                    player.legWins++;
+                    
+                    
+                    if (checkGameWin(player)) {
+                        gameEndTime = new Date();
+                        createConfetti();
+                        setTimeout(() => {
+                            showGameStats();
+                        }, 1000);
+                        return;
+                    }
+                    
+                    alert(`Игрок #${currentPlayer + 1} выиграл лег! (${player.legWins} легов)`);
+                    
+                    
+                    players.forEach(p => {
+                        p.score = gameScore;
+                        p.history.push([]);
+                    });
+                    nextLegStartPlayer = (nextLegStartPlayer + 1) % playerCount;
+                    currentPlayer = nextLegStartPlayer;
+                    
+                    updateScoreBoard();
+                    updateStatsBoard();
                 });
-                nextLegStartPlayer = (nextLegStartPlayer + 1) % playerCount;
-                currentPlayer = nextLegStartPlayer;
             } else {
                 currentPlayer = (currentPlayer + 1) % playerCount;
+                scoreInput.value = '';
+                updateScoreBoard();
+                updateStatsBoard();
+                scoreInput.focus();
             }
-
-            scoreInput.value = '';
-            updateScoreBoard();
-            updateStatsBoard();
-            scoreInput.focus();
         }
 
         function checkGameWin(player) {
@@ -798,6 +866,7 @@
                     <h3>Игрок #${index + 1} ${index === winner.index ? '👑' : ''}</h3>
                     <div class="stat-item">Выиграно легов: ${player.legWins}</div>
                     <div class="stat-item">Всего бросков: ${player.throws}</div>
+                    <div class="stat-item">Всего подходов: ${Math.ceil(player.throws / 3)}</div>
                     <div class="stat-item">Набрано очков: ${player.totalPoints}</div>
                     <div class="stat-item">Средний набор: ${averageScore}</div>
                     <div class="stat-item">Лучший бросок: ${highestScore}</div>
@@ -939,6 +1008,17 @@
             <h2>Статистика игры</h2>
             <div id="gameStatsContent" class="game-stats">
                 <!-- Статистика будет добавлена динамически -->
+            </div>
+        </div>
+    </div>
+    <div id="throwsModal" class="modal">
+        <div class="modal-content" style="max-width: 600px; text-align: center;">
+            <h2 style="font-size: 2em; margin-bottom: 20px;">За сколько бросков завершена игра?</h2>
+            <p style="font-size: 1.2em; margin-bottom: 30px;">(Выберите мышью или нажмите 1, 2 или 3 на клавиатуре)</p>
+            <div class="throws-buttons">
+                <button class="throw-button" data-throws="1">1</button>
+                <button class="throw-button" data-throws="2">2</button>
+                <button class="throw-button" data-throws="3">3</button>
             </div>
         </div>
     </div>

@@ -239,12 +239,46 @@
 
         .game-stats {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 20px;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
             margin: 20px 0;
             padding-bottom: 20px;
         }
 
+
+        @media screen and (min-width: 1600px) {
+            .game-stats {
+                grid-template-columns: repeat(5, 1fr);
+            }
+        }
+
+
+        @media screen and (min-width: 1200px) and (max-width: 1599px) {
+            .game-stats {
+                grid-template-columns: repeat(4, 1fr);
+            }
+        }
+
+
+        @media screen and (min-width: 800px) and (max-width: 1199px) {
+            .game-stats {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+
+        @media screen and (min-width: 500px) and (max-width: 799px) {
+            .game-stats {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+
+        @media screen and (max-width: 499px) {
+            .game-stats {
+                grid-template-columns: 1fr;
+            }
+        }
         .player-stats {
             background: var(--stats-bg);
             padding: 15px;
@@ -299,6 +333,19 @@
             .stat-item {
                 color: black !important;
             }
+        }
+
+        .modal-content {
+            position: relative;
+            background-color: var(--bg-color);
+            margin: 2% auto;
+            padding: 20px;
+            width: 90%;
+            max-width: 1600px;
+            max-height: 90vh;
+            border-radius: 15px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            overflow-y: auto;
         }
     </style>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>

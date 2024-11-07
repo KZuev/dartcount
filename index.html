@@ -180,6 +180,15 @@
                 <span id="playerCount">2</span>
                 <button onclick="adjustPlayers(1)">+</button>
             </div>
+            <div class="game-selection">
+                <label for="legsCount">Количество легов:</label>
+                <select id="legsCount">
+                    <option value="1">1</option>
+                    <option value="3">3</option>
+                    <option value="5">5</option>
+                    <option value="7">7</option>
+                </select>
+            </div>
             <button onclick="startGame()">Начать игру</button>
         </div>
 
@@ -191,7 +200,7 @@
             <label for="score">Очки:</label>
             <input type="number" id="score" min="1" max="180" autofocus onkeypress="handleEnter(event)">
             <button onclick="submitScore()">Отправить очки</button>
-            <button onclick="undoScore()">Отменить ввод</button>
+            <button onclick="undoScore()" title="Отменить ввод (Ctrl + Z)">Отменить ввод</button>
         </div>
         
         <div class="stats-board" id="statsBoard" style="display: none;"></div>
@@ -203,6 +212,15 @@
         let gameScore = 301;
         let playerCount = 2;
         let lastScores = [];
+        let legsCount = 1;
+        let currentLeg = 1;
+
+        document.addEventListener('keydown', function(event) {
+            if (event.ctrlKey && event.key === 'z') {
+                event.preventDefault();
+                undoScore();
+            }
+        });
 
         function adjustPlayers(value) {
             playerCount = Math.max(1, playerCount + value);
@@ -216,12 +234,13 @@
 
         function startGame() {
             gameScore = parseInt(document.getElementById('gameType').value);
+            legsCount = parseInt(document.getElementById('legsCount').value);
             players = Array.from({ length: playerCount }, () => ({
                 score: gameScore,
                 throws: 0,
                 totalPoints: 0,
                 history: []
-            }));
+             }));
             currentPlayer = 0;
             lastScores = [];
             updateScoreBoard();
@@ -257,8 +276,8 @@
             const scoreInput = document.getElementById('score');
             const score = parseInt(scoreInput.value);
 
-            if (isNaN(score) || score < 1 || score > 180) {
-                alert('Введите корректное значение очков (1-180).');
+            if (isNaN(score) || score < 0 || score > 180) {
+                alert('Введите корректное значение очков (0-180).');
                 return;
             }
 
@@ -277,6 +296,19 @@
             player.totalPoints += score;
             player.history.push(score);
             lastScores.push({ playerIndex: currentPlayer, score });
+
+           
+            if (player.score === 0) {
+                alert(`Игрок #${currentPlayer + 1} выиграл лег!`);
+                currentLeg++;
+                if (currentLeg > legsCount) {
+                    alert(`Игра окончена! Игрок #${currentPlayer + 1} выиграл игру!`);
+                    restartGame();
+                    return;
+                }
+               
+                players.forEach(p => p.score = gameScore);
+            }
 
             currentPlayer = (currentPlayer + 1) % playerCount;
             scoreInput.value = '';

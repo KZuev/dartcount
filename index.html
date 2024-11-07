@@ -243,8 +243,9 @@
         }
 
         .game-stats {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
             gap: 15px;
             margin: 20px 0;
             padding-bottom: 20px;
@@ -284,11 +285,27 @@
                 grid-template-columns: 1fr;
             }
         }
+
         .player-stats {
             background: var(--stats-bg);
             padding: 15px;
             border-radius: 10px;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            width: 200px;
+            max-width: 100%;
+        }
+
+        .winner-announcement {
+            width: 100% !important;
+            flex-basis: 100% !important;
+        }
+
+        .button-container {
+            width: 100% !important;
+            flex-basis: 100% !important;
+            display: flex;
+            justify-content: center;
+            gap: 20px;
         }
 
         .close-modal {
@@ -875,7 +892,7 @@
 
         function createConfetti() {
             const colors = ['#ff0000', '#00ff00', '#0000ff', '#ffff00', '#ff00ff', '#00ffff'];
-            const confettiCount = 150;
+            const confettiCount = 200;
             
             for (let i = 0; i < confettiCount; i++) {
                 const confetti = document.createElement('div');
@@ -885,8 +902,8 @@
                 const color = colors[Math.floor(Math.random() * colors.length)];
                 const left = Math.random() * 100;
                 const size = Math.random() * 10 + 5;
-                const duration = Math.random() * 3 + 2;
-                const delay = Math.random() * 2;
+                const duration = Math.random() * 8 + 5;
+                const delay = Math.random() * 6;
                 
                 confetti.style.backgroundColor = color;
                 confetti.style.left = left + 'vw';
@@ -916,7 +933,7 @@
 
             
             const winnerDiv = document.createElement('div');
-            winnerDiv.className = 'player-stats';
+            winnerDiv.className = 'player-stats winner-announcement';
             winnerDiv.style.cssText = `
                 text-align: center;
                 font-size: 1.5em;
@@ -1025,6 +1042,7 @@
 
             
             const buttonContainer = document.createElement('div');
+            buttonContainer.className = 'button-container';
             buttonContainer.style.cssText = `
                 text-align: center;
                 margin-top: 20px;

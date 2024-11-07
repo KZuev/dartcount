@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Дартс - Игры 101, 301, 501</title>
+    <style>
+        :root {
+            --bg-color: #1e1e2f;
+            --text-color: #ffffff;
+            --accent-color: #5a9bd4;
+            --button-hover: #4285b4;
+            --board-bg: #282840;
+            --stats-bg: #303050;
+            --input-focus: #6fa1d4;
+        }
+
+        .light-theme {
+            --bg-color: #ffffff;
+            --text-color: #000000;
+            --accent-color: #0052a5;
+            --button-hover: #003d80;
+            --board-bg: #e0f3ff;
+            --stats-bg: #f7fcff;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: var(--bg-color);
+            color: var(--text-color);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 0;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        .container {
+            max-width: 1200px;
+            padding: 30px;
+            text-align: center;
+            background: var(--bg-color);
+            border-radius: 15px;
+            margin-top: 30px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 30px;
+            transition: background-color 0.3s;
+        }
+
+        h1 {
+            font-size: 3em;
+            color: var(--accent-color);
+            text-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
+        }
+
+        .score-board {
+            margin-top: 20px;
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            font-size: 5em;
+            color: var(--accent-color);
+        }
+
+        .score-column {
+            flex: 1;
+            background: var(--board-bg);
+            padding: 15px;
+            border-radius: 12px;
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .player {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            border-radius: 12px;
+            background: var(--stats-bg);
+            font-size: 1.3em;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        .score-input {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            font-size: 1.5em;
+        }
+
+        input[type="number"] {
+            width: 120px;
+            font-size: 1.5em;
+            padding: 8px;
+            border-radius: 10px;
+            border: 2px solid var(--accent-color);
+            outline: none;
+            transition: border-color 0.3s;
+        }
+
+        input[type="number"]:focus {
+            border-color: var(--input-focus);
+        }
+
+        button {
+            padding: 12px 25px;
+            background: var(--accent-color);
+            border: none;
+            border-radius: 8px;
+            color: #fff;
+            font-size: 1.2em;
+            cursor: pointer;
+            transition: background-color 0.2s, transform 0.2s;
+        }
+
+        button:hover {
+            background: var(--button-hover);
+            transform: scale(1.05);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .theme-selection, .game-selection, .player-count {
+            margin-bottom: 10px;
+        }
+
+        .stats-board {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+        }
+
+        .stats-column {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background: var(--stats-bg);
+            padding: 10px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            color: var(--text-color);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Дартс - Игры 101, 301, 501</h1>
+
+        <div class="settings">
+            <div class="theme-selection">
+                <label for="themeType">Тема:</label>
+                <select id="themeType" onchange="setTheme()">
+                    <option value="dark">Тёмная</option>
+                    <option value="light">Светлая</option>
+                </select>
+            </div>
+            <div class="game-selection">
+                <label for="gameType">Выберите игру:</label>
+                <select id="gameType">
+                    <option value="101">101</option>
+                    <option value="301" selected>301</option>
+                    <option value="501">501</option>
+                </select>
+            </div>
+            <div class="player-count">
+                <label>Количество игроков:</label>
+                <button onclick="adjustPlayers(-1)">-</button>
+                <span id="playerCount">2</span>
+                <button onclick="adjustPlayers(1)">+</button>
+            </div>
+            <button onclick="startGame()">Начать игру</button>
+        </div>
+
+        <button id="restartBtn" onclick="restartGame()" style="display: none;">Начать заново</button>
+
+        <div class="score-board" id="scoreBoard"></div>
+
+        <div class="score-input" id="scoreInput" style="display: none;">
+            <label for="score">Очки:</label>
+            <input type="number" id="score" min="1" max="180" autofocus onkeypress="handleEnter(event)">
+            <button onclick="submitScore()">Отправить очки</button>
+            <button onclick="undoScore()">Отменить ввод</button>
+        </div>
+        
+        <div class="stats-board" id="statsBoard" style="display: none;"></div>
+    </div>
+
+    <script>
+        let players = [];
+        let currentPlayer = 0;
+        let gameScore = 301;
+        let playerCount = 2;
+        let lastScores = [];
+
+        function adjustPlayers(value) {
+            playerCount = Math.max(1, playerCount + value);
+            document.getElementById('playerCount').textContent = playerCount;
+        }
+
+        function setTheme() {
+            const theme = document.getElementById('themeType').value;
+            document.body.classList.toggle('light-theme', theme === 'light');
+        }
+
+        function startGame() {
+            gameScore = parseInt(document.getElementById('gameType').value);
+            players = Array.from({ length: playerCount }, () => ({
+                score: gameScore,
+                throws: 0,
+                totalPoints: 0,
+                history: []
+            }));
+            currentPlayer = 0;
+            lastScores = [];
+            updateScoreBoard();
+            updateStatsBoard();
+            document.getElementById('scoreInput').style.display = 'flex';
+            document.querySelector('.settings').style.display = 'none';
+            document.getElementById('restartBtn').style.display = 'inline-block';
+            document.getElementById('score').focus();
+            document.getElementById('statsBoard').style.display = 'flex';
+        }
+
+        function handleEnter(event) {
+            if (event.key === 'Enter') {
+                submitScore();
+            }
+        }
+
+        function updateScoreBoard() {
+            const scoreBoard = document.getElementById('scoreBoard');
+            scoreBoard.innerHTML = '';
+            players.forEach((player, index) => {
+                const playerDiv = document.createElement('div');
+                playerDiv.classList.add('score-column');
+                playerDiv.innerHTML = `#${index + 1}: <span>${player.score}</span>`;
+                scoreBoard.appendChild(playerDiv);
+            });
+        }
+
+        function submitScore() {
+            const scoreInput = document.getElementById('score');
+            const score = parseInt(scoreInput.value);
+            if (isNaN(score) || score <= 0 || score > 180) {
+                alert("Введите корректное значение от 1 до 180.");
+                return;
+            }
+
+            const player = players[currentPlayer];
+
+           
+            if (player.score - score < 0) {
+                alert(`Нельзя ввести это значение. Осталось очков: ${player.score}`);
+                return;
+            } else if (player.score - score === 1) {
+                alert(`Нельзя остаться с 1 очком. Введите меньшее значение.`);
+                return;
+            }
+
+            player.score -= score;
+            player.throws++;
+            player.totalPoints += score;
+            player.history.push(score);
+            lastScores.push({ playerIndex: currentPlayer, score });
+
+            currentPlayer = (currentPlayer + 1) % playerCount;
+            scoreInput.value = '';
+            updateScoreBoard();
+            updateStatsBoard();
+            scoreInput.focus();
+        }
+
+        function undoScore() {
+            if (lastScores.length === 0) return;
+
+            const { playerIndex, score } = lastScores.pop();
+            const player = players[playerIndex];
+            player.score += score;
+            player.throws--;
+            player.totalPoints -= score;
+            player.history.pop();
+
+            currentPlayer = playerIndex;
+            updateScoreBoard();
+            updateStatsBoard();
+        }
+
+        function updateStatsBoard() {
+            const statsBoard = document.getElementById('statsBoard');
+            statsBoard.innerHTML = '';
+            players.forEach((player, index) => {
+                const playerDiv = document.createElement('div');
+                playerDiv.classList.add('stats-column');
+                playerDiv.innerHTML = `
+                    <h3>Игрок #${index + 1}</h3>
+                    <p>Бросков: ${player.throws}</p>
+                    <p>Набрано очков: ${player.totalPoints}</p>
+                    <p>История бросков: ${player.history.join(', ') || 'Нет бросков'}</p>
+                    <p>Средний набор (1 бросок): ${(player.throws > 0 ? (player.totalPoints / player.throws).toFixed(2) : 0)}</p>
+                    <p>Средний набор (3 броска): ${(player.throws >= 3 ? (player.history.slice(-3).reduce((a, b) => a + b, 0) / 3).toFixed(2) : 0)}</p>
+                `;
+                statsBoard.appendChild(playerDiv);
+            });
+        }
+
+        function restartGame() {
+            document.querySelector('.settings').style.display = 'flex';
+            document.getElementById('scoreInput').style.display = 'none';
+            document.getElementById('restartBtn').style.display = 'none';
+            players = [];
+            currentPlayer = 0;
+            updateScoreBoard();
+            updateStatsBoard();
+        }
+    </script>
+</body>
+</html>

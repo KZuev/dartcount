@@ -73,7 +73,7 @@ DartCount - веб-приложение для подсчета очков в д
 
 ## 📄 Лицензия
 
--
+This project is licensed under the GPL-3.0 License - see the [LICENSE](./LICENSE) file for details.
 
 ## 🙏 Благодарности
 

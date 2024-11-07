@@ -525,8 +525,16 @@
         function undoScore() {
             if (lastScores.length === 0) return;
 
-            const { playerIndex, score, legIndex } = lastScores.pop();
+            const { playerIndex, score, legIndex } = lastScores[lastScores.length - 1];
             const player = players[playerIndex];
+
+            
+            if (player.score + score > gameScore) {
+                alert('Невозможно отменить этот ход, так как будет превышен максимальный счет.');
+                return;
+            }
+
+            lastScores.pop();
             player.score += score;
             player.throws--;
             player.totalPoints -= score;

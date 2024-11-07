@@ -231,8 +231,10 @@
             padding: 20px;
             width: 80%;
             max-width: 800px;
+            max-height: 80vh;
             border-radius: 15px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            overflow-y: auto;
         }
 
         .game-stats {
@@ -240,6 +242,7 @@
             grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
             gap: 20px;
             margin: 20px 0;
+            padding-bottom: 20px;
         }
 
         .player-stats {
@@ -262,6 +265,21 @@
             margin: 10px 0;
             padding: 5px;
             border-bottom: 1px solid var(--accent-color);
+        }
+
+        .close-stats-button {
+            padding: 8px 15px;
+            font-size: 1em;
+            background-color: var(--accent-color);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .close-stats-button:hover {
+            background-color: var(--button-hover);
         }
     </style>
 </head>
@@ -578,6 +596,33 @@
             content.innerHTML = '';
 
             
+            const winner = players.reduce((prev, current, index) => {
+                return (prev.legWins > current.legWins) ? prev : { ...current, index: index };
+            }, { ...players[0], index: 0 });
+
+            
+            const winnerDiv = document.createElement('div');
+            winnerDiv.className = 'player-stats';
+            winnerDiv.style.cssText = `
+                text-align: center;
+                font-size: 1.5em;
+                font-weight: bold;
+                color: gold;
+                text-transform: uppercase;
+                padding: 20px;
+                margin-bottom: 20px;
+                background: var(--accent-color);
+                grid-column: 1 / -1;
+            `;
+            winnerDiv.innerHTML = `
+                🏆 ПОБЕДИТЕЛЬ - ИГРОК #${winner.index + 1} 🏆
+                <div style="font-size: 0.8em; margin-top: 10px;">
+                    Выиграно легов: ${winner.legWins}
+                </div>
+            `;
+            content.appendChild(winnerDiv);
+
+            
             const gameInfo = document.createElement('div');
             gameInfo.className = 'player-stats';
             gameInfo.innerHTML = `
@@ -594,6 +639,12 @@
                 playerStats.className = 'player-stats';
                 
                 
+                if (index === winner.index) {
+                    playerStats.style.border = '2px solid gold';
+                    playerStats.style.boxShadow = '0 0 10px rgba(255, 215, 0, 0.5)';
+                }
+                
+                
                 const averageScore = player.throws > 0 ? (player.totalPoints / player.throws).toFixed(2) : 0;
                 const highestScore = Math.max(...player.history, 0);
                 const last9Throws = player.history.slice(-9);
@@ -602,7 +653,7 @@
                     : 0;
 
                 playerStats.innerHTML = `
-                    <h3>Игрок #${index + 1}</h3>
+                    <h3>Игрок #${index + 1} ${index === winner.index ? '👑' : ''}</h3>
                     <div class="stat-item">Выиграно легов: ${player.legWins}</div>
                     <div class="stat-item">Всего бросков: ${player.throws}</div>
                     <div class="stat-item">Набрано очков: ${player.totalPoints}</div>
@@ -614,11 +665,33 @@
                 content.appendChild(playerStats);
             });
 
-            modal.style.display = 'block';
+                   
+                   const closeButtonContainer = document.createElement('div');
+                    closeButtonContainer.style.cssText = `
+                        text-align: center;
+                        margin-top: 20px;
+                        grid-column: 1 / -1;
+                    `;
 
-            
-            document.addEventListener('keydown', handleKeyPress);
-        }
+                    const closeButton = document.createElement('button');
+                    closeButton.textContent = 'Закрыть';
+                    closeButton.style.cssText = `
+                        padding: 8px 15px;
+                        font-size: 1em;
+                        background-color: var(--accent-color);
+                        color: white;
+                        border: none;
+                        border-radius: 5px;
+                        cursor: pointer;
+                    `;
+                    closeButton.onclick = closeGameStats;
+
+                    closeButtonContainer.appendChild(closeButton);
+                    content.appendChild(closeButtonContainer);
+
+                    modal.style.display = 'block';
+                    document.addEventListener('keydown', handleKeyPress);
+            }
 
         function closeGameStats() {
             const modal = document.getElementById('gameStatsModal');
@@ -650,7 +723,6 @@
             <div id="gameStatsContent" class="game-stats">
                 <!-- Статистика будет добавлена динамически -->
             </div>
-            <button onclick="closeGameStats()">Закрыть</button>
         </div>
     </div>
 </body>

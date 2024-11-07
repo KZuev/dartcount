@@ -146,8 +146,44 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 20px;
-            margin-bottom: 20px;
+            gap: 30px;
+            margin-bottom: 30px;
+            font-size: 1.5em;
+        }
+
+
+        .settings select, 
+        .settings button {
+            font-size: 1em;
+            padding: 10px 20px;
+            min-width: 150px;
+        }
+
+        .settings .game-selection,
+        .settings .theme-selection,
+        .settings .player-count {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .settings #playerCount {
+            font-size: 1.2em;
+            margin: 0 15px;
+        }
+
+
+        .settings .player-count button {
+            font-size: 1em;
+            padding: 8px 15px;
+            min-width: auto;
+        }
+
+
+        .settings > button {
+            font-size: 1.2em;
+            padding: 15px 30px;
+            margin-top: 20px;
         }
 
         .stats-column {
@@ -192,7 +228,7 @@
                 <label for="legsCount">Количество легов:</label>
                 <select id="legsCount">
                     <option value="1">1</option>
-                    <option value="3">3</option>
+                    <option value="3" selected>3</option>
                     <option value="5">5</option>
                     <option value="7">7</option>
                 </select>
@@ -249,7 +285,8 @@
                 score: gameScore,
                 throws: 0,
                 totalPoints: 0,
-                history: []
+                history: [],
+                legWins: 0  
             }));
             currentPlayer = 0;
             nextLegStartPlayer = 0; 
@@ -281,10 +318,13 @@
                 if (index === currentPlayer) {
                     playerDiv.classList.add('active-player');
                 }
-                playerDiv.innerHTML = `<span>${player.score}</span>`; 
+                playerDiv.innerHTML = `
+                    <span>${player.score}</span>
+                    <div style="font-size: 0.4em; margin-top: 10px;">Леги: ${player.legWins}</div>
+                `;
                 scoreBoard.appendChild(playerDiv);
-        });
-}
+            });
+        }
 
         function submitScore() {
             const scoreInput = document.getElementById('score');
@@ -313,6 +353,7 @@
 
             
             if (player.score === 0) {
+                player.legWins++; 
                 alert(`Игрок #${currentPlayer + 1} выиграл лег!`);
                 currentLeg++;
                 if (currentLeg > legsCount) {

@@ -251,6 +251,10 @@
              }));
             currentPlayer = 0;
             lastScores = [];
+
+            
+            document.getElementById('score').value = '';
+
             updateScoreBoard();
             updateStatsBoard();
             document.getElementById('scoreInput').style.display = 'flex';
@@ -316,9 +320,12 @@
                 }
                 
                 players.forEach(p => p.score = gameScore);
+                
+                currentPlayer = (currentPlayer + 1) % playerCount;
+            } else {
+                
+                currentPlayer = (currentPlayer + 1) % playerCount;
             }
-
-            currentPlayer = (currentPlayer + 1) % playerCount;
             scoreInput.value = ''; 
             updateScoreBoard();
             updateStatsBoard();

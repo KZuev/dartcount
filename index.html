@@ -1087,7 +1087,8 @@
                 let averageThrowTime = 'N/A';
                 if (player.throwTimes.length > 1) {
                     const totalTime = (player.throwTimes[player.throwTimes.length - 1] - player.throwTimes[0]) / 1000; 
-                    averageThrowTime = (totalTime / (player.throwTimes.length - 1)).toFixed(2);
+                    const numberOfApproaches = Math.ceil(player.throwTimes.length / 3); 
+                    averageThrowTime = (totalTime / numberOfApproaches).toFixed(2);
                 }
                 
                 
@@ -1112,7 +1113,7 @@
                     <div class="stat-item">Средний набор: ${averageScore}</div>
                     <div class="stat-item">Лучший бросок: ${highestScore}</div>
                     <div class="stat-item">Среднее за последние 9 бросков: ${average9}</div>
-                    <div class="stat-item">Среднее время на бросок: ${averageThrowTime} сек</div>
+                    <div class="stat-item">Среднее время на подход: ${averageThrowTime} сек</div>
                     <div class="stat-item">История бросков:<br>${historyHTML}</div>
                 `;
                 content.appendChild(playerStats);

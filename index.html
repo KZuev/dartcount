@@ -225,12 +225,16 @@
                 <button onclick="adjustPlayers(1)">+</button>
             </div>
             <div class="game-selection">
+                <label for="legMode">Режим игры:</label>
+                <select id="legMode">
+                    <option value="bestOf">Best of</option>
+                    <option value="firstTo">First to</option>
+                </select>
+            </div>
+            <div class="game-selection" id="legsCountContainer">
                 <label for="legsCount">Количество легов:</label>
                 <select id="legsCount">
-                    <option value="1">1</option>
-                    <option value="3" selected>3</option>
-                    <option value="5">5</option>
-                    <option value="7">7</option>
+                    <!-- Опции будут добавляться динамически -->
                 </select>
             </div>
             <button onclick="startGame()">Начать игру</button>
@@ -259,7 +263,8 @@
         let legsCount = 1; 
         let currentLeg = 1; 
         let nextLegStartPlayer = 0; 
-
+        let legMode = 'bestOf'; 
+        let legsToWin = 0; 
 
         document.addEventListener('keydown', function(event) {
             if (event.ctrlKey && event.key === 'z') {
@@ -280,13 +285,21 @@
 
         function startGame() {
             gameScore = parseInt(document.getElementById('gameType').value);
+            legMode = document.getElementById('legMode').value;
             legsCount = parseInt(document.getElementById('legsCount').value);
+            
+            if (legMode === 'bestOf') {
+                legsToWin = Math.ceil(legsCount / 2);
+            } else { 
+                legsToWin = legsCount;
+            }
+            
             players = Array.from({ length: playerCount }, () => ({
                 score: gameScore,
                 throws: 0,
                 totalPoints: 0,
                 history: [],
-                legWins: 0  
+                legWins: 0
             }));
             currentPlayer = 0;
             nextLegStartPlayer = 0; 
@@ -320,7 +333,11 @@
                 }
                 playerDiv.innerHTML = `
                     <span>${player.score}</span>
-                    <div style="font-size: 0.4em; margin-top: 10px;">Леги: ${player.legWins}</div>
+                    <div style="font-size: 0.4em; margin-top: 10px;">
+                        Леги: ${player.legWins}${legMode === 'bestOf' ? 
+                            ` (до ${legsToWin})` : 
+                            ` / ${legsToWin}`}
+                    </div>
                 `;
                 scoreBoard.appendChild(playerDiv);
             });
@@ -353,21 +370,22 @@
 
             
             if (player.score === 0) {
-                player.legWins++; 
-                alert(`Игрок #${currentPlayer + 1} выиграл лег!`);
-                currentLeg++;
-                if (currentLeg > legsCount) {
+                player.legWins++;
+                
+                
+                if (checkGameWin(player)) {
                     alert(`Игра окончена! Игрок #${currentPlayer + 1} выиграл игру!`);
                     restartGame();
                     return;
                 }
                 
-                players.forEach(p => p.score = gameScore);
+                alert(`Игрок #${currentPlayer + 1} выиграл лег! (${player.legWins} легов)`);
                 
+                
+                players.forEach(p => p.score = gameScore);
                 nextLegStartPlayer = (nextLegStartPlayer + 1) % playerCount;
                 currentPlayer = nextLegStartPlayer;
             } else {
-                
                 currentPlayer = (currentPlayer + 1) % playerCount;
             }
 
@@ -375,6 +393,40 @@
             updateScoreBoard();
             updateStatsBoard();
             scoreInput.focus();
+        }
+
+        function checkGameWin(player) {
+            if (legMode === 'bestOf') {
+                
+                return player.legWins >= legsToWin;
+            } else {
+                
+                return player.legWins >= legsToWin;
+            }
+        }       
+
+        function updateLegsCountOptions() {
+            const legMode = document.getElementById('legMode').value;
+            const legsCountSelect = document.getElementById('legsCount');
+            legsCountSelect.innerHTML = ''; 
+
+            if (legMode === 'bestOf') {
+                
+                [3, 5, 7, 9, 11].forEach(num => {
+                    const option = document.createElement('option');
+                    option.value = num;
+                    option.textContent = num;
+                    legsCountSelect.appendChild(option);
+                });
+            } else {
+                
+                for (let i = 1; i <= 10; i++) {
+                    const option = document.createElement('option');
+                    option.value = i;
+                    option.textContent = i;
+                    legsCountSelect.appendChild(option);
+                }
+            }
         }
 
         function undoScore() {
@@ -419,6 +471,15 @@
             updateScoreBoard();
             updateStatsBoard();
         }
+    </script>
+    <script>
+        
+        document.getElementById('legMode').addEventListener('change', updateLegsCountOptions);
+    
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            updateLegsCountOptions();
+        });
     </script>
 </body>
 </html>

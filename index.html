@@ -889,9 +889,19 @@
             tempContainer.appendChild(pdfContent);
 
             
+            const startTimeFormatted = gameStartTime.toLocaleString('ru-RU', {
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit'
+            }).replace(/[/:]/g, '-').replace(', ', '_');
+
+            
             const opt = {
                 margin: 10,
-                filename: `darts_game_stats_${new Date().toLocaleDateString()}.pdf`,
+                filename: `darts_game_stats_${startTimeFormatted}.pdf`,
                 image: { type: 'jpeg', quality: 0.98 },
                 html2canvas: { 
                     scale: 2,
@@ -901,7 +911,7 @@
                 jsPDF: { 
                     unit: 'mm', 
                     format: 'a4', 
-                    orientation: 'portrait' 
+                    orientation: 'landscape'
                 }
             };
 

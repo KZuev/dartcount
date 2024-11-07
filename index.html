@@ -13,6 +13,7 @@
             --board-bg: #282840;
             --stats-bg: #303050;
             --input-focus: #6fa1d4;
+            --active-player-bg: #007bff;
         }
 
         .light-theme {
@@ -22,6 +23,7 @@
             --button-hover: #003d80;
             --board-bg: #e0f3ff;
             --stats-bg: #f7fcff;
+            --active-player-bg: #0056b3;
         }
 
         body {
@@ -74,6 +76,11 @@
             display: flex;
             flex-direction: column;
             align-items: center;
+        }
+
+        .active-player {
+            background: var(--active-player-bg);
+            color: #fff;
         }
 
         .player {
@@ -238,6 +245,9 @@
             players.forEach((player, index) => {
                 const playerDiv = document.createElement('div');
                 playerDiv.classList.add('score-column');
+                if (index === currentPlayer) {
+                    playerDiv.classList.add('active-player');
+                }
                 playerDiv.innerHTML = `#${index + 1}: <span>${player.score}</span>`;
                 scoreBoard.appendChild(playerDiv);
             });
@@ -246,16 +256,16 @@
         function submitScore() {
             const scoreInput = document.getElementById('score');
             const score = parseInt(scoreInput.value);
-            if (isNaN(score) || score <= 0 || score > 180) {
-                alert("Введите корректное значение от 1 до 180.");
+
+            if (isNaN(score) || score < 1 || score > 180) {
+                alert('Введите корректное значение очков (1-180).');
                 return;
             }
 
             const player = players[currentPlayer];
 
-           
             if (player.score - score < 0) {
-                alert(`Нельзя ввести это значение. Осталось очков: ${player.score}`);
+                alert(`Нельзя набрать больше очков, чем у вас есть. У вас ${player.score}.`);
                 return;
             } else if (player.score - score === 1) {
                 alert(`Нельзя остаться с 1 очком. Введите меньшее значение.`);

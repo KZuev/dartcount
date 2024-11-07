@@ -562,9 +562,8 @@
                         modal.classList.remove('active');
                         
                         scoreInput.disabled = false;
-                        setTimeout(() => {
-                            document.getElementById('score').value = '';
-                        }, 100);
+                        scoreInput.value = '';
+                        scoreInput.focus();
                         resolve(throws);
                         document.removeEventListener('keydown', handleEnterPress);
                     }
@@ -649,6 +648,14 @@
             const score = parseInt(scoreInput.value);
             const player = players[currentPlayer];
             const currentTime = new Date();
+
+            
+            if (scoreInput.value.trim() === '') {
+                
+                scoreInput.value = '';
+                scoreInput.focus();
+                return;
+            }
 
             
             if (isNaN(score) || score < 0 || score > 180) {

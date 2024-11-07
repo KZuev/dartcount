@@ -196,6 +196,73 @@
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
             color: var(--text-color);
         }
+
+        .confetti {
+            position: fixed;
+            pointer-events: none;
+            z-index: 999;
+            animation: confetti-fall linear forwards;
+        }
+
+        @keyframes confetti-fall {
+            0% {
+                transform: translateY(-100vh) rotate(0deg);
+            }
+            100% {
+                transform: translateY(100vh) rotate(360deg);
+            }
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            z-index: 1000;
+        }
+
+        .modal-content {
+            position: relative;
+            background-color: var(--bg-color);
+            margin: 5% auto;
+            padding: 20px;
+            width: 80%;
+            max-width: 800px;
+            border-radius: 15px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .game-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        .player-stats {
+            background: var(--stats-bg);
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .close-modal {
+            position: absolute;
+            right: 15px;
+            top: 15px;
+            font-size: 24px;
+            cursor: pointer;
+            color: var(--text-color);
+        }
+
+        .stat-item {
+            margin: 10px 0;
+            padding: 5px;
+            border-bottom: 1px solid var(--accent-color);
+        }
     </style>
 </head>
 <body>
@@ -374,8 +441,10 @@
                 
                 
                 if (checkGameWin(player)) {
-                    alert(`Игра окончена! Игрок #${currentPlayer + 1} выиграл игру!`);
-                    restartGame();
+                    createConfetti();
+                    setTimeout(() => {
+                        showGameStats();
+                    }, 1000); 
                     return;
                 }
                 
@@ -471,6 +540,99 @@
             updateScoreBoard();
             updateStatsBoard();
         }
+
+        function createConfetti() {
+            const colors = ['#ff0000', '#00ff00', '#0000ff', '#ffff00', '#ff00ff', '#00ffff'];
+            const confettiCount = 150;
+            
+            for (let i = 0; i < confettiCount; i++) {
+                const confetti = document.createElement('div');
+                confetti.className = 'confetti';
+                
+                
+                const color = colors[Math.floor(Math.random() * colors.length)];
+                const left = Math.random() * 100;
+                const size = Math.random() * 10 + 5;
+                const duration = Math.random() * 3 + 2;
+                const delay = Math.random() * 2;
+                
+                confetti.style.backgroundColor = color;
+                confetti.style.left = left + 'vw';
+                confetti.style.width = size + 'px';
+                confetti.style.height = size + 'px';
+                confetti.style.animationDuration = duration + 's';
+                confetti.style.animationDelay = delay + 's';
+                
+                document.body.appendChild(confetti);
+                
+                
+                setTimeout(() => {
+                    confetti.remove();
+                }, (duration + delay) * 1000);
+            }
+        }
+
+        function showGameStats() {
+            const modal = document.getElementById('gameStatsModal');
+            const content = document.getElementById('gameStatsContent');
+            content.innerHTML = '';
+
+            
+            const gameInfo = document.createElement('div');
+            gameInfo.className = 'player-stats';
+            gameInfo.innerHTML = `
+                <h3>Общая информация</h3>
+                <div class="stat-item">Тип игры: ${gameScore}</div>
+                <div class="stat-item">Режим легов: ${legMode === 'bestOf' ? 'Best of' : 'First to'} ${legsCount}</div>
+                <div class="stat-item">Количество игроков: ${playerCount}</div>
+            `;
+            content.appendChild(gameInfo);
+
+            
+            players.forEach((player, index) => {
+                const playerStats = document.createElement('div');
+                playerStats.className = 'player-stats';
+                
+                
+                const averageScore = player.throws > 0 ? (player.totalPoints / player.throws).toFixed(2) : 0;
+                const highestScore = Math.max(...player.history, 0);
+                const last9Throws = player.history.slice(-9);
+                const average9 = last9Throws.length > 0 
+                    ? (last9Throws.reduce((a, b) => a + b, 0) / last9Throws.length).toFixed(2)
+                    : 0;
+
+                playerStats.innerHTML = `
+                    <h3>Игрок #${index + 1}</h3>
+                    <div class="stat-item">Выиграно легов: ${player.legWins}</div>
+                    <div class="stat-item">Всего бросков: ${player.throws}</div>
+                    <div class="stat-item">Набрано очков: ${player.totalPoints}</div>
+                    <div class="stat-item">Средний набор: ${averageScore}</div>
+                    <div class="stat-item">Лучший бросок: ${highestScore}</div>
+                    <div class="stat-item">Среднее за последние 9 бросков: ${average9}</div>
+                    <div class="stat-item">История бросков: ${player.history.join(', ') || 'Нет бросков'}</div>
+                `;
+                content.appendChild(playerStats);
+            });
+
+            modal.style.display = 'block';
+
+            
+            document.addEventListener('keydown', handleKeyPress);
+        }
+
+        function closeGameStats() {
+            const modal = document.getElementById('gameStatsModal');
+            modal.style.display = 'none';
+            
+            document.removeEventListener('keydown', handleKeyPress);
+            restartGame();
+        }
+
+        function handleKeyPress(event) {
+            if (event.key === 'Enter') {
+                closeGameStats();
+            }
+        }
     </script>
     <script>
         
@@ -481,5 +643,15 @@
             updateLegsCountOptions();
         });
     </script>
+    <div id="gameStatsModal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeGameStats()">&times;</span>
+            <h2>Статистика игры</h2>
+            <div id="gameStatsContent" class="game-stats">
+                <!-- Статистика будет добавлена динамически -->
+            </div>
+            <button onclick="closeGameStats()">Закрыть</button>
+        </div>
+    </div>
 </body>
 </html>

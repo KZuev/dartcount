@@ -408,7 +408,8 @@
                 throws: 0,
                 totalPoints: 0,
                 history: [[]],  
-                legWins: 0
+                legWins: 0,
+                throwTimes: []
             }));
             
             currentPlayer = 0;
@@ -464,6 +465,7 @@
             }
 
             const player = players[currentPlayer];
+            const currentTime = new Date();
 
             if (player.score - score < 0) {
                 alert(`Нельзя набрать больше очков, чем у вас есть. У вас ${player.score}.`);
@@ -477,6 +479,7 @@
             player.throws++;
             player.totalPoints += score;
             player.history[player.history.length - 1].push(score);  
+            player.throwTimes.push(currentTime); 
             lastScores.push({ playerIndex: currentPlayer, score, legIndex: player.history.length - 1 });
 
             
@@ -723,6 +726,13 @@
                     playerStats.style.border = '2px solid gold';
                     playerStats.style.boxShadow = '0 0 10px rgba(255, 215, 0, 0.5)';
                 }
+
+                
+                let averageThrowTime = 'N/A';
+                if (player.throwTimes.length > 1) {
+                    const totalTime = (player.throwTimes[player.throwTimes.length - 1] - player.throwTimes[0]) / 1000; 
+                    averageThrowTime = (totalTime / (player.throwTimes.length - 1)).toFixed(2);
+                }
                 
                 
                 const averageScore = player.throws > 0 ? (player.totalPoints / player.throws).toFixed(2) : 0;
@@ -745,6 +755,7 @@
                     <div class="stat-item">Средний набор: ${averageScore}</div>
                     <div class="stat-item">Лучший бросок: ${highestScore}</div>
                     <div class="stat-item">Среднее за последние 9 бросков: ${average9}</div>
+                    <div class="stat-item">Среднее время на бросок: ${averageThrowTime} сек</div>
                     <div class="stat-item">История бросков:<br>${historyHTML}</div>
                 `;
                 content.appendChild(playerStats);

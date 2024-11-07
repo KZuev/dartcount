@@ -222,6 +222,8 @@
         let lastScores = []; 
         let legsCount = 1; 
         let currentLeg = 1; 
+        let nextLegStartPlayer = 0; 
+
 
         document.addEventListener('keydown', function(event) {
             if (event.ctrlKey && event.key === 'z') {
@@ -242,26 +244,26 @@
 
         function startGame() {
             gameScore = parseInt(document.getElementById('gameType').value);
-            legsCount = parseInt(document.getElementById('legsCount').value); 
+            legsCount = parseInt(document.getElementById('legsCount').value);
             players = Array.from({ length: playerCount }, () => ({
                 score: gameScore,
                 throws: 0,
                 totalPoints: 0,
                 history: []
-             }));
+            }));
             currentPlayer = 0;
+            nextLegStartPlayer = 0; 
             lastScores = [];
-
             
             document.getElementById('score').value = '';
-
+            
             updateScoreBoard();
             updateStatsBoard();
             document.getElementById('scoreInput').style.display = 'flex';
             document.querySelector('.settings').style.display = 'none';
             document.getElementById('restartBtn').style.display = 'inline-block';
             document.getElementById('score').focus();
-            document.getElementById('statsBoard').style.display = 'flex'; 
+            document.getElementById('statsBoard').style.display = 'flex';
         }
 
         function handleEnter(event) {
@@ -288,7 +290,7 @@
             const scoreInput = document.getElementById('score');
             const score = parseInt(scoreInput.value);
 
-            if (isNaN(score) || score < 0 || score > 180) { 
+            if (isNaN(score) || score < 0 || score > 180) {
                 alert('Введите корректное значение очков (0-180).');
                 return;
             }
@@ -315,21 +317,23 @@
                 currentLeg++;
                 if (currentLeg > legsCount) {
                     alert(`Игра окончена! Игрок #${currentPlayer + 1} выиграл игру!`);
-                    restartGame(); 
+                    restartGame();
                     return;
                 }
                 
                 players.forEach(p => p.score = gameScore);
                 
-                currentPlayer = (currentPlayer + 1) % playerCount;
+                nextLegStartPlayer = (nextLegStartPlayer + 1) % playerCount;
+                currentPlayer = nextLegStartPlayer;
             } else {
                 
                 currentPlayer = (currentPlayer + 1) % playerCount;
             }
-            scoreInput.value = ''; 
+
+            scoreInput.value = '';
             updateScoreBoard();
             updateStatsBoard();
-            scoreInput.focus(); 
+            scoreInput.focus();
         }
 
         function undoScore() {

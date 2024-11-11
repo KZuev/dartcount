@@ -1,0 +1,19 @@
+{
+    "title": "DartCount",
+    "gameType": "Выберите игру:",
+    "playerCount": "Количество игроков:",
+    "legMode": "Режим игры:",
+    "legsCount": "Количество легов:",
+    "startGame": "Начать игру",
+    "score": "Очки:",
+    "submitScore": "Отправить очки",
+    "restartBtn": "Начать заново",
+    "undoButton": "Отменить",
+    "undoButtonTooltip": "Отменить ввод (Ctrl + Z)",
+    "statistics": "Статистика игры",
+    "winner": "ПОБЕДИТЕЛЬ - ИГРОК #",
+    "legsWon": "Выиграно легов:",
+    "throwsModalTitle": "Количество бросков",
+    "legs": "Леги",
+    "to": "до"
+}

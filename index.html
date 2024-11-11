@@ -9,8 +9,13 @@
 </head>
 <body>
     <div class="container">
-        <h1><span class="dart">DART</span><span class="count">COUNT</span></h1>
+        <h1 id="title"><span class="dart">DART</span><span class="count">COUNT</span></h1>
         <div class="theme-selection">
+            <div class="language-selection">
+                <button id="languageButton" class="language-button" onclick="toggleLanguage()">
+                    ru
+                </button>
+            </div>
             <button id="themeToggle" onclick="toggleTheme()">
                 <span class="theme-icon">🌙</span>
             </button>
@@ -21,12 +26,11 @@
         <div id="rulesModal" class="modal">
             <div class="modal-content rules-modal-content">
                 <span class="close-modal" onclick="closeRules()">&times;</span>
-                <!-- Содержимое модального окна будет добавлено динамически из rules.js -->
             </div>
         </div>
             <div class="settings">
                 <div class="game-selection">
-                    <label for="gameType">Выберите игру:</label>
+                    <label id="gameTypeLabel" for="gameType">Выберите игру:</label>
                     <select id="gameType">
                         <option value="101">101</option>
                         <option value="301" selected>301</option>
@@ -34,25 +38,24 @@
                     </select>
                 </div>
                 <div class="player-count">
-                    <label>Количество игроков:</label>
+                    <label id="playerCountLabel">Количество игроков:</label>
                     <button onclick="adjustPlayers(-1)">-</button>
                     <span id="playerCount">2</span>
                     <button onclick="adjustPlayers(1)">+</button>
                 </div>
                 <div class="game-selection">
-                    <label for="legMode">Режим игры:</label>
+                    <label id="legModeLabel" for="legMode">Режим игры:</label>
                     <select id="legMode">
                         <option value="bestOf">Best of</option>
                         <option value="firstTo">First to</option>
                     </select>
                 </div>
                 <div class="game-selection" id="legsCountContainer">
-                    <label for="legsCount">Количество легов:</label>
+                    <label id="legsCountLabel" for="legsCount">Количество легов:</label>
                     <select id="legsCount">
-                        <!-- Опции будут добавляться динамически -->
                     </select>
                 </div>
-                <button onclick="startGame()">Начать игру</button>
+                <button id="startGameButton" onclick="startGame()">Начать игру</button>
                 <a href="https://github.com/KZuev/dartcount" target="_blank" class="github-link">
                     <svg height="24" viewBox="0 0 16 16" width="24">
                         <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/>
@@ -62,7 +65,7 @@
         <button id="restartBtn" onclick="restartGame()" style="display: none;">Начать заново</button>
         <div class="score-board" id="scoreBoard"></div>
         <div class="score-input" id="scoreInput" style="display: none;">
-            <label for="score">Очки:</label>
+            <label id="scoreLabel" for="score">Очки:</label>
             <input type="text" 
                    id="score" 
                    pattern="[\d+\s]*" 
@@ -72,17 +75,16 @@
                    autofocus 
                    onkeypress="handleEnter(event)"
                    style="width: 160px; font-size: 1.5em;">
-            <button onclick="submitScore()">Отправить очки</button>
-            <button onclick="undoScore()" title="Отменить ввод (Ctrl + Z)">Отменить ввод</button>
+            <button id="submitScoreButton" onclick="submitScore()">Отправить очки</button>
+            <button id="undoScoreButton" title="Отменить ввод (Ctrl + Z)" onclick="undoScore()">Отменить ввод</button>
         </div>
         <div class="stats-board" id="statsBoard" style="display: none;"></div>
     </div>
     <div id="gameStatsModal" class="modal">
         <div class="modal-content">
             <span class="close-modal" onclick="closeGameStats()">&times;</span>
-            <h2>Статистика игры</h2>
+            <h2 id="statisticsTitle">Статистика игры</h2>
             <div id="gameStatsContent" class="game-stats">
-                <!-- Статистика будет добавлена динамически -->
             </div>
         </div>
     </div>

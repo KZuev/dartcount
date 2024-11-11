@@ -242,6 +242,40 @@ body.light-theme #themeToggle {
     margin-bottom: 10px;
 }
 
+.language-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    background-color: transparent;
+    color: rgba(0, 0, 0, 0.2);
+    font-size: 0.8em;
+    padding: 0;
+    cursor: pointer;
+    transition: background-color 0.3s, color 0.3s, border-color 0.3s, transform 0.2s;
+}
+
+.language-button:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    border-color: var(--accent-color);
+    color: var(--accent-color);
+    transform: scale(1.1);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+body:not(.light-theme) .language-button {
+    color: #FFFFFF80;
+    border-color: rgba(255, 255, 255, 0.5);
+}
+
+body.light-theme .language-button {
+    color: rgba(0, 0, 0, 0.2);
+    border-color: rgba(0, 0, 0, 0.2);
+}
+
 .info-circle {
     display: flex;
     align-items: center;

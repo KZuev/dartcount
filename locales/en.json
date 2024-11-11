@@ -1,0 +1,19 @@
+{
+    "title": "DartCount",
+    "gameType": "Select Game:",
+    "playerCount": "Number of Players:",
+    "legMode": "Game Mode:",
+    "legsCount": "Number of Legs:",
+    "startGame": "Start Game",
+    "score": "Points:",
+    "submitScore": "Submit Score",
+    "restartBtn": "Restart",
+    "undoButton": "Undo",
+    "undoButtonTooltip": "Undo Input (Ctrl + Z)",
+    "statistics": "Game Statistics",
+    "winner": "WINNER - PLAYER #",
+    "legsWon": "Legs Won:",
+    "throwsModalTitle": "Number of Throws",
+    "legs": "Legs",
+    "to": "to"
+}

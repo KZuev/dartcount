@@ -12,6 +12,7 @@ let gameStartTime = null;
 let gameEndTime = null;
 let confettiInterval;
 let isConfettiActive = true;
+let currentLanguage = localStorage.getItem('language') || 'ru';
 
 document.addEventListener('keydown', function(event) {
     if (event.ctrlKey && event.key === 'z') {
@@ -19,7 +20,6 @@ document.addEventListener('keydown', function(event) {
         undoScore();
     }
 });
-
 
 document.addEventListener('DOMContentLoaded', () => {
     const savedTheme = localStorage.getItem('theme');
@@ -29,6 +29,43 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
+function toggleLanguage() {
+    currentLanguage = currentLanguage === 'ru' ? 'en' : 'ru';
+    localStorage.setItem('language', currentLanguage);
+    document.getElementById('languageButton').textContent = currentLanguage;
+    loadTranslations();
+}
+
+function loadTranslations() {
+    fetch(`locales/${currentLanguage}.json`)
+        .then(response => response.json())
+        .then(translations => {
+            document.title = translations.title;
+            document.getElementById('gameTypeLabel').textContent = translations.gameType;
+            document.getElementById('playerCountLabel').textContent = translations.playerCount;
+            document.getElementById('legModeLabel').textContent = translations.legMode;
+            document.getElementById('legsCountLabel').textContent = translations.legsCount;
+            document.getElementById('startGameButton').textContent = translations.startGame;
+            document.getElementById('scoreLabel').textContent = translations.score;
+            document.getElementById('submitScoreButton').textContent = translations.submitScore;
+            document.getElementById('restartBtn').textContent = translations.restartBtn;
+            document.getElementById('undoScoreButton').textContent = translations.undoButton;
+            document.getElementById('undoScoreButton').title = translations.undoButtonTooltip;
+            document.getElementById('statisticsTitle').textContent = translations.statistics;
+            document.getElementById('winnerText').textContent = translations.winner;
+            document.getElementById('legsWonText').textContent = translations.legsWon;
+            document.getElementById('title').textContent = translations.title;
+            document.getElementById('throwsModalTitle').textContent = translations.throwsModalTitle;
+        })
+        .catch(error => {
+            console.error('Ошибка при загрузке переводов:', error);
+        });
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    loadTranslations();
+    document.getElementById('languageButton').textContent = currentLanguage;
+});
 
 function toggleTheme() {
     const body = document.body;

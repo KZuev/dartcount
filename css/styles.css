@@ -40,7 +40,6 @@ body {
     transition: background-color 0.3s, color 0.3s;
 }
 
-/* Стили для светлой темы */
 body.light-theme {
     background-color: #ffffff;
 }
@@ -209,25 +208,25 @@ button:hover {
 
 #themeToggle {
     background: transparent;
-    border: 2px solid rgba(255, 255, 255, 0.3); /* Более бледный цвет рамки по умолчанию */
+    border: 2px solid rgba(255, 255, 255, 0.3);
     cursor: pointer;
     font-size: 24px;
     padding: 0;
-    width: 40px; /* Увеличенная ширина кнопки */
-    height: 40px; /* Увеличенная высота кнопки */
+    width: 40px;
+    height: 40px;
     display: flex;
     align-items: center;
     justify-content: center;
-    border-radius: 50%; /* Устанавливаем радиус границы для круглой формы */
-    transition: background-color 0.3s, border-color 0.3s; /* Плавный переход для фона и цвета рамки */
+    border-radius: 50%;
+    transition: background-color 0.3s, border-color 0.3s;
 }
 
 body:not(.light-theme) #themeToggle {
-    border-color: rgba(255, 255, 255, 0.5); /* Бледный цвет рамки в темной теме */
+    border-color: rgba(255, 255, 255, 0.5);
 }
 
 body.light-theme #themeToggle {
-    border-color: rgba(0, 0, 0, 0.2); /* Более бледный цвет рамки в светлой теме */
+    border-color: rgba(0, 0, 0, 0.2);
 }
 
 #themeToggle:hover {
@@ -248,37 +247,37 @@ body.light-theme #themeToggle {
     align-items: center;
     justify-content: center;
     margin-right: 10px;
-    width: 37px; /* Ширина кнопки */
-    height: 37px; /* Высота кнопки */
-    border-radius: 50%; /* Устанавливаем радиус границы для круглой формы */
-    border: 2px solid rgba(255, 255, 255, 0.3); /* Цвет рамки */
-    background-color: transparent; /* Фон по умолчанию */
-    color: rgba(0, 0, 0, 0.2); /* Цвет иконки по умолчанию */
-    font-size: 1.2em; /* Размер шрифта */
-    cursor: pointer; /* Курсор при наведении */
-    transition: background-color 0.3s, color 0.3s, border-color 0.3s, transform 0.2s; /* Плавный переход для фона, цвета и увеличения */
+    width: 37px;
+    height: 37px;
+    border-radius: 50%;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    background-color: transparent;
+    color: rgba(0, 0, 0, 0.2);
+    font-size: 1.2em;
+    cursor: pointer;
+    transition: background-color 0.3s, color 0.3s, border-color 0.3s, transform 0.2s;
 }
 
 .info-circle span {
-    font-weight: bold; /* Делаем букву "i" жирной */
+    font-weight: bold;
 }
 
 body:not(.light-theme) .info-circle {
-    color: #FFFFFF80; /* Цвет текста в темной теме */
-    border-color: rgba(255, 255, 255, 0.5); /* Бледный цвет рамки в темной теме */
+    color: #FFFFFF80;
+    border-color: rgba(255, 255, 255, 0.5);
 }
 
 body.light-theme .info-circle {
-    color: rgba(0, 0, 0, 0.2); /* Цвет текста в светлой теме (такой же, как цвет рамки) */
-    border-color: rgba(0, 0, 0, 0.2); /* Более бледный цвет рамки в светлой теме */
+    color: rgba(0, 0, 0, 0.2);
+    border-color: rgba(0, 0, 0, 0.2);
 }
 
 .info-circle:hover {
-    background-color: rgba(255, 255, 255, 0.1); /* Подсветка при наведении */
-    border-color: var(--accent-color); /* Изменение цвета рамки при наведении */
-    color: var(--accent-color); /* Изменение цвета текста при наведении */
-    transform: scale(1.1); /* Увеличение кнопки при наведении */
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Добавляем тень при наведении */
+    background-color: rgba(255, 255, 255, 0.1);
+    border-color: var(--accent-color);
+    color: var(--accent-color);
+    transform: scale(1.1);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
 
 /* ==========================================================================
@@ -299,7 +298,6 @@ body.light-theme .info-circle {
     font-size: 1.5em;
 }
 
-/* Стили для элементов внутри settings */
 .settings select, 
 .settings button {
     font-size: 1em;
@@ -394,13 +392,13 @@ body.light-theme .info-circle {
 }
 
 .modal-content {
-    text-align: left; /* Устанавливаем выравнивание текста по левому краю для всего контента */
+    text-align: left;
 }
 
 .modal-content h2,
 .modal-content h3,
 .modal-content h4 {
-    text-align: center; /* Заголовки по центру */
+    text-align: center;
 }
 
 .modal-content h2 {
@@ -429,7 +427,7 @@ body.light-theme .info-circle {
     line-height: 1.5;
     margin-bottom: 15px;
     color: var(--text-color);
-    text-align: left; /* Убедитесь, что текст параграфов выровнен по левому краю */
+    text-align: left;
 }
 
 .modal-content .rule-list {
@@ -459,11 +457,11 @@ body.light-theme .info-circle {
 }
 
 .modal .modal-content.rules-modal-content {
-    align-items: flex-start; /* Или любое другое значение, которое вам нужно */
+    align-items: flex-start;
 }
 
 .rules-modal-content {
-    align-items: flex-start !important; /* Используйте !important для переопределения */
+    align-items: flex-start !important;
 }
 
 .game-stats {
@@ -505,6 +503,36 @@ body.light-theme .info-circle {
 @media screen and (max-width: 499px) {
     .game-stats {
         grid-template-columns: 1fr;
+    }
+    .score-input {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .score-input label {
+        margin-bottom: 5px;
+    }
+
+    .score-input input[type="text"] {
+        width: 100%;
+        max-width: 300px;
+        font-size: 1.5em;
+    }
+
+    .button-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 10px;
+        width: 100%;
+        max-width: 300px;
+    }
+
+    .score-input button {
+        width: 100%;
+        font-size: 1.2em;
     }
 }
 

@@ -60,5 +60,5 @@ function closeRules() {
 }
 
 document.addEventListener("DOMContentLoaded", function() {
-    // Здесь можно добавить другие инициализации, если необходимо
+    
 });

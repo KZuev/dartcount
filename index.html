@@ -12,8 +12,17 @@
         <h1><span class="dart">DART</span><span class="count">COUNT</span></h1>
         <div class="theme-selection">
             <button id="themeToggle" onclick="toggleTheme()">
-                <span class="theme-icon">🌙</span> <!-- Иконка будет меняться -->
+                <span class="theme-icon">🌙</span>
             </button>
+            <div class="info-circle" onclick="openRules()">
+                <span class="info-icon">i</span>
+            </div>
+        </div>
+        <div id="rulesModal" class="modal">
+            <div class="modal-content rules-modal-content">
+                <span class="close-modal" onclick="closeRules()">&times;</span>
+                <!-- Содержимое модального окна будет добавлено динамически из rules.js -->
+            </div>
         </div>
             <div class="settings">
                 <div class="game-selection">
@@ -89,5 +98,6 @@
         </div>
     </div>
     <script src="js/script.js"></script>
+    <script src="js/rules.js"></script>
 </body>
 </html>

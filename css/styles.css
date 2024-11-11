@@ -200,23 +200,34 @@ button:hover {
 
 .theme-selection {
     position: absolute;
-    top: 20px;
-    right: 20px;
+    top: 35px;
+    right: 10px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
 }
 
 #themeToggle {
     background: transparent;
-    border: none;
+    border: 2px solid rgba(255, 255, 255, 0.3); /* Более бледный цвет рамки по умолчанию */
     cursor: pointer;
     font-size: 24px;
-    padding: 8px;
-    border-radius: 50%;
-    width: 40px;
-    height: 40px;
+    padding: 0;
+    width: 40px; /* Увеличенная ширина кнопки */
+    height: 40px; /* Увеличенная высота кнопки */
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: background-color 0.3s;
+    border-radius: 50%; /* Устанавливаем радиус границы для круглой формы */
+    transition: background-color 0.3s, border-color 0.3s; /* Плавный переход для фона и цвета рамки */
+}
+
+body:not(.light-theme) #themeToggle {
+    border-color: rgba(255, 255, 255, 0.5); /* Бледный цвет рамки в темной теме */
+}
+
+body.light-theme #themeToggle {
+    border-color: rgba(0, 0, 0, 0.2); /* Более бледный цвет рамки в светлой теме */
 }
 
 #themeToggle:hover {
@@ -230,6 +241,44 @@ button:hover {
 
 .theme-selection, .game-selection, .player-count {
     margin-bottom: 10px;
+}
+
+.info-circle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 10px;
+    width: 37px; /* Ширина кнопки */
+    height: 37px; /* Высота кнопки */
+    border-radius: 50%; /* Устанавливаем радиус границы для круглой формы */
+    border: 2px solid rgba(255, 255, 255, 0.3); /* Цвет рамки */
+    background-color: transparent; /* Фон по умолчанию */
+    color: rgba(0, 0, 0, 0.2); /* Цвет иконки по умолчанию */
+    font-size: 1.2em; /* Размер шрифта */
+    cursor: pointer; /* Курсор при наведении */
+    transition: background-color 0.3s, color 0.3s, border-color 0.3s, transform 0.2s; /* Плавный переход для фона, цвета и увеличения */
+}
+
+.info-circle span {
+    font-weight: bold; /* Делаем букву "i" жирной */
+}
+
+body:not(.light-theme) .info-circle {
+    color: #FFFFFF80; /* Цвет текста в темной теме */
+    border-color: rgba(255, 255, 255, 0.5); /* Бледный цвет рамки в темной теме */
+}
+
+body.light-theme .info-circle {
+    color: rgba(0, 0, 0, 0.2); /* Цвет текста в светлой теме (такой же, как цвет рамки) */
+    border-color: rgba(0, 0, 0, 0.2); /* Более бледный цвет рамки в светлой теме */
+}
+
+.info-circle:hover {
+    background-color: rgba(255, 255, 255, 0.1); /* Подсветка при наведении */
+    border-color: var(--accent-color); /* Изменение цвета рамки при наведении */
+    color: var(--accent-color); /* Изменение цвета текста при наведении */
+    transform: scale(1.1); /* Увеличение кнопки при наведении */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Добавляем тень при наведении */
 }
 
 /* ==========================================================================
@@ -342,6 +391,79 @@ button:hover {
     display: flex;
     flex-direction: column;
     align-items: center;
+}
+
+.modal-content {
+    text-align: left; /* Устанавливаем выравнивание текста по левому краю для всего контента */
+}
+
+.modal-content h2,
+.modal-content h3,
+.modal-content h4 {
+    text-align: center; /* Заголовки по центру */
+}
+
+.modal-content h2 {
+    font-size: 28px;
+    font-weight: bold;
+    margin-bottom: 15px;
+    color: var(--text-color);
+}
+
+.modal-content h3 {
+    font-size: 24px;
+    font-weight: bold;
+    margin-bottom: 10px;
+    color: var(--accent-color);
+}
+
+.modal-content h4 {
+    font-size: 20px;
+    font-weight: bold;
+    margin-bottom: 8px;
+    color: var(--accent-color);
+}
+
+.modal-content p {
+    font-size: 18px;
+    line-height: 1.5;
+    margin-bottom: 15px;
+    color: var(--text-color);
+    text-align: left; /* Убедитесь, что текст параграфов выровнен по левому краю */
+}
+
+.modal-content .rule-list {
+    margin-left: 20px;
+    list-style-type: disc;
+    color: var(--text-color);
+}
+
+.modal-content .modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 20px;
+}
+
+.modal-content .modal-footer button {
+    padding: 10px 20px;
+    background-color: var(--accent-color);
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.modal-content .modal-footer button:hover {
+    background-color: var(--button-hover);
+}
+
+.modal .modal-content.rules-modal-content {
+    align-items: flex-start; /* Или любое другое значение, которое вам нужно */
+}
+
+.rules-modal-content {
+    align-items: flex-start !important; /* Используйте !important для переопределения */
 }
 
 .game-stats {

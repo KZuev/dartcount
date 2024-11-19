@@ -11,9 +11,6 @@
     "undoButton": "Undo",
     "undoButtonTooltip": "Undo Input (Ctrl + Z)",
     "statistics": "Game Statistics",
-    "winner": "WINNER - PLAYER #",
-    "legsWon": "Legs Won:",
-    "throwsModalTitle": "Number of Throws",
     "legs": "Legs",
     "to": "to"
 }

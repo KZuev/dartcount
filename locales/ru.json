@@ -11,9 +11,6 @@
     "undoButton": "Отменить",
     "undoButtonTooltip": "Отменить ввод (Ctrl + Z)",
     "statistics": "Статистика игры",
-    "winner": "ПОБЕДИТЕЛЬ - ИГРОК #",
-    "legsWon": "Выиграно легов:",
-    "throwsModalTitle": "Количество бросков",
     "legs": "Леги",
     "to": "до"
 }

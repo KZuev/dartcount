@@ -52,10 +52,7 @@ function loadTranslations() {
             document.getElementById('undoScoreButton').textContent = translations.undoButton;
             document.getElementById('undoScoreButton').title = translations.undoButtonTooltip;
             document.getElementById('statisticsTitle').textContent = translations.statistics;
-            document.getElementById('winnerText').textContent = translations.winner;
-            document.getElementById('legsWonText').textContent = translations.legsWon;
             document.getElementById('title').textContent = translations.title;
-            document.getElementById('throwsModalTitle').textContent = translations.throwsModalTitle;
         })
         .catch(error => {
             console.error('Ошибка при загрузке переводов:', error);

@@ -713,6 +713,9 @@ function showGameStats() {
             averageThrowTimeDetails = `${totalTime.toFixed(2)} сек / ${numberOfApproaches} подходов = ${averageThrowTime} сек`;
         }
 
+        // Лучший бросок
+        const highestScore = allThrows.length > 0 ? Math.max(...allThrows) : 0;
+
         playerStats.innerHTML = `
             <h3>Игрок #${index + 1} ${index === winner.index ? '👑' : ''}</h3>
             <div class="stat-item">Выиграно легов: ${player.legWins}</div>
@@ -721,6 +724,7 @@ function showGameStats() {
             <div class="stat-item">
                 Набрано очков: <span class="calculation" title="${pointsDetails}">${totalPoints}</span>
             </div>
+            <div class="stat-item">Лучший бросок: ${highestScore}</div>
             <div class="stat-item">
                 Средний набор: <span class="calculation" title="${averageScoreDetails}">${averageScore}</span>
             </div>

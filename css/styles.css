@@ -607,6 +607,11 @@ body.light-theme .info-circle {
     border-bottom: 1px solid var(--accent-color);
 }
 
+.calculation {
+    cursor: help;
+    margin-left: 5px;
+}
+
 .close-stats-button {
     padding: 8px 15px;
     font-size: 1em;

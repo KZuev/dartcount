@@ -633,11 +633,9 @@ function showGameStats() {
     `;
     content.appendChild(winnerDiv);
 
-    
     const gameInfo = document.createElement('div');
     gameInfo.className = 'player-stats';
-
-    
+ 
     const formatDateTime = (date) => {
         return date.toLocaleString('ru-RU', {
             day: '2-digit',
@@ -685,38 +683,62 @@ function showGameStats() {
             playerStats.style.boxShadow = '0 0 10px rgba(255, 215, 0, 0.5)';
         }
 
-        
-        let averageThrowTime = 'N/A';
-        if (player.throwTimes.length > 1) {
-            const totalTime = (player.throwTimes[player.throwTimes.length - 1] - player.throwTimes[0]) / 1000; 
-            const numberOfApproaches = Math.ceil(player.throwTimes.length / 3); 
-            averageThrowTime = (totalTime / numberOfApproaches).toFixed(2);
-        }
-        
-        
+        // Набрано очков
+        const totalPoints = player.totalPoints;
+        const pointsDetails = player.history.flat().join(' + ');
+
+        // Средний набор
         const averageScore = player.throws > 0 ? (player.totalPoints / player.throws).toFixed(2) : 0;
+        const averageScoreDetails = `${player.totalPoints} / ${player.throws} = ${averageScore}`;
+
+        // Средний набор за подход
+        const approaches = Math.ceil(player.throws / 3);
+        const averagePerApproach = approaches > 0 ? (player.totalPoints / approaches).toFixed(2) : 0;
+        const averagePerApproachDetails = `${player.totalPoints} / ${approaches} = ${averagePerApproach}`;
+        
+        // Среднее за последние 9 бросков
         const allThrows = player.history.flat();
-        const highestScore = allThrows.length > 0 ? Math.max(...allThrows) : 0;
         const last9Throws = allThrows.slice(-9);
         const average9 = last9Throws.length > 0 
             ? (last9Throws.reduce((a, b) => a + b, 0) / last9Throws.length).toFixed(2)
             : 0;
+        const average9Details = last9Throws.length > 0
+            ? `(${last9Throws.join(' + ')}) / ${last9Throws.length} = ${average9}`
+            : 'Недостаточно данных';
 
-        let historyHTML = player.history.map((leg, legIndex) => 
-            `Лег ${legIndex + 1}: ${leg.join(', ') || 'Нет бросков'}`
-        ).join('<br>');
+        // Среднее время на подход
+        let averageThrowTime = 'N/A';
+        let averageThrowTimeDetails = 'Недостаточно данных';
+        if (player.throwTimes.length > 1) {
+            const totalTime = (player.throwTimes[player.throwTimes.length - 1] - player.throwTimes[0]) / 1000; // в секундах
+            const numberOfApproaches = Math.ceil(player.throwTimes.length / 3); // количество подходов
+            averageThrowTime = (totalTime / numberOfApproaches).toFixed(2);
+            averageThrowTimeDetails = `${totalTime.toFixed(2)} сек / ${numberOfApproaches} подходов = ${averageThrowTime} сек`;
+        }
 
         playerStats.innerHTML = `
             <h3>Игрок #${index + 1} ${index === winner.index ? '👑' : ''}</h3>
             <div class="stat-item">Выиграно легов: ${player.legWins}</div>
             <div class="stat-item">Всего бросков: ${player.throws}</div>
             <div class="stat-item">Всего подходов: ${Math.ceil(player.throws / 3)}</div>
-            <div class="stat-item">Набрано очков: ${player.totalPoints}</div>
-            <div class="stat-item">Средний набор: ${averageScore}</div>
-            <div class="stat-item">Лучший бросок: ${highestScore}</div>
-            <div class="stat-item">Среднее за последние 9 бросков: ${average9}</div>
-            <div class="stat-item">Среднее время на подход: ${averageThrowTime} сек</div>
-            <div class="stat-item">История бросков:<br>${historyHTML}</div>
+            <div class="stat-item">
+                Набрано очков: <span class="calculation" title="${pointsDetails}">${totalPoints}</span>
+            </div>
+            <div class="stat-item">
+                Средний набор: <span class="calculation" title="${averageScoreDetails}">${averageScore}</span>
+            </div>
+            <div class="stat-item">
+                Средний набор за подход: <span class="calculation" title="${averagePerApproachDetails}">${averagePerApproach}</span>
+            </div>
+            <div class="stat-item">
+                Среднее за последние 9 бросков: <span class="calculation" title="${average9Details}">${average9}</span>
+            </div>
+            <div class="stat-item">
+                Среднее время на подход: <span class="calculation" title="${averageThrowTimeDetails}">${averageThrowTime} сек</span>
+            </div>
+            <div class="stat-item">История бросков:<br>${player.history.map((leg, legIndex) => 
+                `Лег ${legIndex + 1}: ${leg.join(', ') || 'Нет бросков'}`
+            ).join('<br>')}</div>
         `;
         content.appendChild(playerStats);
     });

@@ -15,6 +15,37 @@ let isConfettiActive = true;
 let currentLanguage = localStorage.getItem('language') || 'ru';
 
 document.addEventListener('keydown', function(event) {
+    if (event.key === 'F9') { // Проверяем, была ли нажата клавиша F9
+        event.preventDefault(); // Предотвращаем действие по умолчанию (если необходимо)
+        const interfaceElements = document.querySelectorAll('.container, .modal-content, .confetti'); // Убедитесь, что все элементы включены
+        interfaceElements.forEach(element => {
+            element.classList.toggle('hidden'); // Переключение класса hidden
+        });
+    }
+});
+
+document.getElementById('toggleInterfaceButton').addEventListener('click', function() {
+    const interfaceElements = document.querySelectorAll('.container, .modal-content, .confetti'); // Убедитесь, что все элементы включены
+    interfaceElements.forEach(element => {
+        element.classList.toggle('hidden'); // Переключение класса hidden
+    });
+});
+
+document.addEventListener('click', function(event) {
+    const interfaceElements = document.querySelectorAll('.container, .modal-content, .confetti');
+    const isInterfaceHidden = Array.from(interfaceElements).every(element => element.classList.contains('hidden'));
+
+    // Проверяем, был ли клик на одном из элементов интерфейса
+    const isClickOnInterface = Array.from(interfaceElements).some(element => element.contains(event.target));
+
+    if (isInterfaceHidden && !isClickOnInterface) {
+        interfaceElements.forEach(element => {
+            element.classList.remove('hidden'); // Убираем класс hidden, чтобы показать элементы интерфейса
+        });
+    }
+});
+
+document.addEventListener('keydown', function(event) {
     if (event.ctrlKey && event.key === 'z') {
         event.preventDefault();
         undoScore();

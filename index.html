@@ -11,15 +11,22 @@
     <div class="container">
         <h1><span class="dart">DART</span><span class="count">COUNT</span></h1>
         <div class="theme-selection">
+            <button id="toggleInterfaceButton" class="language-button" onclick="toggleInterface()" title="Скрыть интерфейс (F9)">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10" /> <!-- Кружок -->
+                    <line x1="12" y1="8" x2="12" y2="16" /> <!-- Палочка внутри -->
+                    <line x1="12" y1="4" x2="12" y2="6" /> <!-- Верхняя палочка -->
+                </svg>
+            </button>
             <div class="language-selection">
-                <button id="languageButton" class="language-button" onclick="toggleLanguage()">
+                <button id="languageButton" class="language-button" onclick="toggleLanguage()" title="Сменить язык">
                     ru
                 </button>
             </div>
-            <button id="themeToggle" onclick="toggleTheme()">
+            <button id="themeToggle" onclick="toggleTheme()" title="Сменить оформление">
                 <span class="theme-icon">🌙</span>
             </button>
-            <div class="info-circle" onclick="openRules()">
+            <div class="info-circle" onclick="openRules()" title="Информация">
                 <span class="info-icon">i</span>
             </div>
         </div>

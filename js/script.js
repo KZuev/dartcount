@@ -16,8 +16,8 @@ let currentLanguage = localStorage.getItem('language') || 'ru';
 
 document.addEventListener('keydown', function(event) {
     if (event.key === 'F9') { // Проверяем, была ли нажата клавиша F9
-        event.preventDefault(); // Предотвращаем действие по умолчанию (если необходимо)
-        const interfaceElements = document.querySelectorAll('.container, .modal-content, .confetti'); // Убедитесь, что все элементы включены
+        event.preventDefault(); // Предотвращаем действие по умолчанию
+        const interfaceElements = document.querySelectorAll('.container, .modal-content, .confetti');
         interfaceElements.forEach(element => {
             element.classList.toggle('hidden'); // Переключение класса hidden
         });
@@ -25,7 +25,7 @@ document.addEventListener('keydown', function(event) {
 });
 
 document.getElementById('toggleInterfaceButton').addEventListener('click', function() {
-    const interfaceElements = document.querySelectorAll('.container, .modal-content, .confetti'); // Убедитесь, что все элементы включены
+    const interfaceElements = document.querySelectorAll('.container, .modal-content, .confetti');
     interfaceElements.forEach(element => {
         element.classList.toggle('hidden'); // Переключение класса hidden
     });
@@ -138,9 +138,11 @@ function startGame() {
         score: gameScore,
         throws: 0,
         totalPoints: 0,
-        history: [[]],  
+        history: [[]],
         legWins: 0,
-        throwTimes: []
+        throwTimes: [],
+        bestExceededScore: 0, // Лучший бросок при превышении
+        bestNormalScore: 0 // Лучший бросок без превышения
     }));
     
     currentPlayer = 0;
@@ -367,18 +369,15 @@ function submitScore() {
 
     
     if (scoreInput.value.trim() === '') {
-        
         scoreInput.value = '';
         scoreInput.focus();
         return;
     }
 
-    
     if (isNaN(score) || score < 0 || score > 180) {
         showErrorModal('Введите корректное значение очков (0-180).');
         return;
     }
-
     
     if (score === player.score) {
         scoreInput.value = ''; 
@@ -421,37 +420,84 @@ function submitScore() {
             });
         return;
     }
-
-    
     
     const remainingScore = player.score - score;
+    
     if (remainingScore < 0) {
-        showErrorModal(`Нельзя набрать больше очков, чем у вас есть. У вас ${player.score}.`);
-        return;
-    }
-    if (remainingScore === 1) {
-        showErrorModal('Нельзя остаться с 1 очком. Введите меньшее значение.');
+        // Если игрок ввел больше очков, чем у него осталось
+        showWarningModal('Вы превысили допустимое количество очков', 3000);
+        player.history[player.history.length - 1].push(score + ' (0)'); // Записываем результат с 0 в истории
+        player.throws += 3; // Увеличиваем количество бросков
+        player.totalPoints += 0; // Обновляем общие очки
+        player.throwTimes.push(currentTime);
+
+        // Обновляем лучший превышенный бросок
+        if (score > player.bestExceededScore) {
+            player.bestExceededScore = score;
+        }
+
+        lastScores.push({
+            playerIndex: currentPlayer,
+            score: 0,
+            legIndex: player.history.length - 1
+        });
+
+        // Переход к следующему игроку
+        currentPlayer = (currentPlayer + 1) % playerCount;
+        scoreInput.value = '';
+        updateScoreBoard();
+        updateStatsBoard();
+        scoreInput.focus();
         return;
     }
 
-    
-    player.score = remainingScore;
-    player.throws += 3;
-    player.totalPoints += score;
-    player.history[player.history.length - 1].push(score);
+    // Если введенное значение корректное и не превышает оставшиеся очки
+    player.score = remainingScore; // Обновляем счет
+    player.throws += 3; // Увеличиваем количество бросков
+    player.totalPoints += score; // Обновляем общие очки
+    player.history[player.history.length - 1].push(score); // Записываем результат в историю
     player.throwTimes.push(currentTime);
-    lastScores.push({ 
-        playerIndex: currentPlayer, 
-        score, 
-        legIndex: player.history.length - 1 
+    lastScores.push({
+        playerIndex: currentPlayer,
+        score,
+        legIndex: player.history.length - 1
     });
 
-    
-    currentPlayer = (currentPlayer + 1) % playerCount;
-    scoreInput.value = '';
-    updateScoreBoard();
-    updateStatsBoard();
-    scoreInput.focus();
+    // Обновляем лучший бросок без превышения
+    if (score > player.bestNormalScore) {
+        player.bestNormalScore = score;
+    }
+
+    currentPlayer = (currentPlayer + 1) % playerCount; // Переход к следующему игроку
+    scoreInput.value = ''; // Очищаем поле ввода
+    updateScoreBoard(); // Обновляем таблицу счета
+    updateStatsBoard(); // Обновляем статистику
+    scoreInput.focus(); // Фокусируем поле ввода
+}
+
+function showWarningModal(message, duration) {
+    const modal = document.getElementById('throwsModal');
+    const content = modal.querySelector('.modal-content');
+
+    modal.classList.add('active');
+
+    content.innerHTML = `
+        <h2 style="font-size: 4em; margin-bottom: 20px; text-align: center; color: red;">0 очков</h2>
+        <p style="font-size: 2em; margin-bottom: 30px; text-align: center; color: red;">${message}</p>
+    `;
+
+    const handleKeyPress = (event) => {
+        if (event.key === 'Enter') {
+            modal.classList.remove('active');
+        }
+    };
+
+    content.addEventListener('keydown', handleKeyPress);
+
+    setTimeout(() => {
+        modal.classList.remove('active');
+        content.removeEventListener('keydown', handleKeyPress);
+    }, duration);
 }
 
 function checkGameWin(player) {
@@ -533,7 +579,10 @@ function updateStatsBoard() {
             <p>Набрано очков: ${player.totalPoints}</p>
             <p>История бросков:<br>${historyHTML}</p>
             <p>Средний набор (1 бросок): ${(player.throws > 0 ? (player.totalPoints / player.throws).toFixed(2) : 0)}</p>
-            <p>Средний набор (3 броска): ${(player.throws >= 3 ? (player.history.flat().slice(-3).reduce((a, b) => a + b, 0) / 3).toFixed(2) : 0)}</p>
+            <p>Средний набор (3 броска): ${(player.throws >= 3 
+                ? (player.history.flat().filter(score => score > 0).slice(-3).reduce((a, b) => a + b, 0) / Math.min(3, player.history.flat().filter(score => score > 0).length)).toFixed(2) 
+                : 0)}
+            </p>
         `;
         statsBoard.appendChild(playerDiv);
     });
@@ -634,12 +683,10 @@ function showGameStats() {
     const content = document.getElementById('gameStatsContent');
     content.innerHTML = '';
 
-    
     const winner = players.reduce((prev, current, index) => {
         return (prev.legWins > current.legWins) ? prev : { ...current, index: index };
     }, { ...players[0], index: 0 });
 
-    
     const winnerDiv = document.createElement('div');
     winnerDiv.className = 'player-stats winner-announcement';
     winnerDiv.style.cssText = `
@@ -674,7 +721,6 @@ function showGameStats() {
             second: '2-digit'
         });
     };
-
     
     const calculateDuration = (start, end) => {
         const diff = Math.floor((end - start) / 1000); 
@@ -700,7 +746,6 @@ function showGameStats() {
         <div class="stat-item">Длительность: ${calculateDuration(gameStartTime, gameEndTime)}</div>
     `;
     content.appendChild(gameInfo);
-
     
     players.forEach((player, index) => {
         const playerStats = document.createElement('div');
@@ -726,7 +771,7 @@ function showGameStats() {
         
         // Среднее за последние 9 бросков
         const allThrows = player.history.flat();
-        const last9Throws = allThrows.slice(-9);
+        const last9Throws = allThrows.filter(score => score > 0).slice(-9); // Фильтруем нулевые значения
         const average9 = last9Throws.length > 0 
             ? (last9Throws.reduce((a, b) => a + b, 0) / last9Throws.length).toFixed(2)
             : 0;
@@ -747,6 +792,21 @@ function showGameStats() {
         // Лучший бросок
         const highestScore = allThrows.length > 0 ? Math.max(...allThrows) : 0;
 
+        // Определяем, какой бросок отображать
+        let bestThrowDisplay = '';
+        let bestExceededScoreDisplay = '';
+
+        if (player.bestExceededScore > player.bestNormalScore) {
+            bestThrowDisplay = player.bestNormalScore;
+            bestExceededScoreDisplay = `(${player.bestExceededScore})`;
+        } else if (player.bestExceededScore === 0) {
+            bestThrowDisplay = player.bestNormalScore;
+            bestExceededScoreDisplay = ''; // Не отображаем (0) если нет превышающего броска
+        } else {
+            bestThrowDisplay = player.bestNormalScore;
+            bestExceededScoreDisplay = ''; // Не отображаем превышающий бросок, если он меньше
+        }
+
         playerStats.innerHTML = `
             <h3>Игрок #${index + 1} ${index === winner.index ? '👑' : ''}</h3>
             <div class="stat-item">Выиграно легов: ${player.legWins}</div>
@@ -755,7 +815,10 @@ function showGameStats() {
             <div class="stat-item">
                 Набрано очков: <span class="calculation" title="${pointsDetails}">${totalPoints}</span>
             </div>
-            <div class="stat-item">Лучший бросок: ${highestScore}</div>
+            <div class="stat-item">Лучший бросок за всю игру: 
+                <span class="calculation" title="Лучший бросок, который игрок сделал в игре">${player.bestNormalScore}</span>
+                <span class="calculation" title="Лучший бросок, с превышением не засчитанный в общем счете"> ${bestExceededScoreDisplay}</span>
+            </div>
             <div class="stat-item">
                 Средний набор: <span class="calculation" title="${averageScoreDetails}">${averageScore}</span>
             </div>
@@ -775,7 +838,6 @@ function showGameStats() {
         content.appendChild(playerStats);
     });
 
-    
     const buttonContainer = document.createElement('div');
     buttonContainer.className = 'button-container';
     buttonContainer.style.cssText = `

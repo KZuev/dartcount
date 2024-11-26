@@ -45,9 +45,9 @@ body.light-theme {
 }
 
 .hidden {
-    opacity: 0; /* Прозрачность для скрытия */
-    transform: translateY(-10px); /* Подъем вверх при скрытии */
-    pointer-events: none; /* Отключение событий при скрытии */
+    opacity: 0;
+    transform: translateY(-10px);
+    pointer-events: none;
 }
 
 /* ==========================================================================

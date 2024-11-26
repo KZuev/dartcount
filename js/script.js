@@ -426,7 +426,7 @@ function submitScore() {
     if (remainingScore < 0) {
         // Если игрок ввел больше очков, чем у него осталось
         showWarningModal('Вы превысили допустимое количество очков', 3000);
-        player.history[player.history.length - 1].push(score + ' (0)'); // Записываем результат с 0 в истории
+        player.history[player.history.length - 1].push('0 (' + score + ')'); // Записываем 0 как основное значение и превышение в скобках
         player.throws += 3; // Увеличиваем количество бросков
         player.totalPoints += 0; // Обновляем общие очки
         player.throwTimes.push(currentTime);

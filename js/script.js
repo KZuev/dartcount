@@ -450,6 +450,10 @@ function submitScore() {
         scoreInput.focus();
         return;
     }
+    if (remainingScore === 1) {
+        showErrorModal('Нельзя оставить 1 очко. Введите меньшее значение.');
+        return;
+    }
 
     // Если введенное значение корректное и не превышает оставшиеся очки
     player.score = remainingScore; // Обновляем счет

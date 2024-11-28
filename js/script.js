@@ -76,7 +76,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Обработчик для кнопки "Вернуться в меню"
     if (backToMenuButton) {
         backToMenuButton.addEventListener('click', function() {
-            settingsDiv.classList.add('hidden'); // Скрываем блок настроек
+            settingsDiv.classList.toggle('hidden'); // Скрываем блок настроек
             menuButtons.forEach(button => {
                 button.style.display = 'block'; // Показываем кнопки меню
             });
@@ -158,7 +158,11 @@ function loadTranslations() {
             document.getElementById('undoScoreButton').textContent = translations.undoButton;
             document.getElementById('undoScoreButton').title = translations.undoButtonTooltip;
             document.getElementById('statisticsTitle').textContent = translations.statistics;
-            document.getElementById('title').textContent = translations.title;
+            document.getElementById('startNewGameButton').textContent = `🎯 ${translations.startNewGameButton}`;
+            document.getElementById('playersButton').textContent = `👥 ${translations.playersButton}`;
+            document.getElementById('statsButton').textContent = `📊 ${translations.statsButton}`;
+            document.getElementById('tournamentsButton').textContent = `🏆 ${translations.tournamentsButton}`;
+            document.getElementById('settingsButton').textContent = `⚙️ ${translations.settingsButton}`;
         })
         .catch(error => {
             console.error('Ошибка при загрузке переводов:', error);

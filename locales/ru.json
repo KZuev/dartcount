@@ -12,5 +12,11 @@
     "undoButtonTooltip": "Отменить ввод (Ctrl + Z)",
     "statistics": "Статистика игры",
     "legs": "Леги",
-    "to": "до"
+    "to": "до",
+    
+    "startNewGameButton": "Новая игра",
+    "playersButton": "Игроки",
+    "statsButton": "Статистика",
+    "tournamentsButton": "Турниры",
+    "settingsButton": "Настройки"
 }

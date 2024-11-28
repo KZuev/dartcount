@@ -12,5 +12,11 @@
     "undoButtonTooltip": "Undo Input (Ctrl + Z)",
     "statistics": "Game Statistics",
     "legs": "Legs",
-    "to": "to"
+    "to": "to",
+
+    "startNewGameButton": "New Game",
+    "playersButton": "Players",
+    "statsButton": "Statistics",
+    "tournamentsButton": "Tournaments",
+    "settingsButton": "Settings"
 }

@@ -26,6 +26,20 @@
     --icon-color: #000000;
 }
 
+/* CSS для скрытия элемента */
+.hidden {
+    display: none;
+}
+
+.emoji {
+    display: inline-block;
+    filter: grayscale(100%); /* Применяет черно-белый фильтр */
+    width: 45px; /* Размер эмодзи */
+    height: 45px; /* Размер эмодзи */
+    margin-right: 0px; /* Отступ между эмодзи и текстом */
+    vertical-align: middle; /* Выравнивание по центру */
+}
+
 /* ==========================================================================
    2. Base Styles
    ========================================================================== */
@@ -199,6 +213,26 @@ button {
 
 button:hover {
     background: var(--button-hover);
+    transform: scale(1.05);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* Стили для кнопок главного меню */
+.menu-button {
+    padding: 12px 25px;
+    background: #5a9bd4;
+    border: none;
+    border-radius: 8px;
+    color: #fff;
+    font-size: 2em;
+    cursor: pointer;
+    transition: background-color 0.2s, transform 0.2s;
+    width: 400px; /* Устанавливаем одинаковую ширину только для кнопок главного меню */
+    height: 100px;
+}
+
+.menu-button:hover {
+    background: #4285b4;
     transform: scale(1.05);
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }

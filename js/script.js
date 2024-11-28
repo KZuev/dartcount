@@ -14,6 +14,81 @@ let confettiInterval;
 let isConfettiActive = true;
 let currentLanguage = localStorage.getItem('language') || 'ru';
 
+
+// Обработчики событий для кнопок
+document.getElementById('playersButton').addEventListener('click', showModal);
+document.getElementById('statsButton').addEventListener('click', showModal);
+document.getElementById('tournamentsButton').addEventListener('click', showModal);
+document.getElementById('settingsButton').addEventListener('click', showModal);
+
+// Обработчик событий для модального окна
+document.getElementById('closeModal').addEventListener('click', closeModal);
+document.addEventListener('keydown', function(event) {
+    if (event.key === 'Enter') {
+        closeModal();
+    }
+});
+
+// Функции для показа и скрытия модального окна
+function showModal() {
+    document.getElementById('modal').style.display = 'block';
+}
+
+function closeModal() {
+    document.getElementById('modal').style.display = 'none';
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    const backToMenuButton = document.getElementById('backToMenuButton');
+    const settingsDiv = document.querySelector('.settings');
+    const menuButtons = document.querySelectorAll('.menu-button');
+
+    // Проверяем, что элементы найдены
+    if (!settingsDiv) {
+        console.error('Элемент с классом settings не найден.');
+        return;
+    }
+
+    if (menuButtons.length === 0) {
+        console.error('Кнопки меню не найдены.');
+        return;
+    }
+
+    // Скрыть меню настроек при загрузке
+    settingsDiv.classList.add('hidden'); // Убедитесь, что меню настроек скрыто
+
+    // Показать кнопки меню при загрузке
+    menuButtons.forEach(button => {
+        button.style.display = 'block'; // Показываем кнопки меню
+    });
+
+    // Обработчик для кнопки "Новая игра"
+    const startNewGameButton = document.getElementById('startNewGameButton');
+    if (startNewGameButton) {
+        startNewGameButton.addEventListener('click', function() {
+            menuButtons.forEach(button => {
+                button.style.display = 'none'; // Скрываем кнопки меню
+            });
+            settingsDiv.classList.remove('hidden'); // Показываем блок настроек
+        });
+    }
+
+    // Обработчик для кнопки "Вернуться в меню"
+    if (backToMenuButton) {
+        backToMenuButton.addEventListener('click', function() {
+            settingsDiv.classList.add('hidden'); // Скрываем блок настроек
+            menuButtons.forEach(button => {
+                button.style.display = 'block'; // Показываем кнопки меню
+            });
+        });
+    } else {
+        console.error('Элемент с ID backToMenuButton не найден.');
+    }
+});
+
+const menuButtons = document.querySelectorAll('.menu button');
+console.log('Найденные кнопки меню:', menuButtons);
+
 document.addEventListener('keydown', function(event) {
     if (event.key === 'F9') { // Проверяем, была ли нажата клавиша F9
         event.preventDefault(); // Предотвращаем действие по умолчанию

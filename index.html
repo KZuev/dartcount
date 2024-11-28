@@ -35,7 +35,14 @@
                 <span class="close-modal" onclick="closeRules()">&times;</span>
             </div>
         </div>
-            <div class="settings">
+            <button class="menu-button" id="startNewGameButton"><span class="emoji">🎯</span> Новая игра</button>
+            <button class="menu-button" id="playersButton"><span class="emoji">👥</span> Игроки</button>
+            <button class="menu-button" id="statsButton"><span class="emoji">📊</span> Статистика</button>
+            <button class="menu-button" id="tournamentsButton"><span class="emoji">🏆</span> Турниры</button>
+            <button class="menu-button" id="settingsButton"><span class="emoji">⚙️</span> Настройки</button>
+            <div class="settings hidden">
+                <button id="backToMenuButton">Вернуться в меню</button>
+                <h2>Настройки игры</h2>
                 <div class="game-selection">
                     <label id="gameTypeLabel" for="gameType">Выберите игру:</label>
                     <select id="gameType">
@@ -63,11 +70,6 @@
                     </select>
                 </div>
                 <button id="startGameButton" onclick="startGame()">Начать игру</button>
-                <a href="https://github.com/KZuev/dartcount" target="_blank" class="github-link">
-                    <svg height="24" viewBox="0 0 16 16" width="24">
-                        <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/>
-                    </svg>
-                </a>
             </div>
         <button id="restartBtn" onclick="restartGame()" style="display: none;">Начать заново</button>
         <div class="score-board" id="scoreBoard"></div>
@@ -104,6 +106,13 @@
                 <button class="throw-button" data-throws="2">2</button>
                 <button class="throw-button" data-throws="3">3</button>
             </div>
+        </div>
+    </div>
+    <div id="modal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal" id="closeModal">&times;</span>
+            <p style="font-size: 2em; margin-bottom: 30px; text-align: center; color: white;">В РАЗРАБОТКЕ...</p>
+            <button onclick="closeModal()">Закрыть</button>
         </div>
     </div>
     <script src="js/script.js"></script>

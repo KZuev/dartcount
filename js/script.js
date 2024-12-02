@@ -1,4 +1,3 @@
-let players = [];
 let currentPlayer = 0;
 let gameScore = 301;
 let playerCount = 2;
@@ -13,13 +12,251 @@ let gameEndTime = null;
 let confettiInterval;
 let isConfettiActive = true;
 let currentLanguage = localStorage.getItem('language') || 'ru';
+let players = JSON.parse(localStorage.getItem('players')) || [];
+
+function loadPlayers() {
+    const playersList = document.getElementById('playersList');
+    playersList.innerHTML = '';
+    players.forEach((player, index) => {
+        const playerDiv = document.createElement('div');
+        playerDiv.innerHTML = `
+            <input type="text" value="${player}" onchange="editPlayer(${index}, this.value)">
+            <button onclick="removePlayer(${index})">Удалить</button>
+        `;
+        playersList.appendChild(playerDiv);
+    });
+}
+
+document.getElementById('addPlayerButton').addEventListener('click', function() {
+    const playerName = document.getElementById('newPlayerName').value;
+    if (playerName) {
+        players.push(playerName);
+        document.getElementById('newPlayerName').value = '';
+        savePlayers();
+        loadPlayers();
+    }
+});
+
+function editPlayer(index, newName) {
+    players[index] = newName;
+    savePlayers();
+}
+
+function removePlayer(index) {
+    players.splice(index, 1);
+    savePlayers();
+    loadPlayers();
+}
+
+function savePlayers() {
+    localStorage.setItem('players', JSON.stringify(players));
+}
+
+document.getElementById('playersButton').addEventListener('click', showPlayersModal);
+document.getElementById('closePlayersModal').addEventListener('click', closePlayersModal);
+
+function showPlayersModal() {
+    loadPlayers();
+    document.getElementById('playersModal').style.display = 'block';
+}
+
+function closePlayersModal() {
+    document.getElementById('playersModal').style.display = 'none';
+}
+
+document.getElementById('playerCount').textContent = playerCount;
+
+function updatePlayerSelectionFields() {
+    const selectPlayersContainer = document.getElementById('selectPlayersContainer');
+    selectPlayersContainer.innerHTML = ''; // Очищаем контейнер
+    const selectWidth = 100 / playerCount + '%'; // Рассчитываем ширину селекта
+
+    // Создаем массив для отслеживания выбранных игроков
+    const selectedPlayers = new Array(playerCount).fill(null);
+
+    for (let i = 0; i < playerCount; i++) {
+        const select = document.createElement('select');
+        select.className = 'select-player'; // Добавляем CSS-класс
+        select.style.width = selectWidth; // Устанавливаем ширину
+
+        // Добавляем пустой вариант по умолчанию
+        const emptyOption = document.createElement('option');
+        emptyOption.value = '';
+        emptyOption.textContent = 'Выберите игрока';
+        select.appendChild(emptyOption);
+
+        // Добавляем всех игроков в селектор
+        players.forEach(player => {
+            const option = document.createElement('option');
+            option.value = player;
+            option.textContent = player;
+            select.appendChild(option);
+        });
+
+        // Обработчик изменения выбора
+        select.addEventListener('change', function() {
+            const selectedValue = this.value;
+
+            // Обновляем массив выбранных игроков
+            selectedPlayers[i] = selectedValue;
+
+            // Обновляем другие селекторы
+            const allSelects = document.querySelectorAll('.select-player');
+            allSelects.forEach((otherSelect, index) => {
+                if (index !== i) {
+                    // Удаляем уже выбранных игроков из других селекторов
+                    Array.from(otherSelect.options).forEach(option => {
+                        if (selectedPlayers.includes(option.value) && option.value !== '') {
+                            option.disabled = true; // Делаем опцию недоступной
+                        } else {
+                            option.disabled = false; // Включаем опцию обратно
+                        }
+                    });
+                }
+            });
+        });
+
+        selectPlayersContainer.appendChild(select);
+    }
+}
+
+document.getElementById('startNewGameButton').addEventListener('click', function() {
+    updatePlayerSelectionFields();
+});
+
+function loadPlayers() {
+    const playersList = document.getElementById('playersList');
+    playersList.innerHTML = '';
+    players.forEach((player, index) => {
+        const playerDiv = document.createElement('div');
+        playerDiv.innerHTML = `
+            <input type="text" value="${player}" onchange="editPlayer(${index}, this.value)">
+            <button onclick="removePlayer(${index})">Удалить</button>
+        `;
+        playersList.appendChild(playerDiv);
+    });
+}
+
+document.getElementById('addPlayerButton').addEventListener('click', function() {
+    const playerName = document.getElementById('newPlayerName').value;
+    if (playerName) {
+        players.push(playerName);
+        document.getElementById('newPlayerName').value = '';
+        savePlayers();
+        loadPlayers();
+        updatePlayerSelectionFields(); // Обновляем поля выбора игроков
+    }
+});
+
+function editPlayer(index, newName) {
+    players[index] = newName;
+    savePlayers();
+    updatePlayerSelectionFields(); // Обновляем поля выбора игроков
+}
+
+function removePlayer(index) {
+    players.splice(index, 1);
+    savePlayers();
+    loadPlayers();
+    updatePlayerSelectionFields(); // Обновляем поля выбора игроков
+}
+
+function savePlayers() {
+    localStorage.setItem('players', JSON.stringify(players));
+}
+
+function updatePlayerSelectionFields() {
+    const selectPlayersContainer = document.getElementById('selectPlayersContainer');
+    selectPlayersContainer.innerHTML = ''; // Очищаем контейнер
+    for (let i = 0; i < playerCount; i++) {
+        const select = document.createElement('select');
+        select.innerHTML = players.map(player => `<option value="${player}">${player}</option>`).join('');
+        selectPlayersContainer.appendChild(select);
+    }
+}
+
+document.getElementById('startNewGameButton').addEventListener('click', function() {
+    updatePlayerSelectionFields(); // Обновляем поля выбора игроков при начале новой игры
+});
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+function showStorageModal() {
+    document.getElementById('storageModal').style.display = 'block';
+}
+
+function closeStorageModal() {
+    document.getElementById('storageModal').style.display = 'none';
+}
+
+function saveLocalStorageToFile() {
+    const data = JSON.stringify(localStorage); // Преобразуем localStorage в строку JSON
+    const blob = new Blob([data], { type: 'application/json' }); // Создаем Blob
+    const now = new Date(); // Получаем текущую дату и время
+
+    // Форматируем дату и время в нужном формате
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+    const hours = String(now.getHours()).padStart(2, '0');
+    const minutes = String(now.getMinutes()).padStart(2, '0');
+    const seconds = String(now.getSeconds()).padStart(2, '0');
+
+    const fileName = `dartcount_${year}${month}${day}-${hours}${minutes}${seconds}.json`; // Формируем имя файла
+
+    const url = URL.createObjectURL(blob); // Создаем URL для Blob
+
+    const a = document.createElement('a'); // Создаем элемент <a>
+    a.href = url; // Устанавливаем URL
+    a.download = fileName; // Устанавливаем имя файла
+    document.body.appendChild(a); // Добавляем элемент в DOM
+    a.click(); // Имитируем клик для загрузки файла
+    document.body.removeChild(a); // Удаляем элемент из DOM
+    URL.revokeObjectURL(url); // Освобождаем URL
+}
+
+function restoreLocalStorageFromFile(event) {
+    const file = event.target.files[0]; // Получаем файл из события
+    const reader = new FileReader(); // Создаем FileReader
+
+    reader.onload = function(e) {
+        const data = e.target.result; // Получаем содержимое файла
+        const parsedData = JSON.parse(data); // Парсим JSON
+        for (const key in parsedData) {
+            localStorage.setItem(key, parsedData[key]); // Восстанавливаем данные в localStorage
+        }
+        alert('Данные успешно восстановлены из файла!'); // Уведомление об успешном восстановлении
+        
+        // Обновляем страницу для отображения данных
+        location.reload();
+    };
+
+    reader.readAsText(file); // Читаем файл как текст
+}
+
+
+
+
+
 
 
 // Обработчики событий для кнопок
-document.getElementById('playersButton').addEventListener('click', showModal);
+// document.getElementById('playersButton').addEventListener('click', showModal);
 document.getElementById('statsButton').addEventListener('click', showModal);
 document.getElementById('tournamentsButton').addEventListener('click', showModal);
-document.getElementById('settingsButton').addEventListener('click', showModal);
+// document.getElementById('settingsButton').addEventListener('click', showModal);
 
 // Обработчик событий для модального окна
 document.getElementById('closeModal').addEventListener('click', closeModal);
@@ -191,8 +428,9 @@ function toggleTheme() {
 }
 
 function adjustPlayers(value) {
-    playerCount = Math.max(1, playerCount + value);
-    document.getElementById('playerCount').textContent = playerCount;
+    playerCount = Math.max(1, Math.min(6, playerCount + value)); // Ограничиваем количество игроков от 1 до 6
+    document.getElementById('playerCount').textContent = playerCount; // Обновляем отображаемое количество игроков
+    updatePlayerSelectionFields(); // Обновляем поля выбора игроков
 }
 
 // function setTheme() {

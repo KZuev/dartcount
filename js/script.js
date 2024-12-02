@@ -179,20 +179,6 @@ document.getElementById('startNewGameButton').addEventListener('click', function
     updatePlayerSelectionFields(); // Обновляем поля выбора игроков при начале новой игры
 });
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 function showStorageModal() {
     document.getElementById('storageModal').style.display = 'block';
 }
@@ -246,11 +232,13 @@ function restoreLocalStorageFromFile(event) {
     reader.readAsText(file); // Читаем файл как текст
 }
 
-
-
-
-
-
+function clearLocalStorage() {
+    if (confirm('Вы уверены, что хотите очистить все данные? Это действие необратимо.')) {
+        localStorage.clear(); // Очищаем localStorage
+        alert('Хранилище очищено!'); // Уведомление об успешной очистке
+        location.reload(); // Обновляем страницу для отражения изменений
+    }
+}
 
 // Обработчики событий для кнопок
 // document.getElementById('playersButton').addEventListener('click', showModal);

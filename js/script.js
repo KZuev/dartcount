@@ -195,10 +195,10 @@ function adjustPlayers(value) {
     document.getElementById('playerCount').textContent = playerCount;
 }
 
-function setTheme() {
-    const theme = document.getElementById('themeType').value;
-    document.body.classList.toggle('light-theme', theme === 'light');
-}
+// function setTheme() {
+//     const theme = document.getElementById('themeType').value;
+//     document.body.classList.toggle('light-theme', theme === 'light');
+// }
 
 function startGame() {
     gameStartTime = new Date();
@@ -339,8 +339,8 @@ function showThrowsModal(playerNumber, legWins) {
         modal.classList.add('active');
 
         content.innerHTML = `
-            <h2 style="font-size: 2em; margin-bottom: 20px;">За сколько бросков завершена игра?</h2>
-            <p style="font-size: 1.2em; margin-bottom: 30px;">(Выберите мышью или нажмите 1, 2 или 3 на клавиатуре)</p>
+            <h2>За сколько бросков завершена игра?</h2>
+            <h5>(Выберите мышью или нажмите 1, 2 или 3 на клавиатуре)</h5>
             <div class="throws-buttons">
                 <button class="throw-button" data-throws="1">1</button>
                 <button class="throw-button" data-throws="2">2</button>
@@ -350,9 +350,11 @@ function showThrowsModal(playerNumber, legWins) {
 
         function handleThrow(throws) {
             content.innerHTML = `
-                <h2 style="font-size: 2em; margin-bottom: 20px;">Игрок #${playerNumber} выиграл лег!</h2>
-                <p style="font-size: 1.5em; margin-bottom: 30px;">Количество выигранных легов: ${legWins}</p>
-                <button id="continueButton" style="font-size: 1.2em; padding: 10px 20px;">Продолжить</button>
+                <h2>Игрок #${playerNumber} выиграл лег!</h2>
+                <h5>Количество выигранных легов: ${legWins}</h5>
+                <div class="button-container">
+                    <button id="continueButton">Продолжить</button>
+                </div>
             `;
 
             function continueGame() {
@@ -406,8 +408,10 @@ function showErrorModal(message) {
 
         content.innerHTML = `
             <h2 style="font-size: 2em; margin-bottom: 20px; color: #ff4444;">Ошибка</h2>
-            <p style="font-size: 1.5em; margin-bottom: 30px;">${message}</p>
-            <button id="continueButton" style="font-size: 1.2em; padding: 10px 20px;">OK</button>
+            <h5>${message}</h5>
+            <div class="button-container">
+                <button id="continueButton">OK</button>
+            </div>
         `;
 
         function closeError() {
@@ -623,7 +627,6 @@ function undoScore() {
     const { playerIndex, score, legIndex } = lastScores[lastScores.length - 1];
     const player = players[playerIndex];
 
-    
     if (player.score + score > gameScore) {
         alert('Невозможно отменить этот ход, так как будет превышен максимальный счет.');
         return;
@@ -684,15 +687,15 @@ function restartGame() {
     modal.classList.add('active');
 
     content.innerHTML = `
-        <h2 style="font-size: 2em; margin-bottom: 20px;">Начать игру заново?</h2>
-        <p style="font-size: 1.2em; margin-bottom: 30px;">Текущий прогресс будет потерян</p>
-        <div style="display: flex; gap: 20px; justify-content: center;">
+        <h2>Начать игру заново?</h2>
+        <h5>Текущий прогресс будет потерян</h5>
+        <div class="button-container">
             <button onclick="confirmRestart(true)" 
-                    style="padding: 10px 20px; font-size: 1.2em; background-color: var(--accent-color);">
+                    style="font-size: 1.2em; background-color: var(--accent-color);">
                 Да
             </button>
             <button onclick="confirmRestart(false)" 
-                    style="padding: 10px 20px; font-size: 1.2em; background-color: #ff4444;">
+                    style="font-size: 1.2em; background-color: #ff4444;">
                 Нет
             </button>
         </div>
@@ -705,6 +708,16 @@ function confirmRestart(confirmed) {
 
     if (confirmed) {
         performRestart();
+    } else {
+        // Восстанавливаем состояние игры, если игрок выбрал "Нет"
+        if (lastScores.length > 0) {
+            const lastScore = lastScores[lastScores.length - 1];
+            const player = players[lastScore.playerIndex];
+            player.score = lastScore.score; // Восстанавливаем счет
+            currentPlayer = lastScore.playerIndex; // Возвращаемся к последнему игроку
+            updateScoreBoard(); // Обновляем табло счета
+            updateStatsBoard(); // Обновляем статистику
+        }
     }
 }
 

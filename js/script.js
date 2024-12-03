@@ -176,9 +176,51 @@ function savePlayers() {
 function updatePlayerSelectionFields() {
     const selectPlayersContainer = document.getElementById('selectPlayersContainer');
     selectPlayersContainer.innerHTML = ''; // Очищаем контейнер
+
+    // Создаем массив для отслеживания выбранных игроков
+    const selectedPlayers = new Array(playerCount).fill(null);
+
     for (let i = 0; i < playerCount; i++) {
         const select = document.createElement('select');
-        select.innerHTML = players.map(player => `<option value="${player}">${player}</option>`).join('');
+        select.className = 'select-player'; // Добавляем CSS-класс
+
+        // Добавляем пустой вариант по умолчанию
+        const emptyOption = document.createElement('option');
+        emptyOption.value = '';
+        emptyOption.textContent = 'Выберите игрока';
+        select.appendChild(emptyOption);
+
+        // Добавляем всех игроков в селектор, исключая уже выбранных
+        players.forEach(player => {
+            const option = document.createElement('option');
+            option.value = player;
+            option.textContent = player;
+            select.appendChild(option);
+        });
+
+        // Обработчик изменения выбора
+        select.addEventListener('change', function() {
+            const selectedValue = this.value;
+
+            // Обновляем массив выбранных игроков
+            selectedPlayers[i] = selectedValue;
+
+            // Обновляем другие селекторы
+            const allSelects = document.querySelectorAll('.select-player');
+            allSelects.forEach((otherSelect, index) => {
+                if (index !== i) {
+                    // Удаляем уже выбранных игроков из других селекторов
+                    Array.from(otherSelect.options).forEach(option => {
+                        if (selectedPlayers.includes(option.value) && option.value !== '') {
+                            option.disabled = true; // Делаем опцию недоступной
+                        } else {
+                            option.disabled = false; // Включаем опцию обратно
+                        }
+                    });
+                }
+            });
+        });
+
         selectPlayersContainer.appendChild(select);
     }
 }
@@ -435,6 +477,18 @@ function adjustPlayers(value) {
 // }
 
 function startGame() {
+    // Проверяем, есть ли выбранные игроки
+    const selectedPlayers = Array.from(document.querySelectorAll('.select-player')).map(select => select.value);
+    
+    // Фильтруем пустые значения
+    const validPlayers = selectedPlayers.filter(player => player !== '');
+
+    // Если нет выбранных игроков, выводим предупреждение
+    if (validPlayers.length === 0) {
+        alert('Пожалуйста, выберите хотя бы одного игрока перед началом игры.');
+        return; // Завершаем выполнение функции
+    }
+    
     gameStartTime = new Date();
     gameScore = parseInt(document.getElementById('gameType').value);
     playerCount = parseInt(document.getElementById('playerCount').textContent);

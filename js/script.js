@@ -15,6 +15,12 @@ let currentLanguage = localStorage.getItem('language') || 'ru';
 let players = Array.from(new Set(JSON.parse(localStorage.getItem('players')) || []));
 let playerToRemoveIndex = null;
 
+// Обработчик события для кнопки "Сохранить изменения"
+document.getElementById('savePlayersButton').addEventListener('click', function() {
+    savePlayers(); // Сохраняем изменения игроков
+    closePlayersModal(); // Закрываем модальное окно
+});
+
 document.getElementById('newPlayerName').addEventListener('keydown', function(event) {
     if (event.key === 'Enter') {
         event.preventDefault(); // Предотвращаем действие по умолчанию
@@ -1499,7 +1505,6 @@ function generatePDF() {
 function getCheckoutSuggestions(score) {
     if (score > 180 || score <= 1) return [];
     
-    
     const specialCases = {
         170: ['T20 - T20 - 50'],    
         167: ['T20 - T19 - 50'],
@@ -1547,7 +1552,6 @@ function getCheckoutSuggestions(score) {
         120: ['T20 - 20 - D20']
     };
 
-    
     if (specialCases[score]) {
         return specialCases[score];
     }
@@ -1565,9 +1569,12 @@ function getCheckoutSuggestions(score) {
     for (let i of [...singles, ...triples]) {
         if (i < score) {
             let remaining = score - i;
-            if (doubles.includes(remaining)) {
-                suggestions.push(`${formatThrow(i)} - D${remaining/2}`);
-            }
+            if (doubles.includes(remaining)) { 
+                const suggestion = `${formatThrow(i)} - D${remaining / 2}`;
+                if (!suggestions.includes(suggestion)) {
+                    suggestions.push(suggestion);
+                }
+            } 
         }
     }
     
@@ -1577,8 +1584,11 @@ function getCheckoutSuggestions(score) {
                 for (let j of [...singles, ...triples]) {
                     if (i + j < score) {
                         let remaining = score - i - j;
-                        if (doubles.includes(remaining)) {
-                            suggestions.push(`${formatThrow(i)} - ${formatThrow(j)} - D${remaining/2}`);
+                        if (doubles.includes(remaining)) { 
+                            const suggestion = `${formatThrow(i)} - ${formatThrow(j)} - D${remaining / 2}`;
+                            if (!suggestions.includes(suggestion)) {
+                                suggestions.push(suggestion);
+                            }
                         }
                     }
                 }

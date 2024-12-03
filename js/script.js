@@ -1423,7 +1423,8 @@ function getCheckoutSuggestions(score) {
 }
 
 function formatThrow(value) {
-    if (value === 25) return 'Bull';
+    if (value === 50) return 'Bull';
+    if (value === 25) return 'Outer Bull';
     if (value > 20) return 'T' + (value / 3);
     return value.toString();
 }

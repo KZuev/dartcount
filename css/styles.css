@@ -451,6 +451,31 @@ body.light-theme .info-circle {
 .select-player:last-child {
     margin-bottom: 0;
 }
+
+#playersList div {
+    font-size: 18px; /* Увеличьте размер шрифта до 18px */
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    padding: 10px;
+    margin-bottom: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+#playersList input[type="text"] {
+    font-size: 18px; /* Увеличьте размер шрифта до 18px */
+}
+
+/* Стили для поля ввода */
+#newPlayerName {
+    font-size: 18px; /* Increase font size to 18px */
+    width: calc(100% - 22px); /* Keep the width calculation */
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    margin-bottom: 10px;
+}
 /* ==========================================================================
    9. Animations
    ========================================================================== */

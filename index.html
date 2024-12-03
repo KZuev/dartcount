@@ -137,6 +137,23 @@
             </div>
         </div>
     </div>
+    <div id="confirmDeleteModal" class="modal">
+        <div class="modal-content" style="max-width: 600px; text-align: center;">
+            <span class="close-modal" onclick="closeConfirmDeleteModal()">&times;</span>
+            <h2>Подтверждение удаления</h2>
+            <h5>Вы уверены, что хотите удалить этого игрока?</h5>
+            <div class="button-container">
+                <button id="confirmDeleteButton" 
+                        style="font-size: 1.2em; background-color: #ff4444;">
+                        Удалить
+                </button>
+                <button onclick="closeConfirmDeleteModal()" 
+                        style="font-size: 1.2em; background-color: var(--accent-color);">
+                        Отмена
+                </button>
+            </div>
+        </div>
+    </div>
     <div id="modal" class="modal">
         <div class="modal-content">
             <span class="close-modal" id="closeModal">&times;</span>

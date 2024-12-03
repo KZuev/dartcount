@@ -12,11 +12,13 @@ let gameEndTime = null;
 let confettiInterval;
 let isConfettiActive = true;
 let currentLanguage = localStorage.getItem('language') || 'ru';
-let players = JSON.parse(localStorage.getItem('players')) || [];
+let players = Array.from(new Set(JSON.parse(localStorage.getItem('players')) || []));
+let playerToRemoveIndex = null;
 
+// Функция для загрузки списка игроков
 function loadPlayers() {
     const playersList = document.getElementById('playersList');
-    playersList.innerHTML = '';
+    playersList.innerHTML = ''; // Очищаем список перед обновлением
     players.forEach((player, index) => {
         const playerDiv = document.createElement('div');
         playerDiv.innerHTML = `
@@ -27,14 +29,28 @@ function loadPlayers() {
     });
 }
 
+// Функция для добавления игрока
 document.getElementById('addPlayerButton').addEventListener('click', function() {
-    const playerName = document.getElementById('newPlayerName').value;
-    if (playerName) {
-        players.push(playerName);
-        document.getElementById('newPlayerName').value = '';
-        savePlayers();
-        loadPlayers();
+    const playerName = document.getElementById('newPlayerName').value.trim(); // Убираем пробелы
+
+    // Проверка на пустое имя
+    if (playerName === '') {
+        alert('Имя игрока не может быть пустым.');
+        return; // Завершаем выполнение функции
     }
+
+    // Проверка на уникальность имени
+    console.log('Текущий массив игроков:', players); // Отладка
+    if (players.some(player => player.toLowerCase() === playerName.toLowerCase())) {
+        alert('Игрок с таким именем уже существует. Пожалуйста, выберите другое имя.');
+        return; // Завершаем выполнение функции, если игрок с таким именем уже существует
+    }
+
+    // Если имя уникально, добавляем игрока
+    players.push(playerName); // Добавляем игрока только если имя уникально
+    document.getElementById('newPlayerName').value = ''; // Очищаем поле ввода
+    savePlayers(); // Сохраняем изменения
+    loadPlayers(); // Обновляем список игроков, чтобы отобразить новые данные
 });
 
 function editPlayer(index, newName) {
@@ -49,7 +65,9 @@ function removePlayer(index) {
 }
 
 function savePlayers() {
-    localStorage.setItem('players', JSON.stringify(players));
+    // Удаляем дубликаты перед сохранением
+    const uniquePlayers = Array.from(new Set(players));
+    localStorage.setItem('players', JSON.stringify(uniquePlayers));
 }
 
 document.getElementById('playersButton').addEventListener('click', showPlayersModal);
@@ -124,30 +142,6 @@ document.getElementById('startNewGameButton').addEventListener('click', function
     updatePlayerSelectionFields();
 });
 
-function loadPlayers() {
-    const playersList = document.getElementById('playersList');
-    playersList.innerHTML = '';
-    players.forEach((player, index) => {
-        const playerDiv = document.createElement('div');
-        playerDiv.innerHTML = `
-            <input type="text" value="${player}" onchange="editPlayer(${index}, this.value)">
-            <button onclick="removePlayer(${index})">Удалить</button>
-        `;
-        playersList.appendChild(playerDiv);
-    });
-}
-
-document.getElementById('addPlayerButton').addEventListener('click', function() {
-    const playerName = document.getElementById('newPlayerName').value;
-    if (playerName) {
-        players.push(playerName);
-        document.getElementById('newPlayerName').value = '';
-        savePlayers();
-        loadPlayers();
-        updatePlayerSelectionFields(); // Обновляем поля выбора игроков
-    }
-});
-
 function editPlayer(index, newName) {
     players[index] = newName;
     savePlayers();
@@ -155,11 +149,25 @@ function editPlayer(index, newName) {
 }
 
 function removePlayer(index) {
-    players.splice(index, 1);
-    savePlayers();
-    loadPlayers();
-    updatePlayerSelectionFields(); // Обновляем поля выбора игроков
+    playerToRemoveIndex = index; // Сохраняем индекс игрока
+    document.getElementById('confirmDeleteModal').style.display = 'block'; // Показываем модальное окно подтверждения
 }
+
+function confirmDeletePlayer() {
+    if (playerToRemoveIndex !== null) {
+        players.splice(playerToRemoveIndex, 1); // Удаляем игрока из массива
+        savePlayers(); // Сохраняем изменения
+        loadPlayers(); // Обновляем список игроков
+        closeConfirmDeleteModal(); // Закрываем модальное окно
+    }
+}
+
+function closeConfirmDeleteModal() {
+    document.getElementById('confirmDeleteModal').style.display = 'none'; // Закрываем модальное окно
+}
+
+// Добавляем обработчик события для кнопки подтверждения удаления
+document.getElementById('confirmDeleteButton').addEventListener('click', confirmDeletePlayer);
 
 function savePlayers() {
     localStorage.setItem('players', JSON.stringify(players));

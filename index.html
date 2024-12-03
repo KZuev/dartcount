@@ -38,7 +38,7 @@
         </div>
             <button class="menu-button" id="startNewGameButton"><span class="emoji">🎯</span> Новая игра</button>
             <button class="menu-button" id="playersButton"><span class="emoji">👥</span> Игроки</button>
-            <button class="menu-button" id="statsButton"><span class="emoji">📊</span> Статистика</button>
+            <button class="menu-button" id="statsButton" onclick="showStatsModal()"><span class="emoji">📊</span> Статистика</button>
             <button class="menu-button" id="tournamentsButton"><span class="emoji">🏆</span> Турниры</button>
             <button class="menu-button" id="settingsButton" onclick="showStorageModal()"><span class="emoji">⚙️</span> Настройки</button>
             <div class="settings hidden">
@@ -151,6 +151,18 @@
                         style="font-size: 1.2em; background-color: var(--accent-color);">
                         Отмена
                 </button>
+            </div>
+        </div>
+    </div>
+    <div id="statsModal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeStatsModal()">&times;</span>
+            <h2 id="statisticsTitle">Статистика игроков</h2>
+            <div id="playersStatsContent" class="players-stats">
+                <!-- Статистика игроков будет добавлена здесь через JavaScript -->
+            </div>
+            <div class="button-container">
+                <button id="closeStatsButton" onclick="closeStatsModal()" style="margin-top: 20px; height: 50px;">Закрыть</button>
             </div>
         </div>
     </div>

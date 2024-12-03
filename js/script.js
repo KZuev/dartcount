@@ -15,6 +15,82 @@ let currentLanguage = localStorage.getItem('language') || 'ru';
 let players = Array.from(new Set(JSON.parse(localStorage.getItem('players')) || []));
 let playerToRemoveIndex = null;
 
+document.getElementById('newPlayerName').addEventListener('keydown', function(event) {
+    if (event.key === 'Enter') {
+        event.preventDefault(); // Предотвращаем действие по умолчанию
+        addPlayer(); // Вызов функции добавления игрока
+    }
+});
+
+function finishLeg(currentPlayer) {
+    const player = players[currentPlayer];
+    const currentTime = new Date();
+
+    const legScore = player.score; // Сохраняем текущий счет как результат лега
+
+    // Обновляем данные игрока
+    player.throws += 1; // Увеличиваем количество бросков
+    player.totalPoints += legScore; // Добавляем очки к общему счету
+    player.history[player.history.length - 1].push(legScore); // Записываем результат в историю
+    player.throwTimes.push(currentTime); // Записываем время броска
+    player.legWins += 1; // Увеличиваем количество выигранных легов
+
+    // Проверяем лучший бросок
+    if (legScore > player.bestNormalScore) {
+        player.bestNormalScore = legScore;
+    }
+
+    // Сбросить счет для следующего лега
+    player.score = gameScore; // Сбросить счет до начального значения
+    player.history.push([]); // Начинаем новую историю бросков для следующего лега
+
+    // Обновляем интерфейс
+    updateScoreBoard(); // Обновляем отображение счета
+    updateStatsBoard(); // Обновляем статистику
+}
+
+// Функция для открытия модального окна со статистикой
+function showStatsModal() {
+    const playersStatsContent = document.getElementById('playersStatsContent');
+    playersStatsContent.innerHTML = ''; // Очищаем предыдущее содержимое
+
+    players.forEach((player, index) => {
+        const playerStatDiv = document.createElement('div');
+        playerStatDiv.classList.add('player-stat');
+        playerStatDiv.innerHTML = `
+            <h4>${player.name}</h4>
+            <p>Бросков: ${player.throws}</p>
+            <p>Набрано очков: ${player.totalPoints}</p>
+            <p>Выигранные леги: ${player.legWins}</p>
+            <p>Средний набор (за подход): ${player.averagePerApproach}</p>
+            <p>Лучший бросок: ${player.bestNormalScore > 0 ? player.bestNormalScore : 'Нет данных'}</p>
+        `;
+        playersStatsContent.appendChild(playerStatDiv);
+    });
+
+    document.getElementById('statsModal').style.display = 'flex'; // Показываем модальное окно
+}
+
+// Функция для закрытия модального окна со статистикой
+function closeStatsModal() {
+    document.getElementById('statsModal').style.display = 'none'; // Скрываем модальное окно
+}
+
+function saveGameResults() {
+    localStorage.setItem('dartGameResults', JSON.stringify(players));
+}
+
+function loadGameResults() {
+    const savedResults = localStorage.getItem('dartGameResults');
+    if (savedResults) {
+        players = JSON.parse(savedResults);
+        updateStatsBoard(); // Обновляем отображение результатов
+    }
+}
+
+// Загрузка результатов при загрузке страницы
+window.onload = loadGameResults; 
+
 // Функция для загрузки списка игроков
 function loadPlayers() {
     const playersList = document.getElementById('playersList');
@@ -22,7 +98,7 @@ function loadPlayers() {
     players.forEach((player, index) => {
         const playerDiv = document.createElement('div');
         playerDiv.innerHTML = `
-            <input type="text" value="${player}" onchange="editPlayer(${index}, this.value)">
+            <input type="text" value="${player.name}" onchange="editPlayer(${index}, this.value)">
             <button onclick="removePlayer(${index})">Удалить</button>
         `;
         playersList.appendChild(playerDiv);
@@ -30,7 +106,9 @@ function loadPlayers() {
 }
 
 // Функция для добавления игрока
-document.getElementById('addPlayerButton').addEventListener('click', function() {
+document.getElementById('addPlayerButton').addEventListener('click', addPlayer);
+
+function addPlayer() {
     const playerName = document.getElementById('newPlayerName').value.trim(); // Убираем пробелы
 
     // Проверка на пустое имя
@@ -41,20 +119,20 @@ document.getElementById('addPlayerButton').addEventListener('click', function() 
 
     // Проверка на уникальность имени
     console.log('Текущий массив игроков:', players); // Отладка
-    if (players.some(player => player.toLowerCase() === playerName.toLowerCase())) {
+    if (players.some(player => player.name.toLowerCase() === playerName.toLowerCase())) {
         alert('Игрок с таким именем уже существует. Пожалуйста, выберите другое имя.');
         return; // Завершаем выполнение функции, если игрок с таким именем уже существует
     }
 
     // Если имя уникально, добавляем игрока
-    players.push(playerName); // Добавляем игрока только если имя уникально
+    players.push({ name: playerName, throws: 0, totalPoints: 0, legWins: 0, history: [[]] });
     document.getElementById('newPlayerName').value = ''; // Очищаем поле ввода
     savePlayers(); // Сохраняем изменения
     loadPlayers(); // Обновляем список игроков, чтобы отобразить новые данные
-});
+}
 
 function editPlayer(index, newName) {
-    players[index] = newName;
+    players[index].name = newName;
     savePlayers();
 }
 
@@ -106,8 +184,8 @@ function updatePlayerSelectionFields() {
         // Добавляем всех игроков в селектор
         players.forEach(player => {
             const option = document.createElement('option');
-            option.value = player;
-            option.textContent = player;
+            option.value = player.name;
+            option.textContent = player.name;
             select.appendChild(option);
         });
 
@@ -143,7 +221,7 @@ document.getElementById('startNewGameButton').addEventListener('click', function
 });
 
 function editPlayer(index, newName) {
-    players[index] = newName;
+    players[index].name = newName;
     savePlayers();
     updatePlayerSelectionFields(); // Обновляем поля выбора игроков
 }
@@ -193,8 +271,8 @@ function updatePlayerSelectionFields() {
         // Добавляем всех игроков в селектор, исключая уже выбранных
         players.forEach(player => {
             const option = document.createElement('option');
-            option.value = player;
-            option.textContent = player;
+            option.value = player.name;
+            option.textContent = player.name;
             select.appendChild(option);
         });
 
@@ -292,7 +370,7 @@ function clearLocalStorage() {
 
 // Обработчики событий для кнопок
 // document.getElementById('playersButton').addEventListener('click', showModal);
-document.getElementById('statsButton').addEventListener('click', showModal);
+// document.getElementById('statsButton').addEventListener('click', showModal);
 document.getElementById('tournamentsButton').addEventListener('click', showModal);
 // document.getElementById('settingsButton').addEventListener('click', showModal);
 
@@ -502,13 +580,15 @@ function startGame() {
         legsToWin = legsCount;
     }
     
-    players = Array.from({ length: playerCount }, () => ({
-        score: gameScore,
-        throws: 0,
-        totalPoints: 0,
-        history: [[]],
-        legWins: 0,
-        throwTimes: [],
+    // Создаем массив игроков с их именами и результатами
+    players = Array.from({ length: playerCount }, (_, index) => ({
+        name: playerSelects[index].value, // Имя игрока
+        score: gameScore, // Начальный счет
+        throws: 0, // Количество бросков
+        totalPoints: 0, // Общие очки
+        history: [[]], // История бросков
+        legWins: 0, // Выигранные леги
+        throwTimes: [], // Время бросков
         bestExceededScore: 0, // Лучший бросок при превышении
         bestNormalScore: 0 // Лучший бросок без превышения
     }));
@@ -739,69 +819,73 @@ function submitScore() {
     const player = players[currentPlayer];
     const currentTime = new Date();
 
-    
+    // Проверяем, пустое ли поле ввода
     if (scoreInput.value.trim() === '') {
         scoreInput.value = '';
         scoreInput.focus();
         return;
     }
 
+    // Проверяем, корректное ли значение очков
     if (isNaN(score) || score < 0 || score > 180) {
         showErrorModal('Введите корректное значение очков (0-180).');
         return;
     }
-    
+
+    // Если игрок завершает лег (его счет равен 0)
     if (score === player.score) {
-        scoreInput.value = ''; 
+        scoreInput.value = ''; // Очищаем поле ввода
+        finishLeg(currentPlayer); // Обновляем данные игрока
         showThrowsModal(currentPlayer + 1, player.legWins + 1)
             .then(throwsToFinish => {
-                
                 const legScore = score; 
-                player.score = 0;
-                player.throws += throwsToFinish;
-                player.totalPoints += legScore;
-                player.history[player.history.length - 1].push(legScore);
-                player.throwTimes.push(currentTime);
-                player.legWins++;
+                player.score = 0; // Счет игрока обнуляется
+                player.throws += throwsToFinish; // Увеличиваем количество бросков
+                player.totalPoints += legScore; // Добавляем очки
+                player.history[player.history.length - 1].push(legScore); // Записываем результат
+                player.throwTimes.push(currentTime); // Записываем время броска
+                player.legWins++; // Увеличиваем количество выигранных легов
                 lastScores.push({ 
                     playerIndex: currentPlayer, 
                     score: legScore, 
                     legIndex: player.history.length - 1 
                 });
 
-                
+                // Проверяем, выиграл ли игрок игру
                 if (checkGameWin(player)) {
                     gameEndTime = new Date();
-                    createConfetti();
+                    createConfetti(); // Создаем конфетти
                     setTimeout(() => {
-                        showGameStats();
+                        showGameStats(); // Показываем статистику игры
                     }, 1000);
-                    return;
+                    return; // Завершаем выполнение функции
                 }
 
-                
+                // Обновляем состояние для следующего лега
                 players.forEach(p => {
-                    p.score = gameScore;
-                    p.history.push([]);
+                    p.score = gameScore; // Сбрасываем счет для всех игроков
+                    p.history.push([]); // Создаем новую историю бросков
                 });
-                nextLegStartPlayer = (nextLegStartPlayer + 1) % playerCount;
-                currentPlayer = nextLegStartPlayer;
+                nextLegStartPlayer = (nextLegStartPlayer + 1) % playerCount; // Переход к следующему игроку
+                currentPlayer = nextLegStartPlayer; // Обновляем текущего игрока
                 
-                updateScoreBoard();
-                updateStatsBoard();
+                saveGameResults();
+                updateScoreBoard(); // Обновляем таблицу результатов
+                updateStatsBoard(); // Обновляем статистику
             });
-        return;
+        return; // Завершаем выполнение функции
     }
-    
+
+    // Если игрок не завершил лег, проверяем оставшиеся очки
     const remainingScore = player.score - score;
-    
+
     if (remainingScore < 0) {
         // Если игрок ввел больше очков, чем у него осталось
         showWarningModal('Вы превысили допустимое количество очков', 3000);
         player.history[player.history.length - 1].push('0 (' + score + ')'); // Записываем 0 как основное значение и превышение в скобках
         player.throws += 3; // Увеличиваем количество бросков
         player.totalPoints += 0; // Обновляем общие очки
-        player.throwTimes.push(currentTime);
+        player.throwTimes.push(currentTime); // Записываем время броска
 
         // Обновляем лучший превышенный бросок
         if (score > player.bestExceededScore) {
@@ -816,23 +900,24 @@ function submitScore() {
 
         // Переход к следующему игроку
         currentPlayer = (currentPlayer + 1) % playerCount;
-        scoreInput.value = '';
-        updateScoreBoard();
-        updateStatsBoard();
-        scoreInput.focus();
-        return;
+        scoreInput.value = ''; // Очищаем поле ввода
+        updateScoreBoard(); // Обновляем таблицу результатов
+        updateStatsBoard(); // Обновляем статистику
+        scoreInput.focus(); // Фокусируем поле ввода
+        return; // Завершаем выполнение функции
     }
+
     if (remainingScore === 1) {
         showErrorModal('Нельзя оставить 1 очко. Введите меньшее значение.');
-        return;
+        return; // Завершаем выполнение функции
     }
 
     // Если введенное значение корректное и не превышает оставшиеся очки
     player.score = remainingScore; // Обновляем счет
-    player.throws += 3; // Увеличиваем количество бросков
+    player.throws += 3; // Ув величиваем количество бросков
     player.totalPoints += score; // Обновляем общие очки
     player.history[player.history.length - 1].push(score); // Записываем результат в историю
-    player.throwTimes.push(currentTime);
+    player.throwTimes.push(currentTime); // Записываем время броска
     lastScores.push({
         playerIndex: currentPlayer,
         score,
@@ -844,7 +929,8 @@ function submitScore() {
         player.bestNormalScore = score;
     }
 
-    currentPlayer = (currentPlayer + 1) % playerCount; // Переход к следующему игроку
+    // Переход к следующему игроку
+    currentPlayer = (currentPlayer + 1) % playerCount; 
     scoreInput.value = ''; // Очищаем поле ввода
     updateScoreBoard(); // Обновляем таблицу счета
     updateStatsBoard(); // Обновляем статистику
@@ -939,25 +1025,36 @@ function undoScore() {
 
 function updateStatsBoard() {
     const statsBoard = document.getElementById('statsBoard');
-    statsBoard.innerHTML = '';
+    statsBoard.innerHTML = ''; // Очищаем предыдущие данные
+
     players.forEach((player, index) => {
         const playerDiv = document.createElement('div');
         playerDiv.classList.add('stats-column');
         
+        // Формируем историю бросков
         let historyHTML = player.history.map((leg, legIndex) => 
             `Лег ${legIndex + 1}: ${leg.join(', ') || 'Нет бросков'}`
         ).join('<br>');
 
+        // Расчет среднего набора за 1 бросок
+        const averageScore = player.throws > 0 ? (player.totalPoints / player.throws).toFixed(2) : 0;
+
+        // Расчет среднего набора за последние 3 броска
+        const lastScores = player.history.flat().filter(score => score > 0);
+        const averageLast3 = lastScores.length >= 3 
+            ? (lastScores.slice(-3).reduce((a, b) => a + b, 0) / 3).toFixed(2) 
+            : (lastScores.length > 0 ? (lastScores.reduce((a, b) => a + b, 0) / lastScores.length).toFixed(2) : 0);
+
         playerDiv.innerHTML = `
-            <h3>Игрок #${index + 1}</h3>
+            <h3>Игрок #${index + 1}: ${player.name}</h3>
             <p>Бросков: ${player.throws}</p>
             <p>Набрано очков: ${player.totalPoints}</p>
+            <p>Выигранные леги: ${player.legWins}</p>
             <p>История бросков:<br>${historyHTML}</p>
-            <p>Средний набор (1 бросок): ${(player.throws > 0 ? (player.totalPoints / player.throws).toFixed(2) : 0)}</p>
-            <p>Средний набор (3 броска): ${(player.throws >= 3 
-                ? (player.history.flat().filter(score => score > 0).slice(-3).reduce((a, b) => a + b, 0) / Math.min(3, player.history.flat().filter(score => score > 0).length)).toFixed(2) 
-                : 0)}
-            </p>
+            <p>Средний набор (1 бросок): ${averageScore}</p>
+            <p>Средний набор (последние 3 броска): ${averageLast3}</p>
+            <p>Лучший бросок: ${player.bestNormalScore > 0 ? player.bestNormalScore : 'Нет данных'}</p>
+            <p>Лучший превышенный бросок: ${player.bestExceededScore > 0 ? player.bestExceededScore : 'Нет данных'}</p>
         `;
         statsBoard.appendChild(playerDiv);
     });
@@ -1013,13 +1110,25 @@ function confirmRestart(confirmed) {
 function performRestart() {
     gameStartTime = null;
     gameEndTime = null;
-    document.querySelector('.settings').style.display = 'flex';
-    document.getElementById('scoreInput').style.display = 'none';
-    document.getElementById('restartBtn').style.display = 'none';
-    players = [];
-    currentPlayer = 0;
-    updateScoreBoard();
-    updateStatsBoard();
+    currentPlayer = 0; // Сброс текущего игрока
+    nextLegStartPlayer = 0; // Сброс следующего игрока для начала лега
+    lastScores = []; // Очистка последних результатов
+    currentLeg = 1; // Сброс текущего лега
+
+    // Сброс данных игроков, но не удаление их из массива players
+    players.forEach(player => {
+        player.throws = 0;
+        player.totalPoints = 0;
+        player.legWins = 0;
+        player.history = [[]];
+        player.score = gameScore; // Установка начального счета
+    });
+
+    updateScoreBoard(); // Обновляем табло счета
+    updateStatsBoard(); // Обновляем статистику
+    document.querySelector('.settings').style.display = 'flex'; // Показываем настройки
+    document.getElementById('scoreInput').style.display = 'none'; // Скрываем ввод очков
+    document.getElementById('restartBtn').style.display = 'none'; // Скрываем кнопку перезапуска
 }
 
 function createConfetti() {
@@ -1086,7 +1195,7 @@ function showGameStats() {
         grid-column: 1 / -1;
     `;
     winnerDiv.innerHTML = `
-        🏆 ПОБЕДИТЕЛЬ - ИГРОК #${winner.index + 1} 🏆
+        🏆 ПОБЕДИТЕЛЬ - ИГРОК #${winner.index + 1} (${winner.name}) 🏆
         <div style="font-size: 0.8em; margin-top: 10px;">
             Выиграно легов: ${winner.legWins}
         </div>
@@ -1193,7 +1302,7 @@ function showGameStats() {
         }
 
         playerStats.innerHTML = `
-            <h3>Игрок #${index + 1} ${index === winner.index ? '👑' : ''}</h3>
+            <h3>${player.name} #${index + 1} ${index === winner.index ? '👑' : ''}</h3>
             <div class="stat-item">Выиграно легов: ${player.legWins}</div>
             <div class="stat-item">Всего бросков: ${player.throws}</div>
             <div class="stat-item">Всего подходов: ${Math.ceil(player.throws / 3)}</div>
@@ -1308,6 +1417,7 @@ function closeGameStats() {
     existingConfetti.forEach(confetti => confetti.remove());
     
     document.removeEventListener('keydown', handleGameStatsKeyPress);
+    saveGameResults();
     restartGame();
 }
 

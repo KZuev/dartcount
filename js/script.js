@@ -60,11 +60,25 @@ function showStatsModal() {
     const playersStatsContent = document.getElementById('playersStatsContent');
     playersStatsContent.innerHTML = ''; // Очищаем предыдущее содержимое
 
+    // Определяем лучшего игрока
+    let bestPlayer = players[0];
+    players.forEach(player => {
+        if (player.legWins > bestPlayer.legWins) {
+            bestPlayer = player;
+        }
+    });
+
     players.forEach((player, index) => {
         const playerStatDiv = document.createElement('div');
         playerStatDiv.classList.add('player-stat');
+        
+        // Добавляем класс для лучшего игрока
+        if (player === bestPlayer) {
+            playerStatDiv.classList.add('best-player');
+        }
+
         playerStatDiv.innerHTML = `
-            <h4>${player.name}</h4>
+            <h4>${player.name} ${player === bestPlayer ? '👑' : ''}</h4>
             <p>Бросков: ${player.throws}</p>
             <p>Набрано очков: ${player.totalPoints}</p>
             <p>Выигранные леги: ${player.legWins}</p>
@@ -83,13 +97,48 @@ function closeStatsModal() {
 }
 
 function saveGameResults() {
-    localStorage.setItem('dartGameResults', JSON.stringify(players));
+    const savedResults = localStorage.getItem('dartGameResults');
+    let results = savedResults ? JSON.parse(savedResults) : [];
+
+    players.forEach(player => {
+        const existingPlayer = results.find(p => p.name === player.name);
+        if (existingPlayer) {
+            // Суммируем значения
+            existingPlayer.throws += player.throws;
+            existingPlayer.totalPoints += player.totalPoints;
+            existingPlayer.legWins += player.legWins;
+            // Обновляем лучший бросок
+            if (player.bestNormalScore > existingPlayer.bestNormalScore) {
+                existingPlayer.bestNormalScore = player.bestNormalScore;
+            }
+        } else {
+            // Если игрок новый, добавляем его в результаты
+            results.push({ ...player });
+        }
+    });
+
+    localStorage.setItem('dartGameResults', JSON.stringify(results));
 }
 
 function loadGameResults() {
     const savedResults = localStorage.getItem('dartGameResults');
     if (savedResults) {
-        players = JSON.parse(savedResults);
+        const results = JSON.parse(savedResults);
+        results.forEach(savedPlayer => {
+            const existingPlayer = players.find(p => p.name === savedPlayer.name);
+            if (existingPlayer) {
+                // Обновляем существующего игрока
+                existingPlayer.throws += savedPlayer.throws;
+                existingPlayer.totalPoints += savedPlayer.totalPoints;
+                existingPlayer.legWins += savedPlayer.legWins;
+                if (savedPlayer.bestNormalScore > existingPlayer.bestNormalScore) {
+                    existingPlayer.bestNormalScore = savedPlayer.bestNormalScore;
+                }
+            } else {
+                // Если игрока нет, добавляем его
+                players.push({ ...savedPlayer });
+            }
+        });
         updateStatsBoard(); // Обновляем отображение результатов
     }
 }

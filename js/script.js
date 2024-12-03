@@ -477,18 +477,19 @@ function adjustPlayers(value) {
 // }
 
 function startGame() {
-    // Проверяем, есть ли выбранные игроки
-    const selectedPlayers = Array.from(document.querySelectorAll('.select-player')).map(select => select.value);
-    
-    // Фильтруем пустые значения
-    const validPlayers = selectedPlayers.filter(player => player !== '');
+    // Получаем все поля выбора игроков
+    const playerSelects = document.querySelectorAll('.select-player');
 
-    // Если нет выбранных игроков, выводим предупреждение
-    if (validPlayers.length === 0) {
-        alert('Пожалуйста, выберите хотя бы одного игрока перед началом игры.');
+    // Проверяем, что все поля выбора игроков заполнены
+    const allPlayersSelected = Array.from(playerSelects).every(select => select.value !== '');
+
+    // Если не все поля заполнены, выводим предупреждение
+    if (!allPlayersSelected) {
+        alert('Пожалуйста, выберите игрока для каждого поля перед началом игры.');
         return; // Завершаем выполнение функции
     }
-    
+
+    // Если все поля заполнены, продолжаем с началом игры
     gameStartTime = new Date();
     gameScore = parseInt(document.getElementById('gameType').value);
     playerCount = parseInt(document.getElementById('playerCount').textContent);

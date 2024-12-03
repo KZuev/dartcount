@@ -836,7 +836,7 @@ function submitScore() {
     if (score === player.score) {
         scoreInput.value = ''; // Очищаем поле ввода
         finishLeg(currentPlayer); // Обновляем данные игрока
-        showThrowsModal(currentPlayer + 1, player.legWins + 1)
+        showThrowsModal(currentPlayer + 1, player.legWins)
             .then(throwsToFinish => {
                 const legScore = score; 
                 player.score = 0; // Счет игрока обнуляется
@@ -844,7 +844,7 @@ function submitScore() {
                 player.totalPoints += legScore; // Добавляем очки
                 player.history[player.history.length - 1].push(legScore); // Записываем результат
                 player.throwTimes.push(currentTime); // Записываем время броска
-                player.legWins++; // Увеличиваем количество выигранных легов
+                // player.legWins++; // Увеличиваем количество выигранных легов
                 lastScores.push({ 
                     playerIndex: currentPlayer, 
                     score: legScore, 
@@ -1049,12 +1049,9 @@ function updateStatsBoard() {
             <h3>Игрок #${index + 1}: ${player.name}</h3>
             <p>Бросков: ${player.throws}</p>
             <p>Набрано очков: ${player.totalPoints}</p>
-            <p>Выигранные леги: ${player.legWins}</p>
             <p>История бросков:<br>${historyHTML}</p>
             <p>Средний набор (1 бросок): ${averageScore}</p>
             <p>Средний набор (последние 3 броска): ${averageLast3}</p>
-            <p>Лучший бросок: ${player.bestNormalScore > 0 ? player.bestNormalScore : 'Нет данных'}</p>
-            <p>Лучший превышенный бросок: ${player.bestExceededScore > 0 ? player.bestExceededScore : 'Нет данных'}</p>
         `;
         statsBoard.appendChild(playerDiv);
     });
@@ -1561,11 +1558,9 @@ function getCheckoutSuggestions(score) {
     
     let suggestions = [];
     
-    
     if (doubles.includes(score)) {
         suggestions.push(`D${score/2}`);
     }
-    
     
     for (let i of [...singles, ...triples]) {
         if (i < score) {
@@ -1575,7 +1570,6 @@ function getCheckoutSuggestions(score) {
             }
         }
     }
-    
     
     if (suggestions.length === 0) {
         for (let i of [...singles, ...triples]) {
@@ -1592,7 +1586,8 @@ function getCheckoutSuggestions(score) {
         }
     }
     
-    return suggestions.slice(0, 3);
+    // Убираем дробные значения
+    return suggestions.filter(suggestion => !suggestion.includes('.')).slice(0, 3);
 }
 
 function formatThrow(value) {

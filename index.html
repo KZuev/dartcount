@@ -103,14 +103,17 @@
         </div>
     </div>
     <div id="playersModal" class="modal">
-        <div class="modal-content">
+        <div class="modal-content players-modal-content">
             <span class="close-modal" id="closePlayersModal">&times;</span>
-            <h2>Управление игроками</h2>
-            <div id="playersList"></div>
-            <input type="text" id="newPlayerName" placeholder="Имя игрока"><br>
+            <h2 style="font-size: 2em; color: var(--accent-color);">Управление игроками</h2>
+            <p style="font-size: 1.2em; color: var(--text-color);">Добавьте, измените или удалите игроков для игры.</p>
+            <div id="playersList" class="players-list">
+                <!-- Здесь будут карточки игроков -->
+            </div>
+            <input type="text" id="newPlayerName" placeholder="Имя игрока" style="padding: 10px; border-radius: 5px; width: calc(100% - 22px); margin-bottom: 10px;">
             <div class="button-container">
-                <button id="addPlayerButton">Добавить игрока</button>
-                <button id="savePlayersButton">Сохранить изменения</button>
+                <button id="addPlayerButton">➕ Добавить игрока</button>
+                <button id="savePlayersButton">💾 Сохранить изменения</button>
             </div>
         </div>
     </div>
@@ -158,7 +161,7 @@
         <div class="modal-content">
             <span class="close-modal" onclick="closeStatsModal()">&times;</span>
             <h2 id="statisticsTitle">Статистика игроков</h2>
-            <div id="playersStatsContent" class="players-stats">
+            <div id="playersStatsContent" class="players-stats" style="display: flex; flex-wrap: wrap; justify-content: center; gap: 30px;">
                 <!-- Статистика игроков будет добавлена здесь через JavaScript -->
             </div>
             <div class="button-container">

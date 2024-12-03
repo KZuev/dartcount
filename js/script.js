@@ -1331,10 +1331,10 @@ function getCheckoutSuggestions(score) {
     
     
     const specialCases = {
-        170: ['T20 - T20 - Bull'],    
-        167: ['T20 - T19 - Bull'],
-        164: ['T20 - T18 - Bull'],
-        161: ['T20 - T17 - Bull'],
+        170: ['T20 - T20 - 50'],    
+        167: ['T20 - T19 - 50'],
+        164: ['T20 - T18 - 50'],
+        161: ['T20 - T17 - 50'],
         160: ['T20 - T20 - D20'],
         158: ['T20 - T20 - D19'],
         157: ['T20 - T19 - D20'],
@@ -1423,8 +1423,8 @@ function getCheckoutSuggestions(score) {
 }
 
 function formatThrow(value) {
-    if (value === 50) return 'Bull';
-    if (value === 25) return 'Outer Bull';
+    // if (value === 50) return 'Bull';
+    // if (value === 25) return 'Outer Bull';
     if (value > 20) return 'T' + (value / 3);
     return value.toString();
 }

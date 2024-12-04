@@ -501,6 +501,7 @@ body.light-theme .info-circle {
     border-radius: 10px; /* Скругление углов */
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); /* Тень */
     width: 280px; /* Ширина колонки */
+    max-width: 400px;
     text-align: center; /* Центрирование текста */
     color: var(--text-color); /* Цвет текста */
 }
@@ -786,7 +787,7 @@ body.light-theme .info-circle {
 }
 
 .players-modal-content {
-    width: 40%;
+    width: 80%;
     padding: 20px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
     margin: auto;

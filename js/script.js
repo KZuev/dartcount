@@ -60,29 +60,47 @@ function showStatsModal() {
     const playersStatsContent = document.getElementById('playersStatsContent');
     playersStatsContent.innerHTML = ''; // Очищаем предыдущее содержимое
 
+    // Проверяем, есть ли игроки
+    if (players.length === 0) {
+        const noPlayersMessage = document.createElement('div');
+        noPlayersMessage.textContent = 'Игроки не созданы, статистика отсутствует.';
+        noPlayersMessage.style.textAlign = 'center'; // Центрируем текст
+        noPlayersMessage.style.fontSize = '1.5em'; // Увеличиваем размер шрифта
+        playersStatsContent.appendChild(noPlayersMessage);
+        document.getElementById('statsModal').style.display = 'flex'; // Показываем модальное окно
+        return; // Завершаем выполнение функции
+    }
+
     // Определяем лучшего игрока
-    let bestPlayer = players[0];
+    let bestPlayer = null;
+    let maxLegWins = 0;
+    let isTie = false;
+
     players.forEach(player => {
-        if (player.legWins > bestPlayer.legWins) {
+        if (player.legWins > maxLegWins) {
+            maxLegWins = player.legWins;
             bestPlayer = player;
+            isTie = false; // Сбросить признак ничьей
+        } else if (player.legWins === maxLegWins && player.legWins > 0) {
+            isTie = true; // Обнаружена ничья
         }
     });
 
-    players.forEach((player, index) => {
+    players.forEach(player => {
         const playerStatDiv = document.createElement('div');
         playerStatDiv.classList.add('player-stat');
-        
-        // Добавляем класс для лучшего игрока
-        if (player === bestPlayer) {
+
+        // Добавляем класс для лучшего игрока, если он единственный
+        if (player === bestPlayer && !isTie && player.legWins > 0) {
             playerStatDiv.classList.add('best-player');
         }
 
         playerStatDiv.innerHTML = `
-            <h4>${player.name} ${player === bestPlayer ? '👑' : ''}</h4>
+            <h4>${player.name} ${player === bestPlayer && !isTie ? '👑' : ''}</h4>
             <p>Бросков: ${player.throws}</p>
             <p>Набрано очков: ${player.totalPoints}</p>
             <p>Выигранные леги: ${player.legWins}</p>
-            <p>Средний набор (за подход): ${player.averagePerApproach}</p>
+            <p>Средний набор: ${player.averagePerApproach}</p>
             <p>Лучший бросок: ${player.bestNormalScore > 0 ? player.bestNormalScore : 'Нет данных'}</p>
         `;
         playersStatsContent.appendChild(playerStatDiv);

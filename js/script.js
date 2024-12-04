@@ -28,7 +28,8 @@ document.getElementById('newPlayerName').addEventListener('keydown', function(ev
     }
 });
 
-function finishLeg(currentPlayer) {
+function finishLeg() {
+    console.log(`finishLeg вызвана для игрока ${currentPlayer}`);
     const player = players[currentPlayer];
     const currentTime = new Date();
 
@@ -46,7 +47,6 @@ function finishLeg(currentPlayer) {
     // Отладка: после обновления totalPoints
     console.log(`Общие очки после обновления: ${player.totalPoints}`);
   
-
     // Проверяем лучший бросок
     if (legScore > player.bestNormalScore) {
         player.bestNormalScore = legScore;
@@ -74,8 +74,12 @@ function finishLeg(currentPlayer) {
                 p.history.push([]); // Создаем новую историю бросков
             });
 
+            console.log(`Текущий игрок до обновления: ${currentPlayer}`);
             nextLegStartPlayer = (nextLegStartPlayer + 1) % playerCount; // Переход к следующему игроку
             currentPlayer = nextLegStartPlayer; // Обновляем текущего игрока
+            console.log(`Текущий игрок после обновления: ${currentPlayer}`);
+            scoreInput.value = ''; // Очищаем поле ввода
+            scoreInput.focus(); // Устанавливаем фокус на поле ввода
 
             updateScoreBoard();
             updateStatsBoard();
@@ -727,6 +731,8 @@ function handleEnter(event) {
         const scoreInput = document.getElementById('score');
         const expression = scoreInput.value;
 
+        // Здесь вы можете добавить отладочный вывод
+        console.log(`Текущий игрок перед вводом счета: ${currentPlayer}`);
         
         if (expression.includes('+')) {
             try {
@@ -758,9 +764,9 @@ function handleEnter(event) {
 }
 
 function updateScoreBoard() {
+    console.log('updateScoreBoard вызвана');
     const scoreBoard = document.getElementById('scoreBoard');
     scoreBoard.innerHTML = '';
-
     
     const hasAnySuggestions = players.some(player => {
         const suggestions = getCheckoutSuggestions(player.score);
@@ -773,7 +779,6 @@ function updateScoreBoard() {
         if (index === currentPlayer) {
             playerDiv.classList.add('active-player');
         }
-        
         
         const scoreElement = document.createElement('div');
         scoreElement.classList.add('score-main');
@@ -926,6 +931,8 @@ function showErrorModal(message) {
 }
 
 function submitScore() {
+    console.log('submitScore вызвана');
+    console.log(`Текущий игрок в submitScore: ${currentPlayer}`); // Отладочный вывод
     const scoreInput = document.getElementById('score');
     const score = parseInt(scoreInput.value);
     const player = players[currentPlayer];
@@ -966,6 +973,7 @@ function submitScore() {
         // Переход к следующему игроку
         currentPlayer = (currentPlayer + 1) % playerCount;
         scoreInput.value = ''; // Очищаем поле ввода
+        console.log(`Текущий игрок: ${currentPlayer}, Имя игрока: ${players[currentPlayer].name}`);
         updateScoreBoard();
         updateStatsBoard();
         scoreInput.focus();

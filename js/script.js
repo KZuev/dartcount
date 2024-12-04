@@ -74,10 +74,9 @@ function finishLeg(currentPlayer) {
                 p.history.push([]); // Создаем новую историю бросков
             });
 
-            nextLegStartPlayer = (nextLegStartPlayer + 1) % playerCount;
-            currentPlayer = nextLegStartPlayer;
+            nextLegStartPlayer = (nextLegStartPlayer + 1) % playerCount; // Переход к следующему игроку
+            currentPlayer = nextLegStartPlayer; // Обновляем текущего игрока
 
-            saveGameResults();
             updateScoreBoard();
             updateStatsBoard();
         });
@@ -1182,9 +1181,14 @@ function performRestart() {
 
     updateScoreBoard(); // Обновляем табло счета
     updateStatsBoard(); // Обновляем статистику
-    document.querySelector('.settings').style.display = 'flex'; // Показываем настройки
-    document.getElementById('scoreInput').style.display = 'none'; // Скрываем ввод очков
-    document.getElementById('restartBtn').style.display = 'none'; // Скрываем кнопку перезапуска
+
+    // Скрываем элементы, связанные с игрой
+
+    document.getElementById('scoreBoard').style.display = 'none'; // Скрывать счет
+    document.getElementById('scoreInput').style.display = 'none'; // Скрываем ввод очков 
+    document.getElementById('restartBtn').style.display = 'none'; // Скрываем кнопку перезапуска 
+    document.querySelector('.stats-board').style.display = 'none'; // Скрываем статистику 
+    document.querySelector('.settings').style.display = 'flex'; // Показываем настройки 
 }
 
 function createConfetti() {

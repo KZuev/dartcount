@@ -32,27 +32,55 @@ function finishLeg(currentPlayer) {
     const player = players[currentPlayer];
     const currentTime = new Date();
 
-    const legScore = player.score; // Сохраняем текущий счет как результат лега
+    // Отладка: перед обновлением totalPoints
+    console.log(`Общие очки до обновления: ${player.totalPoints}`);
 
     // Обновляем данные игрока
-    player.throws += 1; // Увеличиваем количество бросков
-    player.totalPoints += legScore; // Добавляем очки к общему счету
-    player.history[player.history.length - 1].push(legScore); // Записываем результат в историю
-    player.throwTimes.push(currentTime); // Записываем время броска
-    player.legWins += 1; // Увеличиваем количество выигранных легов
+    const legScore = player.score;
+    player.throws += 1;
+    player.totalPoints += legScore;
+    player.history[player.history.length - 1].push(legScore);
+    player.throwTimes.push(currentTime);
+    player.legWins += 1;
+
+    // Отладка: после обновления totalPoints
+    console.log(`Общие очки после обновления: ${player.totalPoints}`);
+  
 
     // Проверяем лучший бросок
     if (legScore > player.bestNormalScore) {
         player.bestNormalScore = legScore;
     }
 
-    // Сбросить счет для следующего лега
-    player.score = gameScore; // Сбросить счет до начального значения
-    player.history.push([]); // Начинаем новую историю бросков для следующего лега
+    console.log(`Игрок ${currentPlayer + 1} завершил лег с результатом ${legScore}`);
 
-    // Обновляем интерфейс
-    updateScoreBoard(); // Обновляем отображение счета
-    updateStatsBoard(); // Обновляем статистику
+    // Показываем модальное окно с количеством бросков
+    showThrowsModal(currentPlayer + 1, player.legWins)
+        .then(throwsToFinish => {
+            // Обновляем статистику игрока на основе данных из модального окна
+            player.throws += throwsToFinish - 1; // Учитываем дополнительные броски
+
+            // Проверка на победу в игре
+            if (checkGameWin(player)) {
+                gameEndTime = new Date();
+                createConfetti();
+                setTimeout(showGameStats, 1000);
+                return;
+            }
+
+            // Подготовка к следующему легу
+            players.forEach(p => {
+                p.score = gameScore; // Сбрасываем счет для всех игроков
+                p.history.push([]); // Создаем новую историю бросков
+            });
+
+            nextLegStartPlayer = (nextLegStartPlayer + 1) % playerCount;
+            currentPlayer = nextLegStartPlayer;
+
+            saveGameResults();
+            updateScoreBoard();
+            updateStatsBoard();
+        });
 }
 
 // Функция для открытия модального окна со статистикой
@@ -121,10 +149,14 @@ function saveGameResults() {
     players.forEach(player => {
         const existingPlayer = results.find(p => p.name === player.name);
         if (existingPlayer) {
+            // Отладка: показываем, как обновляются очки
+            console.log(`Обновление игрока ${player.name}:`);
+            console.log(`Очки до обновления: ${existingPlayer.totalPoints}`);
             // Суммируем значения
             existingPlayer.throws += player.throws;
             existingPlayer.totalPoints += player.totalPoints;
             existingPlayer.legWins += player.legWins;
+            console.log(`Очки после обновления: ${existingPlayer.totalPoints}`);
             // Обновляем лучший бросок
             if (player.bestNormalScore > existingPlayer.bestNormalScore) {
                 existingPlayer.bestNormalScore = player.bestNormalScore;
@@ -145,9 +177,13 @@ function loadGameResults() {
         results.forEach(savedPlayer => {
             const existingPlayer = players.find(p => p.name === savedPlayer.name);
             if (existingPlayer) {
+                // Отладка: показываем, как загружаются очки
+                console.log(`Загрузка игрока ${savedPlayer.name}:`);
+                console.log(`Очки до загрузки: ${existingPlayer.totalPoints}`);
                 // Обновляем существующего игрока
                 existingPlayer.throws += savedPlayer.throws;
                 existingPlayer.totalPoints += savedPlayer.totalPoints;
+                console.log(`Очки после загрузки: ${existingPlayer.totalPoints}`);
                 existingPlayer.legWins += savedPlayer.legWins;
                 if (savedPlayer.bestNormalScore > existingPlayer.bestNormalScore) {
                     existingPlayer.bestNormalScore = savedPlayer.bestNormalScore;
@@ -890,7 +926,9 @@ function submitScore() {
     const scoreInput = document.getElementById('score');
     const score = parseInt(scoreInput.value);
     const player = players[currentPlayer];
-    const currentTime = new Date();
+
+    // Отладка: показываем введенные очки
+    console.log(`Введенные очки: ${score}`);
 
     // Проверяем, пустое ли поле ввода
     if (scoreInput.value.trim() === '') {
@@ -908,45 +946,8 @@ function submitScore() {
     // Если игрок завершает лег (его счет равен 0)
     if (score === player.score) {
         scoreInput.value = ''; // Очищаем поле ввода
-        finishLeg(currentPlayer); // Обновляем данные игрока
-        showThrowsModal(currentPlayer + 1, player.legWins)
-            .then(throwsToFinish => {
-                const legScore = score; 
-                player.score = 0; // Счет игрока обнуляется
-                player.throws += throwsToFinish; // Увеличиваем количество бросков
-                player.totalPoints += legScore; // Добавляем очки
-                player.history[player.history.length - 1].push(legScore); // Записываем результат
-                player.throwTimes.push(currentTime); // Записываем время броска
-                // player.legWins++; // Увеличиваем количество выигранных легов
-                lastScores.push({ 
-                    playerIndex: currentPlayer, 
-                    score: legScore, 
-                    legIndex: player.history.length - 1 
-                });
-
-                // Проверяем, выиграл ли игрок игру
-                if (checkGameWin(player)) {
-                    gameEndTime = new Date();
-                    createConfetti(); // Создаем конфетти
-                    setTimeout(() => {
-                        showGameStats(); // Показываем статистику игры
-                    }, 1000);
-                    return; // Завершаем выполнение функции
-                }
-
-                // Обновляем состояние для следующего лега
-                players.forEach(p => {
-                    p.score = gameScore; // Сбрасываем счет для всех игроков
-                    p.history.push([]); // Создаем новую историю бросков
-                });
-                nextLegStartPlayer = (nextLegStartPlayer + 1) % playerCount; // Переход к следующему игроку
-                currentPlayer = nextLegStartPlayer; // Обновляем текущего игрока
-                
-                saveGameResults();
-                updateScoreBoard(); // Обновляем таблицу результатов
-                updateStatsBoard(); // Обновляем статистику
-            });
-        return; // Завершаем выполнение функции
+        finishLeg(currentPlayer); // Вызываем finishLeg
+        return;
     }
 
     // Если игрок не завершил лег, проверяем оставшиеся очки
@@ -957,45 +958,30 @@ function submitScore() {
         showWarningModal('Вы превысили допустимое количество очков', 3000);
         player.history[player.history.length - 1].push('0 (' + score + ')'); // Записываем 0 как основное значение и превышение в скобках
         player.throws += 3; // Увеличиваем количество бросков
-        player.totalPoints += 0; // Обновляем общие очки
-        player.throwTimes.push(currentTime); // Записываем время броска
-
-        // Обновляем лучший превышенный бросок
-        if (score > player.bestExceededScore) {
-            player.bestExceededScore = score;
-        }
-
-        lastScores.push({
-            playerIndex: currentPlayer,
-            score: 0,
-            legIndex: player.history.length - 1
-        });
+        player.throwTimes.push(new Date()); // Записываем время броска
 
         // Переход к следующему игроку
         currentPlayer = (currentPlayer + 1) % playerCount;
         scoreInput.value = ''; // Очищаем поле ввода
-        updateScoreBoard(); // Обновляем таблицу результатов
-        updateStatsBoard(); // Обновляем статистику
-        scoreInput.focus(); // Фокусируем поле ввода
-        return; // Завершаем выполнение функции
+        updateScoreBoard();
+        updateStatsBoard();
+        scoreInput.focus();
+        return;
     }
 
     if (remainingScore === 1) {
         showErrorModal('Нельзя оставить 1 очко. Введите меньшее значение.');
-        return; // Завершаем выполнение функции
+        return;
     }
 
     // Если введенное значение корректное и не превышает оставшиеся очки
-    player.score = remainingScore; // Обновляем счет
-    player.throws += 3; // Ув величиваем количество бросков
-    player.totalPoints += score; // Обновляем общие очки
-    player.history[player.history.length - 1].push(score); // Записываем результат в историю
-    player.throwTimes.push(currentTime); // Записываем время броска
-    lastScores.push({
-        playerIndex: currentPlayer,
-        score,
-        legIndex: player.history.length - 1
-    });
+    player.score = remainingScore;
+    player.throws += 3;
+    player.totalPoints += score;
+    player.history[player.history.length - 1].push(score);
+    player.throwTimes.push(new Date());
+
+    console.log(`Общие очки после ввода: ${player.totalPoints}`);
 
     // Обновляем лучший бросок без превышения
     if (score > player.bestNormalScore) {
@@ -1003,11 +989,11 @@ function submitScore() {
     }
 
     // Переход к следующему игроку
-    currentPlayer = (currentPlayer + 1) % playerCount; 
-    scoreInput.value = ''; // Очищаем поле ввода
-    updateScoreBoard(); // Обновляем таблицу счета
-    updateStatsBoard(); // Обновляем статистику
-    scoreInput.focus(); // Фокусируем поле ввода
+    currentPlayer = (currentPlayer + 1) % playerCount;
+    scoreInput.value = '';
+    updateScoreBoard();
+    updateStatsBoard();
+    scoreInput.focus();
 }
 
 function showWarningModal(message, duration) {

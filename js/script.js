@@ -87,6 +87,10 @@ function showStatsModal() {
     const playersStatsContent = document.getElementById('playersStatsContent');
     playersStatsContent.innerHTML = ''; // Очищаем предыдущее содержимое
 
+    // Обновляем статистику перед отображением
+    loadGameResults();
+    updateStatsBoard();
+
     // Проверяем, есть ли игроки
     if (players.length === 0) {
         const noPlayersMessage = document.createElement('div');

@@ -590,9 +590,16 @@ document.addEventListener('click', function(event) {
 });
 
 document.addEventListener('keydown', function(event) {
-    if (event.ctrlKey && event.key === 'z') {
-        event.preventDefault();
-        undoScore();
+    // Проверяем, нажата ли клавиша Ctrl (или Command на Mac)
+    const isCtrlPressed = event.ctrlKey || event.metaKey; 
+
+    // Получаем код нажатой клавиши
+    const key = event.key.toLowerCase(); // Приводим к нижнему регистру для унификации
+
+    // Проверяем, была ли нажата клавиша "Z"
+    if (isCtrlPressed && key === 'z') {
+        event.preventDefault(); // Предотвращаем стандартное поведение
+        undoScore(); // Вызов функции отмены
     }
 });
 
@@ -714,15 +721,17 @@ function startGame() {
     lastScores = [];
     currentLeg = 1;
     
-    document.getElementById('score').value = '';
-    
     updateScoreBoard();
     updateStatsBoard();
-    document.getElementById('scoreInput').style.display = 'flex';
-    document.querySelector('.settings').style.display = 'none';
-    document.getElementById('restartBtn').style.display = 'inline-block';
+
+    // Показываем элементы, связанные с игрой 
+    document.getElementById('scoreBoard').style.display = 'flex'; // Показы ваем табло счета 
+    document.getElementById('scoreInput').style.display = 'flex'; // Показываем ввод очков 
+    document.getElementById('restartBtn').style.display = 'inline-block'; // Показываем кнопку перезапуска 
+    document.querySelector('.stats-board').style.display = 'flex'; // Показываем статистику 
+    document.querySelector('.settings').style.display = 'none'; // Скрываем настройки 
     document.getElementById('score').focus();
-    document.getElementById('statsBoard').style.display = 'flex';
+    document.getElementById('score').value = '';
 }
 
 function handleEnter(event) {
@@ -985,6 +994,9 @@ function submitScore() {
         return;
     }
 
+    // Сохраняем текущее состояние перед изменением
+    lastScores.push({ playerIndex: currentPlayer, score: score, legIndex: player.history.length - 1 }); // Сохраняем фактические очки
+
     // Если введенное значение корректное и не превышает оставшиеся очки
     player.score = remainingScore;
     player.throws += 3;
@@ -1067,30 +1079,40 @@ function updateLegsCountOptions() {
 }
 
 function undoScore() {
-    if (lastScores.length === 0) return;
+    console.log('Функция undoScore вызвана'); // Отладочное сообщение
+    console.log('Содержимое lastScores:', lastScores); // Отладочное сообщение
 
-    const { playerIndex, score, legIndex } = lastScores[lastScores.length - 1];
-    const player = players[playerIndex];
-
-    if (player.score + score > gameScore) {
-        alert('Невозможно отменить этот ход, так как будет превышен максимальный счет.');
+    if (lastScores.length === 0) {
+        console.log('lastScores пуст, отмена ввода невозможна'); // Отладочное сообщение
         return;
     }
 
-    lastScores.pop();
-    player.score += score;
-    player.throws--;
-    player.totalPoints -= score;
-    player.history[legIndex].pop();
+    const { playerIndex, score, legIndex } = lastScores.pop(); // Извлекаем последний элемент и удаляем его из массива
+    const player = players[playerIndex];
 
-    
+    console.log(`Восстановление счета игрока ${player.name}: ${player.score} - ${score}`); // Отладочное сообщение
+
+    // Проверяем, не превышает ли восстановленный счет максимальный
+    if (player.score - score < 0) {
+        alert('Невозможно отменить этот ход, так как счет не может быть отрицательным.');
+        return;
+    }
+
+    // Восстанавливаем счет игрока
+    player.score += score; // Уменьшаем счет на введенные очки
+    player.throws--; // Уменьшаем количество бросков
+    player.totalPoints -= score; // Уменьшаем общие очки
+    player.history[legIndex].pop(); // Удаляем последний бросок из истории
+
+    // Если история лега пуста, удаляем лег
     if (player.history[legIndex].length === 0 && legIndex > 0) {
         player.history.pop();
     }
 
-    currentPlayer = playerIndex;
-    updateScoreBoard();
-    updateStatsBoard();
+    currentPlayer = playerIndex; // Устанавливаем текущего игрока
+    updateScoreBoard(); // Обновляем табло счета
+    updateStatsBoard(); // Обновляем статистику
+    console.log('Функция undoScore завершена. Текущий игрок:', currentPlayer); // Отладочное сообщение
 }
 
 function updateStatsBoard() {

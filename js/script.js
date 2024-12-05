@@ -86,62 +86,64 @@ function finishLeg() {
         });
 }
 
-// Функция для открытия модального окна со статистикой
-function showStatsModal() {
-    const playersStatsContent = document.getElementById('playersStatsContent');
-    playersStatsContent.innerHTML = ''; // Очищаем предыдущее содержимое
+function showStatsModal() { 
+    const playersStatsContent = document.getElementById('playersStatsContent'); 
+    playersStatsContent.innerHTML = ''; // Очищаем предыдущее содержимое 
 
-    // Обновляем статистику перед отображением
-    loadGameResults();
-    updateStatsBoard();
+    // Загружаем всех игроков из localStorage 
+    players = Array.from(new Set(JSON.parse(localStorage.getItem('players')) || [])); 
 
-    // Проверяем, есть ли игроки
-    if (players.length === 0) {
-        const noPlayersMessage = document.createElement('div');
-        noPlayersMessage.textContent = 'Игроки не созданы, статистика отсутствует.';
-        noPlayersMessage.style.textAlign = 'center'; // Центрируем текст
-        noPlayersMessage.style.fontSize = '1.5em'; // Увеличиваем размер шрифта
-        playersStatsContent.appendChild(noPlayersMessage);
-        document.getElementById('statsModal').style.display = 'flex'; // Показываем модальное окно
-        return; // Завершаем выполнение функции
-    }
+    // Загружаем результаты из localStorage 
+    const savedResults = localStorage.getItem('dartGameResults'); 
+    const results = savedResults ? JSON.parse(savedResults) : []; 
 
-    // Определяем лучшего игрока
+    // Определяем лучшего игрока внутри цикла
     let bestPlayer = null;
     let maxLegWins = 0;
     let isTie = false;
 
     players.forEach(player => {
-        if (player.legWins > maxLegWins) {
-            maxLegWins = player.legWins;
+        const existingPlayer = results.find(p => p.name === player.name) || { throws: 0, totalPoints: 0, legWins: 0, bestNormalScore: 0 }; 
+
+        // Логируем информацию о игроке
+        console.log(`Игрок: ${player.name}, Выигранные леги: ${existingPlayer.legWins}`); 
+
+        // Определяем лучшего игрока
+        if (existingPlayer.legWins > maxLegWins) {
+            maxLegWins = existingPlayer.legWins;
             bestPlayer = player;
             isTie = false; // Сбросить признак ничьей
-        } else if (player.legWins === maxLegWins && player.legWins > 0) {
+        } else if (existingPlayer.legWins === maxLegWins && existingPlayer.legWins > 0) {
             isTie = true; // Обнаружена ничья
         }
-    });
 
-    players.forEach(player => {
-        const playerStatDiv = document.createElement('div');
-        playerStatDiv.classList.add('player-stat');
+        // Создаем элемент для отображения статистики игрока
+        const playerStatDiv = document.createElement('div'); 
+        playerStatDiv.classList.add('player-stat'); 
 
         // Добавляем класс для лучшего игрока, если он единственный
-        if (player === bestPlayer && !isTie && player.legWins > 0) {
+        if (player === bestPlayer && !isTie && existingPlayer.legWins > 0) {
             playerStatDiv.classList.add('best-player');
         }
 
-        playerStatDiv.innerHTML = `
-            <h4>${player.name} ${player === bestPlayer && !isTie ? '👑' : ''}</h4>
-            <p>Бросков: ${player.throws}</p>
-            <p>Набрано очков: ${player.totalPoints}</p>
-            <p>Выигранные леги: ${player.legWins}</p>
-            <p>Средний набор: ${player.averagePerApproach}</p>
-            <p>Лучший бросок: ${player.bestNormalScore > 0 ? player.bestNormalScore : 'Нет данных'}</p>
-        `;
-        playersStatsContent.appendChild(playerStatDiv);
-    });
+        playerStatDiv.innerHTML = ` 
+            <h4>${player.name} ${player === bestPlayer && !isTie ? '👑' : ''}</h4> 
+            <p>Бросков: ${existingPlayer.throws}</p> 
+            <p>Набрано очков: ${existingPlayer.totalPoints}</p> 
+            <p>Выигранные леги: ${existingPlayer.legWins}</p> 
+            <p>Средний набор: ${player.averagePerApproach}</p> 
+            <p>Лучший бросок: ${player.bestNormalScore > 0 ? player.bestNormalScore : 'Нет данных'}</p> 
+        `; 
 
-    document.getElementById('statsModal').style.display = 'flex'; // Показываем модальное окно
+        // Выводим в лог данные, которые отображаются на экране
+        console.log(`Отображаем игрока: ${player.name}, Бросков: ${existingPlayer.throws}, Набрано очков: ${existingPlayer.totalPoints}, Выигранные леги: ${existingPlayer.legWins}`);
+
+        playersStatsContent.appendChild(playerStatDiv); 
+    }); 
+
+    console.log(`Лучший игрок: ${bestPlayer ? bestPlayer.name : 'Нет'}, Леги: ${maxLegWins}, Ничья: ${isTie}`); // Отладка
+
+    document.getElementById('statsModal').style.display = 'flex'; // Показываем модальное окно 
 }
 
 // Функция для закрытия модального окна со статистикой
@@ -1705,14 +1707,14 @@ document.addEventListener('DOMContentLoaded', function() {
     updateLegsCountOptions();
 });
 
-if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-      navigator.serviceWorker.register('/service-worker.js')
-        .then((registration) => {
-          console.log('Service Worker зарегистрирован с областью:', registration.scope);
-        })
-        .catch((error) => {
-          console.error('Ошибка регистрации Service Worker:', error);
-        });
-    });
-  }
+// if ('serviceWorker' in navigator) {
+//     window.addEventListener('load', () => {
+//       navigator.serviceWorker.register('/service-worker.js')
+//         .then((registration) => {
+//           console.log('Service Worker зарегистрирован с областью:', registration.scope);
+//         })
+//         .catch((error) => {
+//           console.error('Ошибка регистрации Service Worker:', error);
+//         });
+//     });
+//   }

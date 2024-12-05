@@ -1374,7 +1374,7 @@ function showGameStats() {
         }
 
         playerStats.innerHTML = `
-            <h3>${player.name} #${index + 1} ${index === winner.index ? '👑' : ''}</h3>
+            <h3>${player.name} ${index === winner.index ? '👑' : ''}</h3>
             <div class="stat-item">Выиграно легов: ${player.legWins}</div>
             <div class="stat-item">Всего бросков: ${player.throws}</div>
             <div class="stat-item">Всего подходов: ${Math.ceil(player.throws / 3)}</div>
@@ -1575,50 +1575,50 @@ function getCheckoutSuggestions(score) {
     if (score > 180 || score <= 1) return [];
     
     const specialCases = {
-        170: ['T20 - T20 - 50'],    
-        167: ['T20 - T19 - 50'],
-        164: ['T20 - T18 - 50'],
-        161: ['T20 - T17 - 50'],
-        160: ['T20 - T20 - D20'],
-        158: ['T20 - T20 - D19'],
-        157: ['T20 - T19 - D20'],
-        156: ['T20 - T20 - D18'],
-        155: ['T20 - T19 - D19'],
-        154: ['T20 - T18 - D20'],
-        153: ['T20 - T19 - D18'],
-        152: ['T20 - T20 - D16'],
-        151: ['T20 - T17 - D20'],
-        150: ['T20 - T18 - D18'],
-        149: ['T20 - T19 - D16'],
-        148: ['T20 - T16 - D20'],
-        147: ['T20 - T17 - D18'],
-        146: ['T20 - T18 - D16'],
-        145: ['T20 - T15 - D20'],
-        144: ['T20 - T20 - D12'],
-        143: ['T20 - T17 - D16'],
-        142: ['T20 - T14 - D20'],
-        141: ['T20 - T19 - D12'],
-        140: ['T20 - T20 - D10'],
-        139: ['T20 - T13 - D20'],
-        138: ['T20 - T18 - D12'],
-        137: ['T20 - T19 - D10'],
-        136: ['T20 - T20 - D8'],
-        135: ['T20 - T17 - D12'],
-        134: ['T20 - T14 - D16'],
-        133: ['T20 - T19 - D8'],
-        132: ['T20 - T16 - D12'],
-        131: ['T20 - T13 - D16'],
-        130: ['T20 - T18 - D8'],
-        129: ['T19 - T16 - D12'],
-        128: ['T18 - T14 - D16'],
-        127: ['T20 - T17 - D8'],
-        126: ['T19 - T19 - D6'],
-        125: ['T20 - T19 - D4'],
-        124: ['T20 - T16 - D8'],
-        123: ['T19 - T16 - D9'],
-        122: ['T18 - T20 - D4'],
-        121: ['T20 - T11 - D14'],
-        120: ['T20 - 20 - D20']
+        170: ['T20-T20-50'],    
+        167: ['T20-T19-50'],
+        164: ['T20-T18-50'],
+        161: ['T20-T17- 50'],
+        157: ['T20-T19-D20'],
+        158: ['T20-T20-D19'],
+        160: ['T20-T20-D20'],
+        156: ['T20-T20-D18'],
+        155: ['T20-T19-D19'],
+        154: ['T20-T18-D20'],
+        153: ['T20-T19-D18'],
+        152: ['T20-T20-D16'],
+        151: ['T20-T17-D20'],
+        150: ['T20-T18-D18'],
+        149: ['T20-T19-D16'],
+        148: ['T20-T16-D20'],
+        147: ['T20-T17-D18'],
+        146: ['T20-T18-D16'],
+        145: ['T20-T15-D20'],
+        144: ['T20-T20-D12'],
+        143: ['T20-T17-D16'],
+        142: ['T20-T14-D20'],
+        141: ['T20-T19-D12'],
+        140: ['T20-T20-D10'],
+        139: ['T20-T13-D20'],
+        138: ['T20-T18-D12'],
+        137: ['T20-T19-D10'],
+        136: ['T20-T20-D8'],
+        135: ['T20-T17-D12'],
+        134: ['T20-T14-D16'],
+        133: ['T20-T19-D8'],
+        132: ['T20-T16-D12'],
+        131: ['T20-T13-D16'],
+        130: ['T20-T18-D8'],
+        129: ['T19-T16-D12'],
+        128: ['T18-T14-D16'],
+        127: ['T20-T17-D8'],
+        126: ['T19-T19-D6'],
+        125: ['T20-T19-D4'],
+        124: ['T20-T16-D8'],
+        123: ['T19-T16-D9'],
+        122: ['T18-T20-D4'],
+        121: ['T20-T11-D14'],
+        120: ['T20-20-D20']
     };
 
     if (specialCases[score]) {
@@ -1639,7 +1639,7 @@ function getCheckoutSuggestions(score) {
         if (i < score) {
             let remaining = score - i;
             if (doubles.includes(remaining)) { 
-                const suggestion = `${formatThrow(i)} - D${remaining / 2}`;
+                const suggestion = `${formatThrow(i)}-D${remaining / 2}`;
                 if (!suggestions.includes(suggestion)) {
                     suggestions.push(suggestion);
                 }
@@ -1654,7 +1654,7 @@ function getCheckoutSuggestions(score) {
                     if (i + j < score) {
                         let remaining = score - i - j;
                         if (doubles.includes(remaining)) { 
-                            const suggestion = `${formatThrow(i)} - ${formatThrow(j)} - D${remaining / 2}`;
+                            const suggestion = `${formatThrow(i)}-${formatThrow(j)}-D${remaining / 2}`;
                             if (!suggestions.includes(suggestion)) {
                                 suggestions.push(suggestion);
                             }

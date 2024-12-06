@@ -15,6 +15,68 @@ let currentLanguage = localStorage.getItem('language') || 'ru';
 let players = Array.from(new Set(JSON.parse(localStorage.getItem('players')) || []));
 let playerToRemoveIndex = null;
 
+// Функция для обновления состояния кнопок
+function updateButtonVisibility() {
+    const reportIssueButton = document.getElementById('reportIssueButton');
+    const toggleInterfaceButton = document.getElementById('toggleInterfaceButton');
+    const languageButton = document.getElementById('languageButton');
+    const themeToggleButton = document.getElementById('themeToggle');
+
+    const isReportIssueVisible = document.getElementById('toggleReportIssue').checked;
+    const isToggleInterfaceVisible = document.getElementById('toggleToggleInterface').checked;
+    const isLanguageVisible = document.getElementById('toggleLanguage').checked;
+    const isThemeToggleVisible = document.getElementById('toggleTheme').checked;
+
+    reportIssueButton.style.display = isReportIssueVisible ? 'inline-block' : 'none';
+    toggleInterfaceButton.style.display = isToggleInterfaceVisible ? 'inline-block' : 'none';
+    languageButton.style.display = isLanguageVisible ? 'inline-block' : 'none';
+    themeToggleButton.style.display = isThemeToggleVisible ? 'inline-block' : 'none';
+
+    // Сохраняем состояние в локальное хранилище
+    localStorage.setItem('toggleReportIssue', isReportIssueVisible);
+    localStorage.setItem('toggleToggleInterface', isToggleInterfaceVisible);
+    localStorage.setItem('toggleLanguage', isLanguageVisible);
+    localStorage.setItem('toggleTheme', isThemeToggleVisible);
+}
+
+// Инициализация состояния кнопок при загрузке
+document.addEventListener('DOMContentLoaded', function() {
+    // Проверяем и загружаем состояние из локального хранилища
+    const isReportIssueVisible = localStorage.getItem('toggleReportIssue');
+    const isToggleInterfaceVisible = localStorage.getItem('toggleToggleInterface');
+    const isLanguageVisible = localStorage.getItem('toggleLanguage');
+    const isThemeToggleVisible = localStorage.getItem('toggleTheme');
+
+    // Устанавливаем состояние переключателей
+    document.getElementById('toggleReportIssue').checked = (isReportIssueVisible === 'true') || (isReportIssueVisible === null);
+    document.getElementById('toggleToggleInterface').checked = (isToggleInterfaceVisible === 'true') || (isToggleInterfaceVisible === null);
+    document.getElementById('toggleLanguage').checked = (isLanguageVisible === 'true') || (isLanguageVisible === null);
+    document.getElementById('toggleTheme').checked = (isThemeToggleVisible === 'true') || (isThemeToggleVisible === null);
+
+    // Сохраняем состояние в локальное хранилище, если оно не было установлено
+    if (isReportIssueVisible === null) {
+        localStorage.setItem('toggleReportIssue', 'true');
+    }
+    if (isToggleInterfaceVisible === null) {
+        localStorage.setItem('toggleToggleInterface', 'true');
+    }
+    if (isLanguageVisible === null) {
+        localStorage.setItem('toggleLanguage', 'true');
+    }
+    if (isThemeToggleVisible === null) {
+        localStorage.setItem('toggleTheme', 'true');
+    }
+
+    // Обновляем видимость кнопок
+    updateButtonVisibility();
+
+    // Обработчики событий для переключателей
+    document.getElementById('toggleReportIssue').addEventListener('change', updateButtonVisibility);
+    document.getElementById('toggleToggleInterface').addEventListener('change', updateButtonVisibility);
+    document.getElementById('toggleLanguage').addEventListener('change', updateButtonVisibility);
+    document.getElementById('toggleTheme').addEventListener('change', updateButtonVisibility);
+});
+
 function openIssuePage() {
     const repoUrl = 'https://github.com/kzuev/dartcount/issues/new'; // Замените USERNAME и REPO на ваши данные
     window.open(repoUrl, '_blank');

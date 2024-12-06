@@ -366,6 +366,32 @@ body.light-theme .info-circle {
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
 
+.toggle-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px;
+    border: 1px solid var(--accent-color);
+    border-radius: 8px;
+    background-color: rgba(255, 255, 255, 0.1);
+    margin: 10px 0;
+    transition: background-color 0.3s;
+}
+
+.toggle-container:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+}
+
+.toggle-container label {
+    flex-grow: 1;
+    margin-right: 10px;
+    color: var(--text-color);
+}
+
+.toggle-container input[type="checkbox"] {
+    margin-right: 10px;
+}
+
 /* ==========================================================================
    8. Statistics Styles
    ========================================================================== */

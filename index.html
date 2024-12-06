@@ -133,6 +133,51 @@
                 <button onclick="document.getElementById('fileInput').click();">Восстановить настройки</button>
                 <button onclick="clearLocalStorage()">Очистить хранилище</button>
             </div>
+            <h2 style="margin-top: 60px;">Настройки интерфейса</h3>
+            <h3>Отображение кнопок</h3>
+            <div class="toggle-container">
+                <label>
+                    <input type="checkbox" id="toggleReportIssue" checked>
+                    Сообщить об ошибке
+                </label>
+                <button id="reportIssueButton" class="language-button"> 🐞 </button>
+            </div>
+            <div class="toggle-container">
+                <label>
+                    <input type="checkbox" id="toggleToggleInterface" checked>
+                    Скрыть интерфейс
+                </label>
+                <button id="toggleInterfaceButton" class="language-button">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10" />
+                        <line x1="12" y1="8" x2="12" y2="16" />
+                        <line x1="12" y1="4" x2="12" y2="6" />
+                    </svg>
+                </label>
+            </div>
+            <div class="toggle-container">
+                <label>
+                    <input type="checkbox" id="toggleLanguage" checked>
+                    Сменить язык
+                </label>
+                <div class="language-selection">
+                    <button id="languageButton" class="language-button">
+                        ru
+                    </button>
+                </div>
+            </div>
+            <div class="toggle-container">
+                <label>
+                    <input type="checkbox" id="toggleTheme" checked>
+                    Сменить оформление
+                </label>
+                <button id="themeToggle">
+                    <span class="theme-icon">🌙</span>
+                </button>
+            </div>
+            <div class="button-container" style="margin-top: 40px;">
+                <button onclick="closeStorageModal()">Закрыть</button>
+            </div>
         </div>
     </div>
     <div id="throwsModal" class="modal">

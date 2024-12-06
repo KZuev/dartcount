@@ -62,6 +62,7 @@ function finishLeg() {
 
             // Проверка на победу в игре
             if (checkGameWin(player)) {
+                player.gameWins += 1; // Увеличиваем количество побед в играх
                 gameEndTime = new Date();
                 createConfetti();
                 setTimeout(showGameStats, 1000);
@@ -100,17 +101,18 @@ function showStatsModal() {
     // Определяем лучшего игрока внутри цикла
     let bestPlayer = null;
     let maxLegWins = 0;
+    let maxGameWins = 0;
     let isTie = false;
 
     players.forEach(player => {
-        const existingPlayer = results.find(p => p.name === player.name) || { throws: 0, totalPoints: 0, legWins: 0, bestNormalScore: 0 }; 
+        const existingPlayer = results.find(p => p.name === player.name) || { throws: 0, totalPoints: 0, legWins: 0, gameWins: 0 };
 
         // Логируем информацию о игроке
         console.log(`Игрок: ${player.name}, Выигранные леги: ${existingPlayer.legWins}`); 
 
         // Определяем лучшего игрока
-        if (existingPlayer.legWins > maxLegWins) {
-            maxLegWins = existingPlayer.legWins;
+        if (existingPlayer.gameWins > maxGameWins) {
+            maxGameWins = existingPlayer.gameWins;
             bestPlayer = player;
             isTie = false; // Сбросить признак ничьей
         } else if (existingPlayer.legWins === maxLegWins && existingPlayer.legWins > 0) {
@@ -129,10 +131,11 @@ function showStatsModal() {
         playerStatDiv.innerHTML = ` 
             <h4>${player.name} ${player === bestPlayer && !isTie ? '👑' : ''}</h4> 
             <p>Бросков: ${existingPlayer.throws}</p> 
-            <p>Набрано очков: ${existingPlayer.totalPoints}</p> 
+            <p>Набрано очков: ${existingPlayer.totalPoints}</p>
+            <p>Победы в игре: ${existingPlayer.gameWins}</p> 
             <p>Выигранные леги: ${existingPlayer.legWins}</p> 
             <p>Средний набор: ${player.averagePerApproach}</p> 
-            <p>Лучший бросок: ${player.bestNormalScore > 0 ? player.bestNormalScore : 'Нет данных'}</p> 
+            <p>Лучший бросок: ${existingPlayer.bestNormalScore > 0 ? existingPlayer.bestNormalScore : 'Нет данных'}</p> 
         `; 
 
         // Выводим в лог данные, которые отображаются на экране
@@ -142,7 +145,7 @@ function showStatsModal() {
     }); 
 
     console.log(`Лучший игрок: ${bestPlayer ? bestPlayer.name : 'Нет'}, Леги: ${maxLegWins}, Ничья: ${isTie}`); // Отладка
-
+    console.log(`Лучший игрок по количеству побед: ${bestPlayer ? bestPlayer.name : 'Нет'}, Побед: ${maxGameWins}`);
     document.getElementById('statsModal').style.display = 'flex'; // Показываем модальное окно 
 }
 
@@ -165,6 +168,7 @@ function saveGameResults() {
             existingPlayer.throws += player.throws;
             existingPlayer.totalPoints += player.totalPoints;
             existingPlayer.legWins += player.legWins;
+            existingPlayer.gameWins += player.gameWins || 0;
             console.log(`Очки после обновления: ${existingPlayer.totalPoints}`);
             // Обновляем лучший бросок
             if (player.bestNormalScore > existingPlayer.bestNormalScore) {
@@ -190,10 +194,11 @@ function loadGameResults() {
                 console.log(`Загрузка игрока ${savedPlayer.name}:`);
                 console.log(`Очки до загрузки: ${existingPlayer.totalPoints}`);
                 // Обновляем существующего игрока
-                existingPlayer.throws += savedPlayer.throws;
-                existingPlayer.totalPoints += savedPlayer.totalPoints;
+                existingPlayer.throws = savedPlayer.throws || 0;
+                existingPlayer.totalPoints = savedPlayer.totalPoints || 0;
                 console.log(`Очки после загрузки: ${existingPlayer.totalPoints}`);
-                existingPlayer.legWins += savedPlayer.legWins;
+                existingPlayer.legWins = savedPlayer.legWins || 0;
+                existingPlayer.gameWins = savedPlayer.gameWins || 0;
                 if (savedPlayer.bestNormalScore > existingPlayer.bestNormalScore) {
                     existingPlayer.bestNormalScore = savedPlayer.bestNormalScore;
                 }
@@ -243,7 +248,14 @@ function addPlayer() {
     }
 
     // Если имя уникально, добавляем игрока
-    players.push({ name: playerName, throws: 0, totalPoints: 0, legWins: 0, history: [[]] });
+    players.push({ 
+        name: playerName, 
+        throws: 0, 
+        totalPoints: 0, 
+        legWins: 0, 
+        gameWins: 0,
+        history: [[]] 
+    });
     document.getElementById('newPlayerName').value = ''; // Очищаем поле ввода
     savePlayers(); // Сохраняем изменения
     loadPlayers(); // Обновляем список игроков, чтобы отобразить новые данные
@@ -713,6 +725,7 @@ function startGame() {
         totalPoints: 0, // Общие очки
         history: [[]], // История бросков
         legWins: 0, // Выигранные леги
+        gameWins: 0, // Инициализация количества побед
         throwTimes: [], // Время бросков
         bestExceededScore: 0, // Лучший бросок при превышении
         bestNormalScore: 0 // Лучший бросок без превышения

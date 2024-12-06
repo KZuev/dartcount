@@ -15,6 +15,11 @@ let currentLanguage = localStorage.getItem('language') || 'ru';
 let players = Array.from(new Set(JSON.parse(localStorage.getItem('players')) || []));
 let playerToRemoveIndex = null;
 
+function openIssuePage() {
+    const repoUrl = 'https://github.com/kzuev/dartcount/issues/new'; // Замените USERNAME и REPO на ваши данные
+    window.open(repoUrl, '_blank');
+}
+
 // Обработчик события для кнопки "Сохранить изменения"
 document.getElementById('savePlayersButton').addEventListener('click', function() {
     savePlayers(); // Сохраняем изменения игроков

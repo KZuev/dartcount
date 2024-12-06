@@ -115,16 +115,20 @@ function showStatsModal() {
             maxGameWins = existingPlayer.gameWins;
             bestPlayer = player;
             isTie = false; // Сбросить признак ничьей
-        } else if (existingPlayer.legWins === maxLegWins && existingPlayer.legWins > 0) {
+        } else if (existingPlayer.gameWins === maxGameWins && existingPlayer.gameWins > 0) {
             isTie = true; // Обнаружена ничья
         }
+    });
+
+    players.forEach(player => {
+        const existingPlayer = results.find(p => p.name === player.name) || { throws: 0, totalPoints: 0, legWins: 0, gameWins: 0 };
 
         // Создаем элемент для отображения статистики игрока
         const playerStatDiv = document.createElement('div'); 
         playerStatDiv.classList.add('player-stat'); 
 
         // Добавляем класс для лучшего игрока, если он единственный
-        if (player === bestPlayer && !isTie && existingPlayer.legWins > 0) {
+        if (player === bestPlayer && !isTie && existingPlayer.gameWins > 0) {
             playerStatDiv.classList.add('best-player');
         }
 

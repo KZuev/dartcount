@@ -1179,7 +1179,7 @@ function undoScore() {
     console.log(`Восстановление счета игрока ${player.name}: ${player.score} - ${score}`); // Отладочное сообщение
 
     // Проверяем, не превышает ли восстановленный счет максимальный
-    if (player.score - score < 0) {
+    if (player.score + score < 0) { 
         alert('Невозможно отменить этот ход, так как счет не может быть отрицательным.');
         return;
     }

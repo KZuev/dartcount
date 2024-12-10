@@ -224,7 +224,7 @@ function showStatsModal() {
     let isTie = false;
 
     players.forEach(player => {
-        const existingPlayer = results.find(p => p.name === player.name) || { throws: 0, totalPoints: 0, legWins: 0, gameWins: 0 };
+        const existingPlayer = results.find(p => p.name === player.name) || { throws: 0, totalPoints: 0, legWins: 0, gameWins: 0, averageScores: [] };
 
         // Логируем информацию о игроке
         console.log(`Игрок: ${player.name}, Выигранные леги: ${existingPlayer.legWins}`); 

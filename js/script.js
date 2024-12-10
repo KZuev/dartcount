@@ -249,11 +249,6 @@ function showStatsModal() {
         const playerStatDiv = document.createElement('div'); 
         playerStatDiv.classList.add('player-stat'); 
 
-        // Добавляем класс для лучшего игрока, если он единственный
-        if (player === bestPlayer && !isTie && existingPlayer.gameWins > 0) {
-            playerStatDiv.classList.add('best-player');
-        }
-
         playerStatDiv.innerHTML = ` 
             <h4>${player.name} ${player === bestPlayer && !isTie ? '👑' : ''}</h4> 
             <p>Бросков: ${existingPlayer.throws}</p> 

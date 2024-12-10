@@ -12,6 +12,7 @@
     <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png" />
     <link rel="manifest" href="site.webmanifest" />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.min.js"></script>
 </head>
 <body>
     <div class="container">
@@ -119,7 +120,7 @@
             <input type="text" id="newPlayerName" placeholder="Имя игрока" style="padding: 10px; border-radius: 5px; width: calc(100% - 22px); margin-bottom: 10px;">
             <div class="button-container">
                 <button id="addPlayerButton">Добавить игрока</button>
-                <button id="savePlayersButton">Сохранить изменения</button>
+                <button id="savePlayersButton">Закрыть</button>
             </div>
         </div>
     </div>
@@ -217,6 +218,16 @@
             </div>
             <div class="button-container">
                 <button id="closeStatsButton" onclick="closeStatsModal()" style="margin-top: 20px; height: 50px;">Закрыть</button>
+            </div>
+        </div>
+    </div>
+    <div id="averageTrendModal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeAverageTrendModal()">&times;</span>
+            <h2>Средний набор игрока</h2>
+            <canvas id="averageTrendChart" width="400" height="200"></canvas>
+            <div class="button-container">
+                <button onclick="closeAverageTrendModal()" style="margin-top: 20px;">Закрыть</button>
             </div>
         </div>
     </div>

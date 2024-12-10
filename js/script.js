@@ -154,6 +154,58 @@ function finishLeg() {
         });
 }
 
+function closeAverageTrendModal() {
+    document.getElementById('averageTrendModal').style.display = 'none'; // Скрываем модальное окно
+}
+
+function showAverageTrend(playerName) {
+    // Находим игрока в массиве dartGameResults
+    const results = JSON.parse(localStorage.getItem('dartGameResults')) || [];
+    const player = results.find(p => p.name === playerName);
+
+    // Проверяем, существует ли игрок и есть ли у него данные о среднем наборе
+    if (!player) {
+        alert(`Нет данных по игроку.`);
+        return;
+    }
+
+    if (!player.averageScores || player.averageScores.length === 0) {
+        alert(`У игрока ${playerName} нет данных о среднем наборе.`);
+        return;
+    }
+
+    console.log(`Данные для графика игрока ${playerName}:`, player.averageScores);
+
+    const ctx = document.getElementById('averageTrendChart').getContext('2d');
+    const chartData = {
+        labels: player.averageScores.map((_, index) => `Игра ${index + 1}`),
+        datasets: [{
+            label: 'Средний набор',
+            data: player.averageScores,
+            borderColor: 'rgba(75, 192, 192, 1)',
+            borderWidth: 2,
+            fill: false
+        }]
+    };
+
+    const chartOptions = {
+        responsive: true,
+        scales: {
+            y: {
+                beginAtZero: true
+            }
+        }
+    };
+
+    new Chart(ctx, {
+        type: 'line',
+        data: chartData,
+        options: chartOptions
+    });
+
+    document.getElementById('averageTrendModal').style.display = 'block'; // Показываем модальное окно с графиком
+}
+
 function showStatsModal() { 
     const playersStatsContent = document.getElementById('playersStatsContent'); 
     playersStatsContent.innerHTML = ''; // Очищаем предыдущее содержимое 
@@ -177,6 +229,13 @@ function showStatsModal() {
         // Логируем информацию о игроке
         console.log(`Игрок: ${player.name}, Выигранные леги: ${existingPlayer.legWins}`); 
 
+        // Рассчитываем средний набор
+        const averageScore = existingPlayer.averageScores && existingPlayer.averageScores.length > 0 
+            ? typeof existingPlayer.averageScores[existingPlayer.averageScores.length - 1] === 'number' 
+                ? existingPlayer.averageScores[existingPlayer.averageScores.length - 1].toFixed(2) 
+                : existingPlayer.averageScores[existingPlayer.averageScores.length - 1] 
+            : 0;
+
         // Определяем лучшего игрока
         if (existingPlayer.gameWins > maxGameWins) {
             maxGameWins = existingPlayer.gameWins;
@@ -185,10 +244,6 @@ function showStatsModal() {
         } else if (existingPlayer.gameWins === maxGameWins && existingPlayer.gameWins > 0) {
             isTie = true; // Обнаружена ничья
         }
-    });
-
-    players.forEach(player => {
-        const existingPlayer = results.find(p => p.name === player.name) || { throws: 0, totalPoints: 0, legWins: 0, gameWins: 0 };
 
         // Создаем элемент для отображения статистики игрока
         const playerStatDiv = document.createElement('div'); 
@@ -205,7 +260,7 @@ function showStatsModal() {
             <p>Набрано очков: ${existingPlayer.totalPoints}</p>
             <p>Победы в игре: ${existingPlayer.gameWins}</p> 
             <p>Выигранные леги: ${existingPlayer.legWins}</p> 
-            <p>Средний набор: ${player.averagePerApproach}</p> 
+            <p>Средний набор: <span class="average-score" onclick="showAverageTrend('${existingPlayer.name}')">${averageScore} 📊</span></p>
             <p>Лучший бросок: ${existingPlayer.bestNormalScore > 0 ? existingPlayer.bestNormalScore : 'Нет данных'}</p> 
         `; 
 
@@ -241,6 +296,15 @@ function saveGameResults() {
             existingPlayer.legWins += player.legWins;
             existingPlayer.gameWins += player.gameWins || 0;
             console.log(`Очки после обновления: ${existingPlayer.totalPoints}`);
+
+            // Обновляем средний набор
+            const averageScore = existingPlayer.throws > 0 ? (existingPlayer.totalPoints / existingPlayer.throws).toFixed(2) : 0;
+            if (!existingPlayer.averageScores) {
+                existingPlayer.averageScores = []; // Инициализация, если поле отсутствует
+            }
+            existingPlayer.averageScores.push(averageScore); // Добавляем новое значение
+
+
             // Обновляем лучший бросок
             if (player.bestNormalScore > existingPlayer.bestNormalScore) {
                 existingPlayer.bestNormalScore = player.bestNormalScore;
@@ -270,6 +334,15 @@ function loadGameResults() {
                 console.log(`Очки после загрузки: ${existingPlayer.totalPoints}`);
                 existingPlayer.legWins = savedPlayer.legWins || 0;
                 existingPlayer.gameWins = savedPlayer.gameWins || 0;
+
+                // Обновляем средний набор
+                const averageScore = existingPlayer.throws > 0 ? (existingPlayer.totalPoints / existingPlayer.throws).toFixed(2) : 0;
+                if (!existingPlayer.averageScores) {
+                    existingPlayer.averageScores = []; // Инициализация, если поле отсутствует
+                }
+                existingPlayer.averageScores.push(averageScore); // Добавляем новое значение
+
+
                 if (savedPlayer.bestNormalScore > existingPlayer.bestNormalScore) {
                     existingPlayer.bestNormalScore = savedPlayer.bestNormalScore;
                 }
@@ -284,6 +357,16 @@ function loadGameResults() {
 
 // Загрузка результатов при загрузке страницы
 window.onload = loadGameResults; 
+
+// Загрузка результатов при загрузке страницы
+window.onload = function() {
+    const storedPlayers = JSON.parse(localStorage.getItem('players')) || [];
+    players = storedPlayers.map(player => ({
+        ...player,
+        averageScores: player.averageScores || [] // Обеспечиваем наличие поля averageScores
+    }));
+    loadPlayers(); // Загружаем игроков
+};
 
 // Функция для загрузки списка игроков
 function loadPlayers() {
@@ -325,7 +408,8 @@ function addPlayer() {
         totalPoints: 0, 
         legWins: 0, 
         gameWins: 0,
-        history: [[]] 
+        history: [[]],
+        averageScores: []
     });
     document.getElementById('newPlayerName').value = ''; // Очищаем поле ввода
     savePlayers(); // Сохраняем изменения
@@ -346,8 +430,17 @@ function removePlayer(index) {
 function savePlayers() {
     // Удаляем дубликаты перед сохранением
     const uniquePlayers = Array.from(new Set(players));
+    uniquePlayers.forEach(player => {
+        if (!player.averageScores) {
+            player.averageScores = []; // Инициализация, если поле отсутствует
+        }
+    });
     localStorage.setItem('players', JSON.stringify(uniquePlayers));
 }
+
+// function savePlayers() {
+//     localStorage.setItem('players', JSON.stringify(players));
+// }
 
 document.getElementById('playersButton').addEventListener('click', showPlayersModal);
 document.getElementById('closePlayersModal').addEventListener('click', closePlayersModal);
@@ -447,10 +540,6 @@ function closeConfirmDeleteModal() {
 
 // Добавляем обработчик события для кнопки подтверждения удаления
 document.getElementById('confirmDeleteButton').addEventListener('click', confirmDeletePlayer);
-
-function savePlayers() {
-    localStorage.setItem('players', JSON.stringify(players));
-}
 
 function updatePlayerSelectionFields() {
     const selectPlayersContainer = document.getElementById('selectPlayersContainer');

@@ -211,7 +211,7 @@ function showStatsModal() {
     playersStatsContent.innerHTML = ''; // Очищаем предыдущее содержимое 
 
     // Загружаем всех игроков из localStorage 
-    players = Array.from(new Set(JSON.parse(localStorage.getItem('players')) || [])); 
+    players = Array.from(new Set(JSON.parse(localStorage.getItem('dartGameResults')) || [])); 
 
     // Загружаем результаты из localStorage 
     const savedResults = localStorage.getItem('dartGameResults'); 
@@ -223,45 +223,38 @@ function showStatsModal() {
     let maxGameWins = 0;
     let isTie = false;
 
-    players.forEach(player => {
-        const existingPlayer = results.find(p => p.name === player.name) || { throws: 0, totalPoints: 0, legWins: 0, gameWins: 0, averageScores: [] };
+    results.forEach(player => {
+        if (player.gameWins > maxGameWins) {
+            maxGameWins = player.gameWins;
+            bestPlayer = player; // Назначаем нового лучшего игрока
+        }
+    });
 
-        // Логируем информацию о игроке
-        console.log(`Игрок: ${player.name}, Выигранные леги: ${existingPlayer.legWins}`); 
+    results.forEach(player => {
+        const playerStatDiv = document.createElement('div');
+        playerStatDiv.classList.add('player-stat');
 
-        // Рассчитываем средний набор
-        const averageScore = existingPlayer.averageScores && existingPlayer.averageScores.length > 0 
-            ? typeof existingPlayer.averageScores[existingPlayer.averageScores.length - 1] === 'number' 
-                ? existingPlayer.averageScores[existingPlayer.averageScores.length - 1].toFixed(2) 
-                : existingPlayer.averageScores[existingPlayer.averageScores.length - 1] 
-            : 0;
-
-        // Определяем лучшего игрока
-        if (existingPlayer.gameWins > maxGameWins) {
-            maxGameWins = existingPlayer.gameWins;
-            bestPlayer = player;
-            isTie = false; // Сбросить признак ничьей
-        } else if (existingPlayer.gameWins === maxGameWins && existingPlayer.gameWins > 0) {
-            isTie = true; // Обнаружена ничья
+        // Выделяем только лучшего игрока
+        if (player.name === bestPlayer?.name) {
+            playerStatDiv.classList.add('best-player');
         }
 
-        // Создаем элемент для отображения статистики игрока
-        const playerStatDiv = document.createElement('div'); 
-        playerStatDiv.classList.add('player-stat'); 
+        // Проверка наличия averageScores и корректного значения
+        const averageScore = Array.isArray(player.averageScores) && player.averageScores.length > 0
+            ? parseFloat(player.averageScores[player.averageScores.length - 1]).toFixed(2)
+            : 0;
 
-        playerStatDiv.innerHTML = ` 
-            <h4>${player.name} ${player === bestPlayer && !isTie ? '👑' : ''}</h4> 
-            <p>Бросков: ${existingPlayer.throws}</p> 
-            <p>Набрано очков: ${existingPlayer.totalPoints}</p>
-            <p>Победы в игре: ${existingPlayer.gameWins}</p> 
-            <p>Выигранные леги: ${existingPlayer.legWins}</p> 
-            <p>Средний набор: <span class="average-score" onclick="showAverageTrend('${existingPlayer.name}')">${averageScore} 📊</span></p>
-            <p>Лучший бросок: ${existingPlayer.bestNormalScore > 0 ? existingPlayer.bestNormalScore : 'Нет данных'}</p> 
-        `; 
+        console.log(`Лучший игрок: ${bestPlayer?.name || 'Нет'}, Ничья: ${isTie}`);
 
-        // Выводим в лог данные, которые отображаются на экране
-        console.log(`Отображаем игрока: ${player.name}, Бросков: ${existingPlayer.throws}, Набрано очков: ${existingPlayer.totalPoints}, Выигранные леги: ${existingPlayer.legWins}`);
-
+        playerStatDiv.innerHTML = `
+            <h4>${player.name} ${player.name === bestPlayer?.name ? '👑' : ''}</h4>
+            <p>Бросков: ${player.throws}</p>
+            <p>Набрано очков: ${player.totalPoints}</p>
+            <p>Победы в игре: ${player.gameWins}</p>
+            <p>Выигранные леги: ${player.legWins}</p>
+            <p>Средний набор: <span class="average-score" onclick="showAverageTrend('${player.name}')">${averageScore} 📊</span></p>
+            <p>Лучший бросок: ${player.bestNormalScore > 0 ? player.bestNormalScore : 'Нет данных'}</p>
+        `;
         playersStatsContent.appendChild(playerStatDiv); 
     }); 
 

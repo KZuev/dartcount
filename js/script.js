@@ -14,6 +14,7 @@ let isConfettiActive = true;
 let currentLanguage = localStorage.getItem('language') || 'ru';
 let players = Array.from(new Set(JSON.parse(localStorage.getItem('players')) || []));
 let playerToRemoveIndex = null;
+let isInterfaceVisible = true;
 
 // Функция для обновления состояния кнопок
 function updateButtonVisibility() {
@@ -720,34 +721,52 @@ document.addEventListener('DOMContentLoaded', () => {
 const menuButtons = document.querySelectorAll('.menu button');
 console.log('Найденные кнопки меню:', menuButtons);
 
-document.addEventListener('keydown', function(event) {
-    if (event.key === 'F9') { // Проверяем, была ли нажата клавиша F9
-        event.preventDefault(); // Предотвращаем действие по умолчанию
-        const interfaceElements = document.querySelectorAll('.container, .modal-content, .confetti');
-        interfaceElements.forEach(element => {
-            element.classList.toggle('hidden'); // Переключение класса hidden
-        });
-    }
-});
-
-document.getElementById('toggleInterfaceButton').addEventListener('click', function() {
+function toggleInterface() {
     const interfaceElements = document.querySelectorAll('.container, .modal-content, .confetti');
+    
+    isInterfaceVisible = !isInterfaceVisible;
     interfaceElements.forEach(element => {
-        element.classList.toggle('hidden'); // Переключение класса hidden
+        element.classList.toggle('hidden', !isInterfaceVisible);
     });
+
+    const body = document.body; 
+
+    if (isInterfaceVisible) {
+        body.classList.remove('hidden-background');
+        body.style.backgroundImage = "url('/img/bg.jpeg')";
+        body.style.backgroundSize = 'cover';
+        body.style.backgroundPosition = 'center';
+        body.style.backgroundRepeat = 'no-repeat';
+    } else {
+        body.classList.add('hidden-background');
+        body.style.backgroundImage = 'none';
+    }
+}
+
+document.getElementById('toggleInterfaceButton').addEventListener('click', toggleInterface);
+
+document.addEventListener('keydown', function(event) {
+    if (event.key === 'F9') {
+        event.preventDefault();
+        toggleInterface();
+    }
 });
 
 document.addEventListener('click', function(event) {
     const interfaceElements = document.querySelectorAll('.container, .modal-content, .confetti');
-    const isInterfaceHidden = Array.from(interfaceElements).every(element => element.classList.contains('hidden'));
-
-    // Проверяем, был ли клик на одном из элементов интерфейса
     const isClickOnInterface = Array.from(interfaceElements).some(element => element.contains(event.target));
 
-    if (isInterfaceHidden && !isClickOnInterface) {
+    if (!isClickOnInterface && !isInterfaceVisible) {
+        isInterfaceVisible = true;
         interfaceElements.forEach(element => {
-            element.classList.remove('hidden'); // Убираем класс hidden, чтобы показать элементы интерфейса
+            element.classList.remove('hidden');
         });
+        const body = document.body;
+        body.classList.remove('hidden-background');
+        body.style.backgroundImage = "url('/img/bg.jpeg')";
+        body.style.backgroundSize = 'cover';
+        body.style.backgroundPosition = 'center';
+        body.style.backgroundRepeat = 'no-repeat';
     }
 });
 

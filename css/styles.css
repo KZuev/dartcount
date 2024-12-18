@@ -59,7 +59,7 @@ body {
     margin: 0;
     transition: background-color 0.3s, color 0.3s;
     position: relative;
-    background-image: url('img/bg.jpeg');
+    background-image: url('../img/bg.jpeg');
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;

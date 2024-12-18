@@ -733,7 +733,7 @@ function toggleInterface() {
 
     if (isInterfaceVisible) {
         body.classList.remove('hidden-background');
-        body.style.backgroundImage = "url('img/bg.jpeg')";
+        body.style.backgroundImage = "url('./img/bg.jpeg')";
         body.style.backgroundSize = 'cover';
         body.style.backgroundPosition = 'center';
         body.style.backgroundRepeat = 'no-repeat';
@@ -763,7 +763,7 @@ document.addEventListener('click', function(event) {
         });
         const body = document.body;
         body.classList.remove('hidden-background');
-        body.style.backgroundImage = "url('img/bg.jpeg')";
+        body.style.backgroundImage = "url('./img/bg.jpeg')";
         body.style.backgroundSize = 'cover';
         body.style.backgroundPosition = 'center';
         body.style.backgroundRepeat = 'no-repeat';

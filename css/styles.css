@@ -260,7 +260,7 @@ button:hover {
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
 
-.menu {
+.main-menu {
     width: 100%; /* Устанавливает ширину меню на 100% */
     min-width: 450px; /* Максимальная ширина меню */
     margin: 0 auto; /* Центрирует меню */

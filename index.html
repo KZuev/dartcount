@@ -13,6 +13,7 @@
     <link rel="manifest" href="site.webmanifest" />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
 </head>
 <body>
     <div class="container">
@@ -20,11 +21,7 @@
         <div class="theme-selection">
             <button id="reportIssueButton" class="language-button" onclick="openIssuePage()" title="Сообщить об ошибке"> 🐞 </button>
             <button id="toggleInterfaceButton" class="language-button" title="Скрыть интерфейс (F9)">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <circle cx="12" cy="12" r="10" />
-                    <line x1="12" y1="8" x2="12" y2="16" />
-                    <line x1="12" y1="4" x2="12" y2="6" />
-                </svg>
+                <i class="fas fa-power-off"></i>
             </button>
             <div class="language-selection">
                 <button id="languageButton" class="language-button" onclick="toggleLanguage()" title="Сменить язык">
@@ -49,7 +46,7 @@
             <button class="menu-button" id="statsButton" onclick="showStatsModal()"><span class="emoji">📊</span> Статистика</button>
             <button class="menu-button" id="tournamentsButton"><span class="emoji">🏆</span> Турниры</button>
             <button class="menu-button" id="settingsButton" onclick="showStorageModal()"><span class="emoji">⚙️</span> Настройки</button>
-        </div>
+        
             <div class="settings hidden">
                 <button id="backToMenuButton">Вернуться в меню</button>
                 <h2>Настройки игры</h2>

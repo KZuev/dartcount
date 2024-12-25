@@ -405,13 +405,17 @@ function addPlayer() {
 
     // Если имя уникально, добавляем игрока
     players.push({ 
-        name: playerName, 
-        throws: 0, 
-        totalPoints: 0, 
-        legWins: 0, 
-        gameWins: 0,
-        history: [[]],
-        averageScores: []
+        name: playerName, // Имя игрока
+        score: gameScore, // Начальный счет
+        throws: 0, // Количество бросков
+        totalPoints: 0, // Общие очки
+        history: [[]], // История бросков
+        legWins: 0, // Выигранные леги
+        gameWins: 0, // Инициализация количества побед
+        throwTimes: [], // Время бросков
+        bestExceededScore: 0, // Лучший бросок при превышении
+        bestNormalScore: 0, // Лучший бросок без превышения
+        averageScores: [] // Средний набор
     });
     document.getElementById('newPlayerName').value = ''; // Очищаем поле ввода
     savePlayers(); // Сохраняем изменения

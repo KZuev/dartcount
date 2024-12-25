@@ -106,6 +106,13 @@ body > * {
     background-image: none;
 }
 
+.no-players-message {
+    text-align: center;
+    font-size: 1.5em;
+    color: var(--text-color);
+    margin-top: 20px;
+    padding: 100px;
+}
 /* ==========================================================================
    3. Layout Components
    ========================================================================== */

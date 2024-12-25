@@ -160,8 +160,8 @@ function closeAverageTrendModal() {
 }
 
 function showAverageTrend(playerName) {
-    // Находим игрока в массиве dartGameResults
-    const results = JSON.parse(localStorage.getItem('dartGameResults')) || [];
+    // Находим игрока в массиве players
+    const results = JSON.parse(localStorage.getItem('players')) || [];
     const player = results.find(p => p.name === playerName);
 
     // Проверяем, существует ли игрок и есть ли у него данные о среднем наборе
@@ -211,11 +211,24 @@ function showStatsModal() {
     const playersStatsContent = document.getElementById('playersStatsContent'); 
     playersStatsContent.innerHTML = ''; // Очищаем предыдущее содержимое 
 
+    // Проверяем наличие игроков
+    if (players.length === 0) {
+        const noPlayersMessage = document.createElement('div');
+        noPlayersMessage.className = 'no-players-message';
+        noPlayersMessage.textContent = 'Нет игроков'; // Сообщение о отсутствии игроков
+        playersStatsContent.appendChild(noPlayersMessage);
+        document.getElementById('statsModal').style.display = 'flex'; // Показываем модальное окно 
+        return; // Завершаем выполнение функции
+    }
+
     // Загружаем всех игроков из localStorage 
-    players = Array.from(new Set(JSON.parse(localStorage.getItem('dartGameResults')) || [])); 
+    checkPlayers = localStorage.getItem('players'); 
+
+    // Загружаем всех игроков из localStorage 
+    players = Array.from(new Set(JSON.parse(localStorage.getItem('players')) || [])); 
 
     // Загружаем результаты из localStorage 
-    const savedResults = localStorage.getItem('dartGameResults'); 
+    const savedResults = localStorage.getItem('players'); 
     const results = savedResults ? JSON.parse(savedResults) : []; 
 
     // Определяем лучшего игрока внутри цикла
@@ -270,7 +283,7 @@ function closeStatsModal() {
 }
 
 function saveGameResults() {
-    const savedResults = localStorage.getItem('dartGameResults');
+    const savedResults = localStorage.getItem('players');
     let results = savedResults ? JSON.parse(savedResults) : [];
 
     players.forEach(player => {
@@ -304,11 +317,11 @@ function saveGameResults() {
         }
     });
 
-    localStorage.setItem('dartGameResults', JSON.stringify(results));
+    localStorage.setItem('players', JSON.stringify(results));
 }
 
 function loadGameResults() {
-    const savedResults = localStorage.getItem('dartGameResults');
+    const savedResults = localStorage.getItem('players');
     if (savedResults) {
         const results = JSON.parse(savedResults);
         results.forEach(savedPlayer => {

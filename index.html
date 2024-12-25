@@ -156,11 +156,9 @@
                     <input type="checkbox" id="toggleLanguage" checked>
                     Сменить язык
                 </label>
-                <div class="language-selection">
                     <button id="languageButton" class="language-button">
                         ru
                     </button>
-                </div>
             </div>
             <div class="toggle-container">
                 <label>
@@ -211,6 +209,9 @@
             <div id="playersStatsContent" class="players-stats" style="display: flex; flex-wrap: wrap; justify-content: center; gap: 30px;">
                 <!-- Статистика игроков будет добавлена здесь через JavaScript -->
             </div>
+            <div id="noPlayersMessage" class="no-players-message" style="display: none;">
+                Нет игроков
+            </div>
             <div class="button-container">
                 <button id="closeStatsButton" onclick="closeStatsModal()" style="margin-top: 20px; height: 50px;">Закрыть</button>
             </div>
@@ -229,8 +230,11 @@
     <div id="modal" class="modal">
         <div class="modal-content">
             <span class="close-modal" id="closeModal">&times;</span>
-            <p style="font-size: 2em; margin-bottom: 30px; text-align: center; color: white;">В РАЗРАБОТКЕ...</p>
+            <h2 style="font-size: 2em; color: var(--accent-color);">🏆 Турниры</h2>
+            <p style="font-size: 1.2em; color: var(--text-color);">Создание, управление и статистика турниров.</p>
+            <input type="text" id="newPlayerName" placeholder="Название турнира (ID)" style="padding: 10px; border-radius: 5px; width: calc(100% - 22px); margin-bottom: 10px;">
             <div class="button-container">
+                <button onclick="">Создать новый турнир</button>
                 <button onclick="closeModal()">Закрыть</button>
             </div>
         </div>

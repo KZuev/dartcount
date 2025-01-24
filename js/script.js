@@ -1105,8 +1105,8 @@ function updateScoreBoard() {
         
         const legsElement = document.createElement('div');
         legsElement.classList.add('legs-info');
-        legsElement.textContent = `Леги: ${player.legWins}${legMode === 'bestOf' ? 
-            ` (до ${legsToWin})` : 
+        legsElement.textContent = `${player.legWins}${legMode === 'bestOf' ? 
+            ` / ${legsToWin}` : 
             ` / ${legsToWin}`}`;
         
         
@@ -1419,6 +1419,11 @@ function updateStatsBoard() {
         const playerDiv = document.createElement('div');
         playerDiv.classList.add('stats-column');
         
+        // Добавляем класс active-player для текущего игрока
+        if (index === currentPlayer) {
+            playerDiv.classList.add('active-player');
+        }
+        
         // Формируем историю бросков
         let historyHTML = player.history.map((leg, legIndex) => 
             `Лег ${legIndex + 1}: ${leg.join(', ') || 'Нет бросков'}`
@@ -1434,7 +1439,7 @@ function updateStatsBoard() {
             : (lastScores.length > 0 ? (lastScores.reduce((a, b) => a + b, 0) / lastScores.length).toFixed(2) : 0);
 
         playerDiv.innerHTML = `
-            <h3>Игрок #${index + 1}: ${player.name}</h3>
+            <h2>Игрок #${index + 1}: ${player.name}</h2>
             <p>Бросков: ${player.throws}</p>
             <p>Набрано очков: ${player.totalPoints}</p>
             <p>История бросков:<br>${historyHTML}</p>

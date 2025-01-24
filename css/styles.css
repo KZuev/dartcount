@@ -176,6 +176,7 @@ h1 .count {
     flex-direction: column;
     align-items: center;
     justify-content: space-between;
+    min-width: 200px;
     min-height: 150px;
 }
 
@@ -508,6 +509,13 @@ body.light-theme .info-circle {
     border-radius: 8px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
     color: var(--text-color);
+    margin-bottom: 50px;
+}
+
+.stats-column.active-player {
+    background: var(--active-player-bg);
+    color: #fff;
+    box-shadow: 0 0 15px rgba(0, 123, 255, 0.5);
 }
 
 .confetti {

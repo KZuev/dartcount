@@ -16,6 +16,8 @@ let players = Array.from(new Set(JSON.parse(localStorage.getItem('players')) || 
 let playerToRemoveIndex = null;
 let isInterfaceVisible = true;
 
+document.getElementById('confirmDeleteButton').addEventListener('click', confirmDeletePlayer);
+
 // Функция для обновления состояния кнопок
 function updateButtonVisibility() {
     const reportIssueButton = document.getElementById('reportIssueButton');
@@ -265,7 +267,7 @@ function showStatsModal() {
         console.log(`Лучший игрок: ${bestPlayer?.name || 'Нет'}, Ничья: ${isTie}`);
 
         playerStatDiv.innerHTML = `
-            <h4>${player.name} ${player.name === bestPlayer?.name ? '👑' : ''}</h4>
+            <h4><span class="player-name" onclick="editPlayerName('${player.name}', this)">${player.name}</span> ${player.name === bestPlayer?.name ? '👑' : ''}</h4>
             <p>Бросков: ${player.throws}</p>
             <p>Набрано очков: ${player.totalPoints}</p>
             <p>Победы в игре: ${player.gameWins}</p>
@@ -279,6 +281,97 @@ function showStatsModal() {
     console.log(`Лучший игрок: ${bestPlayer ? bestPlayer.name : 'Нет'}, Леги: ${maxLegWins}, Ничья: ${isTie}`); // Отладка
     console.log(`Лучший игрок по количеству побед: ${bestPlayer ? bestPlayer.name : 'Нет'}, Побед: ${maxGameWins}`);
     document.getElementById('statsModal').style.display = 'flex'; // Показываем модальное окно 
+}
+
+
+function deletePlayer(index) {
+    if (index !== -1) {
+        players.splice(index, 1);
+        savePlayers(); // Сохраните изменения в localStorage или другом хранилище
+        loadPlayers(); // Обновите список игроков
+    }
+}
+
+function confirmDeletePlayer() {
+    if (playerToRemoveIndex !== null) {
+        deletePlayer(playerToRemoveIndex); // Удаляем игрока из массива
+        closeConfirmDeleteModal(); // Закрываем модальное окно
+    }
+}
+
+function closeConfirmDeleteModal() {
+    document.getElementById('confirmDeleteModal').style.display = 'none'; // Закрываем модальное окно
+}
+
+function editPlayerName(currentName, element) {
+    console.log('Функция editPlayerName вызвана для игрока:', currentName); // Отладка
+
+    const container = document.createElement('div');
+    container.className = 'edit-container';
+
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.value = currentName;
+    input.className = 'edit-player-name';
+    input.onblur = function() {
+        savePlayerName(currentName, input.value, container);
+    };
+    input.onkeydown = function(event) {
+        if (event.key === 'Enter') {
+            savePlayerName(currentName, input.value, container);
+        }
+    };
+
+    const deleteIcon = document.createElement('span');
+    deleteIcon.className = 'delete-icon';
+    deleteIcon.textContent = '🗑️';
+    deleteIcon.addEventListener('click', function() {
+        console.log('Корзина нажата для игрока:', currentName); // Выводим в консоль факт нажатия
+        playerToRemoveIndex = players.findIndex(p => p.name === currentName);
+        console.log('Индекс игрока для удаления:', playerToRemoveIndex); // Отладка
+        const confirmDeleteModal = document.getElementById('confirmDeleteModal');
+        if (confirmDeleteModal) {
+            confirmDeleteModal.style.display = 'block';
+            console.log('Модальное окно подтверждения удаления отображено'); // Отладка
+        } else {
+            console.error('Модальное окно подтверждения удаления не найдено'); // Отладка
+        }
+    });
+
+    container.appendChild(input);
+    container.appendChild(deleteIcon);
+    element.replaceWith(container);
+    input.focus();
+
+    console.log('Элемент deleteIcon создан и добавлен в DOM для игрока:', currentName); // Отладка
+}
+
+function savePlayerName(oldName, newName, inputElement) {
+    if (newName.trim() === '') {
+        alert('Имя не может быть пустым.');
+        inputElement.replaceWith(createPlayerNameSpan(oldName)); // Возвращаем старое имя
+        return;
+    }
+
+    const player = players.find(p => p.name === oldName);
+    if (player) {
+        player.name = newName;
+        savePlayers(); // Сохраните изменения в localStorage или другом хранилище
+    }
+
+    const span = createPlayerNameSpan(newName);
+    inputElement.replaceWith(span);
+}
+
+function createPlayerNameSpan(name) {
+    const span = document.createElement('span');
+    span.className = 'player-name';
+    span.textContent = name;
+    span.title = 'Нажмите, чтобы изменить имя'; // Добавляем подсказку
+    span.onclick = function() {
+        editPlayerName(name, span);
+    };
+    return span;
 }
 
 // Функция для закрытия модального окна со статистикой
@@ -837,8 +930,8 @@ function loadTranslations() {
             document.getElementById('undoScoreButton').title = translations.undoButtonTooltip;
             document.getElementById('statisticsTitle').textContent = translations.statistics;
             document.getElementById('startNewGameButton').textContent = `🎯 ${translations.startNewGameButton}`;
-            document.getElementById('playersButton').textContent = `👥 ${translations.playersButton}`;
-            document.getElementById('statsButton').textContent = `📊 ${translations.statsButton}`;
+            document.getElementById('playersButton').textContent = `☁️ ${translations.playersButton}`;
+            document.getElementById('statsButton').textContent = `👥 ${translations.statsButton}`;
             document.getElementById('tournamentsButton').textContent = `🏆 ${translations.tournamentsButton}`;
             document.getElementById('settingsButton').textContent = `⚙️ ${translations.settingsButton}`;
         })

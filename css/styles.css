@@ -559,6 +559,24 @@ body.light-theme .info-circle {
     margin-bottom: 10px;
 }
 
+.edit-container {
+    display: flex;
+    align-items: center;
+}
+
+.edit-player-name {
+    flex-grow: 1;
+}
+
+.delete-icon {
+    cursor: pointer;
+    margin-left: 10px;
+}
+
+.player-name {
+    cursor: pointer; /* Изменяет курсор на указатель при наведении */
+}
+
 .player-card {
     background: var(--stats-bg);
     padding: 15px;

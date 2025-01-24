@@ -42,9 +42,9 @@
         </div>
         <div class="main-menu">
             <button class="menu-button" id="startNewGameButton"><span class="emoji">🎯</span> Новая игра</button>
-            <button class="menu-button" id="playersButton"><span class="emoji">👥</span> Игроки</button>
-            <button class="menu-button" id="statsButton" onclick="showStatsModal()"><span class="emoji">📊</span> Статистика</button>
+            <button class="menu-button" id="statsButton" onclick="showStatsModal()"><span class="emoji">👥</span> Игроки</button>
             <button class="menu-button" id="tournamentsButton"><span class="emoji">🏆</span> Турниры</button>
+            <button class="menu-button" id="playersButton"><span class="emoji">☁️</span> Онлайн</button>
             <button class="menu-button" id="settingsButton" onclick="showStorageModal()"><span class="emoji">⚙️</span> Настройки</button>
         </div>
             <div class="settings hidden">
@@ -213,6 +213,7 @@
                 Нет игроков
             </div>
             <div class="button-container">
+                <button id="addPlayerButton"  style="margin-top: 20px; height: 50px;">Добавить игрока</button>
                 <button id="closeStatsButton" onclick="closeStatsModal()" style="margin-top: 20px; height: 50px;">Закрыть</button>
             </div>
         </div>
@@ -224,6 +225,23 @@
             <canvas id="averageTrendChart" width="400" height="200"></canvas>
             <div class="button-container">
                 <button onclick="closeAverageTrendModal()" style="margin-top: 20px;">Закрыть</button>
+            </div>
+        </div>
+    </div>
+    <div id="confirmDeleteModal" class="modal">
+        <div class="modal-content" style="max-width: 600px; text-align: center;">
+            <span class="close-modal" onclick="closeConfirmDeleteModal()">&times;</span>
+            <h2>Подтверждение удаления</h2>
+            <h5>Вы уверены, что хотите удалить этого игрока?</h5>
+            <div class="button-container">
+                <button id="confirmDeleteButton" 
+                        style="font-size: 1.2em; background-color: #ff4444;">
+                        Удалить
+                </button>
+                <button onclick="closeConfirmDeleteModal()" 
+                        style="font-size: 1.2em; background-color: var(--accent-color);">
+                        Отмена
+                </button>
             </div>
         </div>
     </div>

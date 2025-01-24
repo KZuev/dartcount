@@ -15,8 +15,8 @@
     "to": "to",
 
     "startNewGameButton": "New Game",
-    "playersButton": "Players",
-    "statsButton": "Statistics",
+    "playersButton": "Online",
+    "statsButton": "Players",
     "tournamentsButton": "Tournaments",
     "settingsButton": "Settings"
 }

@@ -15,8 +15,8 @@
     "to": "до",
     
     "startNewGameButton": "Новая игра",
-    "playersButton": "Игроки",
-    "statsButton": "Статистика",
+    "playersButton": "Онлайн",
+    "statsButton": "Игроки",
     "tournamentsButton": "Турниры",
     "settingsButton": "Настройки"
 }

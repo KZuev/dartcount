@@ -241,6 +241,10 @@ function showStatsModal() {
         if (player.gameWins > maxGameWins) {
             maxGameWins = player.gameWins;
             bestPlayer = player; // Назначаем нового лучшего игрока
+            isTie = false;
+        } else if (player.gameWins === maxGameWins && player.gameWins > 0) {
+            isTie = true; // Обнаружена ничья
+            bestPlayer = null;
         }
     });
 

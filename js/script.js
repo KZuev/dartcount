@@ -344,15 +344,15 @@ function showStatsModal() {
         playerStatDiv.innerHTML = `
             <h4><span class="player-name" onclick="editPlayerName('${player.name}', this)">${player.name}</span> ${player.name === bestPlayer?.name ? '👑' : ''}</h4>
             <p>Рейтинг: ${player.rating}</p>
-            <p>Бросков: ${player.throws}</p>
+            <p>Всего бросков: ${player.throws}</p>
             <p>Набрано очков: ${player.totalPoints}</p>
-            <p>Сыграно игр: ${gamesPlayed}</p>
-            <p>Победы в игре: ${player.gameWins}</p>
-            <p>Процент побед: ${winPercentage}%</p>
+            <p>Всего игр: ${gamesPlayed}</p>
             <p>Выигранные леги: ${player.legWins}</p>
+            <p>Победы в играх: ${player.gameWins}</p>
+            <p>Процент побед: ${winPercentage}%</p>
             <p>Средний набор: <span class="average-score" onclick="showAverageTrend('${player.name}')">${averageScore} 📊</span></p>
             <p>Средний набор подхода: <span class="average-score" onclick="showAverageApproachTrend('${player.name}')">${averageApproachScore} 📊</span></p>
-            <p>Лучший набор: ${player.bestNormalScore > 0 ? player.bestNormalScore : 'Нет данных'}</p>
+            <p>Лучший набор подхода: ${player.bestNormalScore > 0 ? player.bestNormalScore : 'Нет данных'}</p>
         `;
         playersStatsContent.appendChild(playerStatDiv); 
     }); 

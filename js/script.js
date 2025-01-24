@@ -209,6 +209,56 @@ function showAverageTrend(playerName) {
     document.getElementById('averageTrendModal').style.display = 'block'; // Показываем модальное окно с графиком
 }
 
+function showAverageApproachTrend(playerName) {
+    const results = JSON.parse(localStorage.getItem('players')) || [];
+    const player = results.find(p => p.name === playerName);
+
+    if (!player) {
+        alert(`Нет данных по игроку.`);
+        return;
+    }
+
+    if (!player.averageApproachScores || player.averageApproachScores.length === 0) {
+        alert(`У игрока ${playerName} нет данных о среднем наборе за подход.`);
+        return;
+    }
+
+    console.log(`Данные для графика среднего набора за подход игрока ${playerName}:`, player.averageApproachScores);
+
+    const ctx = document.getElementById('averageApproachTrendChart').getContext('2d');
+    const chartData = {
+        labels: player.averageApproachScores.map((_, index) => `Игра ${index + 1}`),
+        datasets: [{
+            label: 'Средний набор за подход',
+            data: player.averageApproachScores,
+            borderColor: 'rgba(75, 192, 192, 1)',
+            borderWidth: 2,
+            fill: false
+        }]
+    };
+
+    const chartOptions = {
+        responsive: true,
+        scales: {
+            y: {
+                beginAtZero: true
+            }
+        }
+    };
+
+    new Chart(ctx, {
+        type: 'line',
+        data: chartData,
+        options: chartOptions
+    });
+
+    document.getElementById('averageApproachTrendModal').style.display = 'block';
+}
+
+function closeAverageApproachTrendModal() {
+    document.getElementById('averageApproachTrendModal').style.display = 'none';
+}
+
 function showStatsModal() { 
     const playersStatsContent = document.getElementById('playersStatsContent'); 
     playersStatsContent.innerHTML = ''; // Очищаем предыдущее содержимое 
@@ -250,6 +300,20 @@ function showStatsModal() {
         }
     });
 
+    // Рассчитываем процент побед для каждого игрока
+    results.forEach(player => {
+        const gamesPlayed = Array.isArray(player.averageScores) ? player.averageScores.length : 0;
+        player.winPercentage = gamesPlayed > 0 ? ((player.gameWins / gamesPlayed) * 100).toFixed(2) : 0;
+    });
+
+    // Сортируем игроков по проценту побед в порядке убывания
+    results.sort((a, b) => b.winPercentage - a.winPercentage);
+
+    // Назначаем рейтинг каждому игроку на основе его позиции в отсортированном списке
+    results.forEach((player, index) => {
+        player.rating = index + 1;
+    });
+
     results.forEach(player => {
         const playerStatDiv = document.createElement('div');
         playerStatDiv.classList.add('player-stat');
@@ -261,19 +325,34 @@ function showStatsModal() {
 
         // Проверка наличия averageScores и корректного значения
         const averageScore = Array.isArray(player.averageScores) && player.averageScores.length > 0
-            ? parseFloat(player.averageScores[player.averageScores.length - 1]).toFixed(2)
+            ? parseFloat(player.averageScores[player.averageScores.length - 1]).toFixed(1)
             : 0;
+        
+        // Проверка наличия averageApproachScores и корректного значения
+        const averageApproachScore = Array.isArray(player.averageApproachScores) && player.averageApproachScores.length > 0
+            ? parseFloat(player.averageApproachScores[player.averageApproachScores.length - 1]).toFixed(1)
+            : 0;
+        
+        // Подсчет количества сыгранных игр на основе данных в среднем наборе
+        const gamesPlayed = Array.isArray(player.averageScores) ? player.averageScores.length : 0;
+
+         // Расчет процента побед
+         const winPercentage = gamesPlayed > 0 ? ((player.gameWins / gamesPlayed) * 100).toFixed(2) : 0;
 
         console.log(`Лучший игрок: ${bestPlayer?.name || 'Нет'}, Ничья: ${isTie}`);
 
         playerStatDiv.innerHTML = `
             <h4><span class="player-name" onclick="editPlayerName('${player.name}', this)">${player.name}</span> ${player.name === bestPlayer?.name ? '👑' : ''}</h4>
+            <p>Рейтинг: ${player.rating}</p>
             <p>Бросков: ${player.throws}</p>
             <p>Набрано очков: ${player.totalPoints}</p>
+            <p>Сыграно игр: ${gamesPlayed}</p>
             <p>Победы в игре: ${player.gameWins}</p>
+            <p>Процент побед: ${winPercentage}%</p>
             <p>Выигранные леги: ${player.legWins}</p>
             <p>Средний набор: <span class="average-score" onclick="showAverageTrend('${player.name}')">${averageScore} 📊</span></p>
-            <p>Лучший бросок: ${player.bestNormalScore > 0 ? player.bestNormalScore : 'Нет данных'}</p>
+            <p>Средний набор подхода: <span class="average-score" onclick="showAverageApproachTrend('${player.name}')">${averageApproachScore} 📊</span></p>
+            <p>Лучший набор: ${player.bestNormalScore > 0 ? player.bestNormalScore : 'Нет данных'}</p>
         `;
         playersStatsContent.appendChild(playerStatDiv); 
     }); 
@@ -403,6 +482,13 @@ function saveGameResults() {
             }
             existingPlayer.averageScores.push(averageScore); // Добавляем новое значение
 
+            // Обновляем средний набор за подход
+            const approaches = Math.ceil(existingPlayer.throws / 3);
+            const averageApproachScore = approaches > 0 ? (existingPlayer.totalPoints / approaches).toFixed(2) : 0;
+            if (!existingPlayer.averageApproachScores) {
+                existingPlayer.averageApproachScores = [];
+            }
+            existingPlayer.averageApproachScores.push(averageApproachScore);
 
             // Обновляем лучший бросок
             if (player.bestNormalScore > existingPlayer.bestNormalScore) {
@@ -440,6 +526,14 @@ function loadGameResults() {
                     existingPlayer.averageScores = []; // Инициализация, если поле отсутствует
                 }
                 existingPlayer.averageScores.push(averageScore); // Добавляем новое значение
+
+                // Обновляем средний набор за подход
+                const approaches = Math.ceil(existingPlayer.throws / 3);
+                const averageApproachScore = approaches > 0 ? (existingPlayer.totalPoints / approaches).toFixed(2) : 0;
+                if (!existingPlayer.averageApproachScores) {
+                    existingPlayer.averageApproachScores = [];
+                }
+                existingPlayer.averageApproachScores.push(averageApproachScore);
 
 
                 if (savedPlayer.bestNormalScore > existingPlayer.bestNormalScore) {
@@ -512,7 +606,8 @@ function addPlayer() {
         throwTimes: [], // Время бросков
         bestExceededScore: 0, // Лучший бросок при превышении
         bestNormalScore: 0, // Лучший бросок без превышения
-        averageScores: [] // Средний набор
+        averageScores: [], // Средний набор
+        averageApproachScores: [] // Средний набор за подход
     });
     document.getElementById('newPlayerName').value = ''; // Очищаем поле ввода
     savePlayers(); // Сохраняем изменения

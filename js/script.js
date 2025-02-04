@@ -1418,7 +1418,7 @@ function updateLegsCountOptions() {
 
 function undoScore() {
     if (lastScores.length === 0) {
-        alert('lastScores пуст, отмена ввода невозможна');
+        alert('Отмена ввода невозможна');
         return;
     }
 
@@ -1431,16 +1431,22 @@ function undoScore() {
         return;
     }
 
+    // Проверяем, не превышает ли восстановленный счет максимальный счет игры
+    if (player.score + score > gameScore) {
+        alert(`Невозможно отменить этот ход, так как счет не может превышать ${gameScore}.`);
+        return;
+    }
+
     // Восстанавливаем счет игрока
     player.score += score; // Уменьшаем счет на введенные очки
     player.throws--; // Уменьшаем количество бросков
     player.totalPoints -= score; // Уменьшаем общие очки
     player.history[legIndex].pop(); // Удаляем последний бросок из истории
 
-    // Если история лега пуста, удаляем лег
-    if (player.history[legIndex].length === 0 && legIndex > 0) {
-        player.history.pop();
-    }
+    // // Если история лега пуста, удаляем лег
+    // if (player.history[legIndex].length === 0 && legIndex > 0) {
+    //     player.history.pop();
+    // }
 
     currentPlayer = playerIndex; // Устанавливаем текущего игрока
     updateScoreBoard(); // Обновляем табло счета

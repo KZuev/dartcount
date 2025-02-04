@@ -99,12 +99,8 @@ document.getElementById('newPlayerName').addEventListener('keydown', function(ev
 });
 
 function finishLeg() {
-    console.log(`finishLeg вызвана для игрока ${currentPlayer}`);
     const player = players[currentPlayer];
     const currentTime = new Date();
-
-    // Отладка: перед обновлением totalPoints
-    console.log(`Общие очки до обновления: ${player.totalPoints}`);
 
     // Обновляем данные игрока
     const legScore = player.score;
@@ -113,16 +109,11 @@ function finishLeg() {
     player.history[player.history.length - 1].push(legScore);
     player.throwTimes.push(currentTime);
     player.legWins += 1;
-
-    // Отладка: после обновления totalPoints
-    console.log(`Общие очки после обновления: ${player.totalPoints}`);
   
     // Проверяем лучший бросок
     if (legScore > player.bestNormalScore) {
         player.bestNormalScore = legScore;
     }
-
-    console.log(`Игрок ${currentPlayer + 1} завершил лег с результатом ${legScore}`);
 
     // Показываем модальное окно с количеством бросков
     showThrowsModal(currentPlayer + 1, player.legWins)
@@ -145,10 +136,8 @@ function finishLeg() {
                 p.history.push([]); // Создаем новую историю бросков
             });
 
-            console.log(`Текущий игрок до обновления: ${currentPlayer}`);
             nextLegStartPlayer = (nextLegStartPlayer + 1) % playerCount; // Переход к следующему игроку
             currentPlayer = nextLegStartPlayer; // Обновляем текущего игрока
-            console.log(`Текущий игрок после обновления: ${currentPlayer}`);
             scoreInput.value = ''; // Очищаем поле ввода
             scoreInput.focus(); // Устанавливаем фокус на поле ввода
 
@@ -176,8 +165,6 @@ function showAverageTrend(playerName) {
         alert(`У игрока ${playerName} нет данных о среднем наборе.`);
         return;
     }
-
-    console.log(`Данные для графика игрока ${playerName}:`, player.averageScores);
 
     const ctx = document.getElementById('averageTrendChart').getContext('2d');
     const chartData = {
@@ -222,8 +209,6 @@ function showAverageApproachTrend(playerName) {
         alert(`У игрока ${playerName} нет данных о среднем наборе за подход.`);
         return;
     }
-
-    console.log(`Данные для графика среднего набора за подход игрока ${playerName}:`, player.averageApproachScores);
 
     const ctx = document.getElementById('averageApproachTrendChart').getContext('2d');
     const chartData = {
@@ -339,8 +324,6 @@ function showStatsModal() {
          // Расчет процента побед
          const winPercentage = gamesPlayed > 0 ? ((player.gameWins / gamesPlayed) * 100).toFixed(2) : 0;
 
-        console.log(`Лучший игрок: ${bestPlayer?.name || 'Нет'}, Ничья: ${isTie}`);
-
         playerStatDiv.innerHTML = `
             <h4><span class="player-name" onclick="editPlayerName('${player.name}', this)">${player.name}</span> ${player.name === bestPlayer?.name ? '👑' : ''}</h4>
             <p>Рейтинг: ${player.rating}</p>
@@ -357,8 +340,6 @@ function showStatsModal() {
         playersStatsContent.appendChild(playerStatDiv); 
     }); 
 
-    console.log(`Лучший игрок: ${bestPlayer ? bestPlayer.name : 'Нет'}, Леги: ${maxLegWins}, Ничья: ${isTie}`); // Отладка
-    console.log(`Лучший игрок по количеству побед: ${bestPlayer ? bestPlayer.name : 'Нет'}, Побед: ${maxGameWins}`);
     document.getElementById('statsModal').style.display = 'flex'; // Показываем модальное окно 
 }
 
@@ -366,8 +347,8 @@ function showStatsModal() {
 function deletePlayer(index) {
     if (index !== -1) {
         players.splice(index, 1);
-        savePlayers(); // Сохраните изменения в localStorage или другом хранилище
-        loadPlayers(); // Обновите список игроков
+        savePlayers();
+        loadPlayers();
     }
 }
 
@@ -383,8 +364,6 @@ function closeConfirmDeleteModal() {
 }
 
 function editPlayerName(currentName, element) {
-    console.log('Функция editPlayerName вызвана для игрока:', currentName); // Отладка
-
     const container = document.createElement('div');
     container.className = 'edit-container';
 
@@ -405,15 +384,11 @@ function editPlayerName(currentName, element) {
     deleteIcon.className = 'delete-icon';
     deleteIcon.textContent = '🗑️';
     deleteIcon.addEventListener('click', function() {
-        console.log('Корзина нажата для игрока:', currentName); // Выводим в консоль факт нажатия
         playerToRemoveIndex = players.findIndex(p => p.name === currentName);
-        console.log('Индекс игрока для удаления:', playerToRemoveIndex); // Отладка
         const confirmDeleteModal = document.getElementById('confirmDeleteModal');
         if (confirmDeleteModal) {
             confirmDeleteModal.style.display = 'block';
-            console.log('Модальное окно подтверждения удаления отображено'); // Отладка
         } else {
-            console.error('Модальное окно подтверждения удаления не найдено'); // Отладка
         }
     });
 
@@ -421,8 +396,6 @@ function editPlayerName(currentName, element) {
     container.appendChild(deleteIcon);
     element.replaceWith(container);
     input.focus();
-
-    console.log('Элемент deleteIcon создан и добавлен в DOM для игрока:', currentName); // Отладка
 }
 
 function savePlayerName(oldName, newName, inputElement) {
@@ -435,7 +408,7 @@ function savePlayerName(oldName, newName, inputElement) {
     const player = players.find(p => p.name === oldName);
     if (player) {
         player.name = newName;
-        savePlayers(); // Сохраните изменения в localStorage или другом хранилище
+        savePlayers();
     }
 
     const span = createPlayerNameSpan(newName);
@@ -465,15 +438,11 @@ function saveGameResults() {
     players.forEach(player => {
         const existingPlayer = results.find(p => p.name === player.name);
         if (existingPlayer) {
-            // Отладка: показываем, как обновляются очки
-            console.log(`Обновление игрока ${player.name}:`);
-            console.log(`Очки до обновления: ${existingPlayer.totalPoints}`);
             // Суммируем значения
             existingPlayer.throws += player.throws;
             existingPlayer.totalPoints += player.totalPoints;
             existingPlayer.legWins += player.legWins;
             existingPlayer.gameWins += player.gameWins || 0;
-            console.log(`Очки после обновления: ${existingPlayer.totalPoints}`);
 
             // Обновляем средний набор
             const averageScore = existingPlayer.throws > 0 ? (existingPlayer.totalPoints / existingPlayer.throws).toFixed(2) : 0;
@@ -510,13 +479,9 @@ function loadGameResults() {
         results.forEach(savedPlayer => {
             const existingPlayer = players.find(p => p.name === savedPlayer.name);
             if (existingPlayer) {
-                // Отладка: показываем, как загружаются очки
-                console.log(`Загрузка игрока ${savedPlayer.name}:`);
-                console.log(`Очки до загрузки: ${existingPlayer.totalPoints}`);
                 // Обновляем существующего игрока
                 existingPlayer.throws = savedPlayer.throws || 0;
                 existingPlayer.totalPoints = savedPlayer.totalPoints || 0;
-                console.log(`Очки после загрузки: ${existingPlayer.totalPoints}`);
                 existingPlayer.legWins = savedPlayer.legWins || 0;
                 existingPlayer.gameWins = savedPlayer.gameWins || 0;
 
@@ -588,7 +553,6 @@ function addPlayer() {
     }
 
     // Проверка на уникальность имени
-    console.log('Текущий массив игроков:', players); // Отладка
     if (players.some(player => player.name.toLowerCase() === playerName.toLowerCase())) {
         alert('Игрок с таким именем уже существует. Пожалуйста, выберите другое имя.');
         return; // Завершаем выполнение функции, если игрок с таким именем уже существует
@@ -635,10 +599,6 @@ function savePlayers() {
     });
     localStorage.setItem('players', JSON.stringify(uniquePlayers));
 }
-
-// function savePlayers() {
-//     localStorage.setItem('players', JSON.stringify(players));
-// }
 
 document.getElementById('playersButton').addEventListener('click', showPlayersModal);
 document.getElementById('closePlayersModal').addEventListener('click', closePlayersModal);
@@ -928,7 +888,6 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 const menuButtons = document.querySelectorAll('.menu button');
-console.log('Найденные кнопки меню:', menuButtons);
 
 function toggleInterface() {
     const interfaceElements = document.querySelectorAll('.container, .modal-content, .confetti');
@@ -1130,9 +1089,6 @@ function handleEnter(event) {
         event.preventDefault();
         const scoreInput = document.getElementById('score');
         const expression = scoreInput.value;
-
-        // Здесь вы можете добавить отладочный вывод
-        console.log(`Текущий игрок перед вводом счета: ${currentPlayer}`);
         
         if (expression.includes('+')) {
             try {
@@ -1164,7 +1120,6 @@ function handleEnter(event) {
 }
 
 function updateScoreBoard() {
-    console.log('updateScoreBoard вызвана');
     const scoreBoard = document.getElementById('scoreBoard');
     scoreBoard.innerHTML = '';
     
@@ -1331,14 +1286,9 @@ function showErrorModal(message) {
 }
 
 function submitScore() {
-    console.log('submitScore вызвана');
-    console.log(`Текущий игрок в submitScore: ${currentPlayer}`); // Отладочный вывод
     const scoreInput = document.getElementById('score');
     const score = parseInt(scoreInput.value);
     const player = players[currentPlayer];
-
-    // Отладка: показываем введенные очки
-    console.log(`Введенные очки: ${score}`);
 
     // Проверяем, пустое ли поле ввода
     if (scoreInput.value.trim() === '') {
@@ -1373,7 +1323,6 @@ function submitScore() {
         // Переход к следующему игроку
         currentPlayer = (currentPlayer + 1) % playerCount;
         scoreInput.value = ''; // Очищаем поле ввода
-        console.log(`Текущий игрок: ${currentPlayer}, Имя игрока: ${players[currentPlayer].name}`);
         updateScoreBoard();
         updateStatsBoard();
         scoreInput.focus();
@@ -1394,8 +1343,6 @@ function submitScore() {
     player.totalPoints += score;
     player.history[player.history.length - 1].push(score);
     player.throwTimes.push(new Date());
-
-    console.log(`Общие очки после ввода: ${player.totalPoints}`);
 
     // Обновляем лучший бросок без превышения
     if (score > player.bestNormalScore) {
@@ -1470,18 +1417,13 @@ function updateLegsCountOptions() {
 }
 
 function undoScore() {
-    console.log('Функция undoScore вызвана'); // Отладочное сообщение
-    console.log('Содержимое lastScores:', lastScores); // Отладочное сообщение
-
     if (lastScores.length === 0) {
-        console.log('lastScores пуст, отмена ввода невозможна'); // Отладочное сообщение
+        alert('lastScores пуст, отмена ввода невозможна');
         return;
     }
 
     const { playerIndex, score, legIndex } = lastScores.pop(); // Извлекаем последний элемент и удаляем его из массива
     const player = players[playerIndex];
-
-    console.log(`Восстановление счета игрока ${player.name}: ${player.score} - ${score}`); // Отладочное сообщение
 
     // Проверяем, не превышает ли восстановленный счет максимальный
     if (player.score + score < 0) { 
@@ -1503,7 +1445,6 @@ function undoScore() {
     currentPlayer = playerIndex; // Устанавливаем текущего игрока
     updateScoreBoard(); // Обновляем табло счета
     updateStatsBoard(); // Обновляем статистику
-    console.log('Функция undoScore завершена. Текущий игрок:', currentPlayer); // Отладочное сообщение
 }
 
 function updateStatsBoard() {
@@ -1982,7 +1923,7 @@ function generatePDF() {
 
     
     html2pdf().set(opt).from(tempContainer).save().then(() => {
-        console.log('PDF успешно создан');
+
     }).catch(error => {
         console.error('Ошибка при создании PDF:', error);
         alert('Произошла ошибка при создании PDF');
@@ -2100,15 +2041,3 @@ document.getElementById('legMode').addEventListener('change', updateLegsCountOpt
 document.addEventListener('DOMContentLoaded', function() {
     updateLegsCountOptions();
 });
-
-// if ('serviceWorker' in navigator) {
-//     window.addEventListener('load', () => {
-//       navigator.serviceWorker.register('/service-worker.js')
-//         .then((registration) => {
-//           console.log('Service Worker зарегистрирован с областью:', registration.scope);
-//         })
-//         .catch((error) => {
-//           console.error('Ошибка регистрации Service Worker:', error);
-//         });
-//     });
-//   }

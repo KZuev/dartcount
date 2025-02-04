@@ -1,6 +1,3 @@
-/* ==========================================================================
-   1. CSS Variables (Custom Properties)
-   ========================================================================== */
 :root {
     --bgmain-color: #11111a;
     --bg-color: #1e1e2f;
@@ -26,7 +23,6 @@
     --icon-color: #000000;
 }
 
-/* CSS для скрытия элемента */
 .hidden {
     height: 0;
     display: none;
@@ -47,16 +43,13 @@
 
 .emoji {
     display: inline-block;
-    filter: grayscale(100%); /* Применяет черно-белый фильтр */
-    width: 45px; /* Размер эмодзи */
-    height: 45px; /* Размер эмодзи */
-    margin-right: 0px; /* Отступ между эмодзи и текстом */
-    vertical-align: middle; /* Выравнивание по центру */
+    filter: grayscale(100%);
+    width: 45px;
+    height: 45px;
+    margin-right: 0px;
+    vertical-align: middle;
 }
 
-/* ==========================================================================
-   2. Base Styles
-   ========================================================================== */
 html, body {
     height: 100%;
     margin: 0;
@@ -113,9 +106,7 @@ body > * {
     margin-top: 20px;
     padding: 100px;
 }
-/* ==========================================================================
-   3. Layout Components
-   ========================================================================== */
+
 .container {
     max-width: 1200px;
     padding: 30px 30px 20px;
@@ -154,9 +145,6 @@ h1 .count {
     color: #007bff;
 }
 
-/* ==========================================================================
-   4. Score Board Styles
-   ========================================================================== */
 .score-board {
     margin-top: 20px;
     display: flex;
@@ -212,9 +200,6 @@ h1 .count {
     color: #fff;
 }
 
-/* ==========================================================================
-   5. Player Components
-   ========================================================================== */
 .player {
     display: flex;
     flex-direction: column;
@@ -226,9 +211,6 @@ h1 .count {
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
 }
 
-/* ==========================================================================
-   6. Input and Button Styles
-   ========================================================================== */
 .score-input {
     display: flex;
     align-items: center;
@@ -269,12 +251,11 @@ button:hover {
 }
 
 .main-menu {
-    width: 100%; /* Устанавливает ширину меню на 100% */
-    min-width: 450px; /* Максимальная ширина меню */
-    margin: 0 auto; /* Центрирует меню */
+    width: 100%;
+    min-width: 450px;
+    margin: 0 auto;
 }
 
-/* Стили для кнопок главного меню */
 .menu-button {
     padding: 12px 25px;
     background-color: var(--accent-color);
@@ -449,9 +430,6 @@ body.light-theme .info-circle {
     margin-right: 10px;
 }
 
-/* ==========================================================================
-   8. Statistics Styles
-   ========================================================================== */
 .stats-board {
     display: flex;
     justify-content: center;
@@ -543,7 +521,7 @@ body.light-theme .info-circle {
 }
 
 #playersList div {
-    font-size: 18px; /* Увеличьте размер шрифта до 18px */
+    font-size: 18px;
     border: 1px solid #ccc;
     border-radius: 5px;
     padding: 10px;
@@ -554,13 +532,12 @@ body.light-theme .info-circle {
 }
 
 #playersList input[type="text"] {
-    font-size: 18px; /* Увеличьте размер шрифта до 18px */
+    font-size: 18px;
 }
 
-/* Стили для поля ввода */
 #newPlayerName {
-    font-size: 18px; /* Increase font size to 18px */
-    width: calc(100% - 22px); /* Keep the width calculation */
+    font-size: 18px;
+    width: calc(100% - 22px);
     padding: 10px;
     border: 1px solid #ccc;
     border-radius: 5px;
@@ -582,7 +559,7 @@ body.light-theme .info-circle {
 }
 
 .player-name {
-    cursor: pointer; /* Изменяет курсор на указатель при наведении */
+    cursor: pointer;
 }
 
 .player-card {
@@ -598,34 +575,32 @@ body.light-theme .info-circle {
 
 .players-stats {
     display: flex;
-    flex-wrap: wrap; /* Позволяет колонкам переноситься на новую строку */
-    justify-content: center; /* Центрирует колонки */
-    gap: 20px; /* Расстояние между колонками */
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 20px;
 }
 
 .player-stat {
-    background: var(--stats-bg); /* Задайте цвет фона */
-    padding: 15px; /* Отступы внутри колонки */
-    border-radius: 10px; /* Скругление углов */
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); /* Тень */
-    width: 280px; /* Ширина колонки */
+    background: var(--stats-bg);
+    padding: 15px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+    width: 280px;
     max-width: 400px;
-    text-align: center; /* Центрирование текста */
-    color: var(--text-color); /* Цвет текста */
+    text-align: center;
+    color: var(--text-color);
 }
 
 .best-player {
-    border: 2px solid gold; /* Золотая рамка */
-    box-shadow: 0 0 10px rgba(255, 215, 0, 0.5); /* Золотая тень */
-    background: rgba(255, 215, 0, 0.1); /* Легкий золотой фон */
+    border: 2px solid gold;
+    box-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+    background: rgba(255, 215, 0, 0.1);
 }
 
 .average-score {
-    cursor: pointer; /* Изменяет курсор на указатель при наведении */
+    cursor: pointer;
 }
-/* ==========================================================================
-   9. Animations
-   ========================================================================== */
+
 @keyframes confetti-fall {
     0% {
         transform: translateY(-100vh) rotate(0deg);
@@ -635,9 +610,6 @@ body.light-theme .info-circle {
     }
 }
 
-/* ==========================================================================
-   7. Modal and Overlay Styles
-   ========================================================================== */
 .modal {
     display: none;
     position: fixed;
@@ -762,9 +734,6 @@ body.light-theme .info-circle {
     padding-bottom: 20px;
 }
 
-/* ==========================================================================
-   10. Media Queries
-   ========================================================================== */
 @media screen and (min-width: 1600px) {
     .game-stats {
         grid-template-columns: repeat(5, 1fr);

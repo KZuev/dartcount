@@ -1316,16 +1316,16 @@ function submitScore() {
     if (remainingScore < 0) {
         // Если игрок ввел больше очков, чем у него осталось
         showWarningModal('Вы превысили допустимое количество очков', 3000);
-        player.history[player.history.length - 1].push('0 (' + score + ')'); // Записываем 0 как основное значение и превышение в скобках
-        player.throws += 3; // Увеличиваем количество бросков
-        player.throwTimes.push(new Date()); // Записываем время броска
+        // player.history[player.history.length - 1].push('0 (' + score + ')'); // Записываем 0 как основное значение и превышение в скобках
+        // player.throws += 3; // Увеличиваем количество бросков
+        // player.throwTimes.push(new Date()); // Записываем время броска
 
-        // Переход к следующему игроку
-        currentPlayer = (currentPlayer + 1) % playerCount;
-        scoreInput.value = ''; // Очищаем поле ввода
-        updateScoreBoard();
-        updateStatsBoard();
-        scoreInput.focus();
+        // // Переход к следующему игроку
+        // currentPlayer = (currentPlayer + 1) % playerCount;
+        // scoreInput.value = ''; // Очищаем поле ввода
+        // updateScoreBoard();
+        // updateStatsBoard();
+        // scoreInput.focus();
         return;
     }
 
@@ -1364,7 +1364,7 @@ function showWarningModal(message, duration) {
     modal.classList.add('active');
 
     content.innerHTML = `
-        <h2 style="font-size: 4em; margin-bottom: 20px; text-align: center; color: red;">0 очков</h2>
+        <!-- <h2 style="font-size: 4em; margin-bottom: 20px; text-align: center; color: red;">0 очков</h2> -->
         <p style="font-size: 2em; margin-bottom: 30px; text-align: center; color: red;">${message}</p>
     `;
 

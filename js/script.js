@@ -1075,6 +1075,7 @@ function startGame() {
     updateStatsBoard();
 
     // Показываем элементы, связанные с игрой 
+    document.getElementById('currentPlayerName').style.display = 'flex';
     document.getElementById('scoreBoard').style.display = 'flex'; // Показы ваем табло счета 
     document.getElementById('scoreInput').style.display = 'flex'; // Показываем ввод очков 
     document.getElementById('restartBtn').style.display = 'inline-block'; // Показываем кнопку перезапуска 
@@ -1123,7 +1124,8 @@ function updateScoreBoard() {
     const scoreBoard = document.getElementById('scoreBoard');
     scoreBoard.innerHTML = '';
 
-    currentPlayerName.innerHTML = `<span style="color: grey;">Игрок: </span><span style="font-weight: bold;">${players[currentPlayer].name}</span>`;
+    const nextPlayerIndex = (currentPlayer + 1) % players.length;
+    currentPlayerName.innerHTML = `<span style="color: grey;">Игрок: </span><span style="color: white; font-weight: bold;">${players[currentPlayer].name}</span><span style="color: grey;"> ➟ ${players[nextPlayerIndex].name}</span>`;
     
     const hasAnySuggestions = players.some(player => {
         const suggestions = getCheckoutSuggestions(player.score);
@@ -1563,6 +1565,7 @@ function performRestart() {
 
     // Скрываем элементы, связанные с игрой
 
+    document.getElementById('currentPlayerName').style.display = 'none'; // Скрывать счет
     document.getElementById('scoreBoard').style.display = 'none'; // Скрывать счет
     document.getElementById('scoreInput').style.display = 'none'; // Скрываем ввод очков 
     document.getElementById('restartBtn').style.display = 'none'; // Скрываем кнопку перезапуска 

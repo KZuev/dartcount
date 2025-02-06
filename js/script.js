@@ -1122,6 +1122,8 @@ function handleEnter(event) {
 function updateScoreBoard() {
     const scoreBoard = document.getElementById('scoreBoard');
     scoreBoard.innerHTML = '';
+
+    currentPlayerName.innerHTML = `<span style="color: grey;">Игрок: </span><span style="font-weight: bold;">${players[currentPlayer].name}</span>`;
     
     const hasAnySuggestions = players.some(player => {
         const suggestions = getCheckoutSuggestions(player.score);

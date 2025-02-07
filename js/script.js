@@ -42,6 +42,10 @@ function updateButtonVisibility() {
     localStorage.setItem('toggleTheme', isThemeToggleVisible);
 }
 
+document.getElementById('toggleCurrentPlayerName').addEventListener('change', function() {
+    localStorage.setItem('toggleCurrentPlayerName', document.getElementById('toggleCurrentPlayerName').checked);
+});
+
 // Функция для обновления видимости текущего и следующего игрока в процессе игры
 function updateCurrentPlayerNameVisibility() {
     const currentPlayerNameDiv = document.getElementById('currentPlayerName');

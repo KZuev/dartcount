@@ -42,6 +42,13 @@ function updateButtonVisibility() {
     localStorage.setItem('toggleTheme', isThemeToggleVisible);
 }
 
+// Функция для обновления видимости текущего и следующего игрока в процессе игры
+function updateCurrentPlayerNameVisibility() {
+    const currentPlayerNameDiv = document.getElementById('currentPlayerName');
+    const isCurrentPlayerNameVisible = document.getElementById('toggleCurrentPlayerName').checked;
+    currentPlayerNameDiv.style.display = isCurrentPlayerNameVisible ? 'block' : 'none';
+}
+
 // Инициализация состояния кнопок при загрузке
 document.addEventListener('DOMContentLoaded', function() {
     // Проверяем и загружаем состояние из локального хранилища
@@ -1033,6 +1040,16 @@ function startGame() {
     // Проверяем, что все поля выбора игроков заполнены
     const allPlayersSelected = Array.from(playerSelects).every(select => select.value !== '');
 
+    // Инициализация состояния видимости текущего и следующего игрока в процессе игры
+    const isCurrentPlayerNameVisible = localStorage.getItem('toggleCurrentPlayerName') === 'true';
+    document.getElementById('toggleCurrentPlayerName').checked = isCurrentPlayerNameVisible;
+    updateCurrentPlayerNameVisibility();
+
+    // Обработчик события для состояния видимости текущего и следующего игрока в процессе игры
+    document.getElementById('toggleCurrentPlayerName').addEventListener('change', function() {
+        localStorage.setItem('toggleCurrentPlayerName', document.getElementById('toggleCurrentPlayerName').checked);
+    });
+
     // Если не все поля заполнены, выводим предупреждение
     if (!allPlayersSelected) {
         alert('Пожалуйста, выберите игрока для каждого поля перед началом игры.');
@@ -1075,7 +1092,7 @@ function startGame() {
     updateStatsBoard();
 
     // Показываем элементы, связанные с игрой 
-    document.getElementById('currentPlayerName').style.display = 'flex';
+    // document.getElementById('currentPlayerName').style.display = 'flex';
     document.getElementById('scoreBoard').style.display = 'flex'; // Показы ваем табло счета 
     document.getElementById('scoreInput').style.display = 'flex'; // Показываем ввод очков 
     document.getElementById('restartBtn').style.display = 'inline-block'; // Показываем кнопку перезапуска 
@@ -1125,8 +1142,9 @@ function updateScoreBoard() {
     scoreBoard.innerHTML = '';
 
     const nextPlayerIndex = (currentPlayer + 1) % players.length;
+    const currentPlayerName = document.getElementById('currentPlayerName');
     currentPlayerName.innerHTML = `<span style="color: grey;">Игрок: </span><span style="color: white; font-weight: bold;">${players[currentPlayer].name}</span><span style="color: grey;"> ➟ ${players[nextPlayerIndex].name}</span>`;
-    
+     
     const hasAnySuggestions = players.some(player => {
         const suggestions = getCheckoutSuggestions(player.score);
         return suggestions && suggestions.length > 0;

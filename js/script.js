@@ -39,7 +39,7 @@ function generateQRCode() {
 
     try {
         const compressedData = pako.deflate(data, { to: 'string' });
-        const base64Data = btoa(compressedData);
+        const base64Data = btoa(String.fromCharCode.apply(null, compressedData));
 
         const qrCode = new QRCode(qrCodeContainer, {
             text: base64Data,
@@ -53,7 +53,7 @@ function generateQRCode() {
 
 function restoreLocalStorageFromQRCode(base64Data) {
     try {
-        const compressedData = atob(base64Data);
+        const compressedData = Uint8Array.from(atob(base64Data), c => c.charCodeAt(0));
         const data = pako.inflate(compressedData, { to: 'string' });
         const parsedData = JSON.parse(data);
 

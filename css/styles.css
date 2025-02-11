@@ -50,6 +50,22 @@
     vertical-align: middle;
 }
 
+.qr-code-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 20px;
+}
+
+.reader {
+    display: none;
+    justify-content: center;
+    align-items: center;
+    width: 300px;
+    height: 300px;
+    margin: 20px auto;
+}
+
 html, body {
     height: 100%;
     margin: 0;

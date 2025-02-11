@@ -15,8 +15,112 @@ let currentLanguage = localStorage.getItem('language') || 'ru';
 let players = Array.from(new Set(JSON.parse(localStorage.getItem('players')) || []));
 let playerToRemoveIndex = null;
 let isInterfaceVisible = true;
+let html5QrCode;
+let stream;
 
 document.getElementById('confirmDeleteButton').addEventListener('click', confirmDeletePlayer);
+
+function toggleQRCode() {
+    const qrCodeContainer = document.getElementById('qrCodeContainer');
+    if (qrCodeContainer.classList.contains('hidden')) {
+        qrCodeContainer.classList.remove('hidden');
+        generateQRCode();
+    } else {
+        qrCodeContainer.classList.add('hidden');
+    }
+}
+
+function generateQRCode() {
+    const qrCodeContainer = document.getElementById('qrCodeContainer');
+    qrCodeContainer.innerHTML = '';
+
+    const data = JSON.stringify(localStorage);
+    console.log('Data for QR Code:', data);
+
+    try {
+        const compressedData = pako.deflate(data, { to: 'string' });
+        const base64Data = btoa(compressedData);
+
+        const qrCode = new QRCode(qrCodeContainer, {
+            text: base64Data,
+            width: 256,
+            height: 256
+        });
+    } catch (error) {
+        console.error('Failed to generate QR Code:', error);
+    }
+}
+
+function restoreLocalStorageFromQRCode(base64Data) {
+    try {
+        const compressedData = atob(base64Data);
+        const data = pako.inflate(compressedData, { to: 'string' });
+        const parsedData = JSON.parse(data);
+
+        for (const key in parsedData) {
+            localStorage.setItem(key, parsedData[key]);
+        }
+        alert('Данные успешно восстановлены из QR-кода!');
+        location.reload();
+    } catch (error) {
+        console.error('Failed to restore data from QR Code:', error);
+    }
+}
+
+function scanQRCode() {
+    const readerElement = document.getElementById('reader');
+
+    if (!html5QrCode) {
+        html5QrCode = new Html5Qrcode("reader");
+    }
+
+    if (readerElement.style.display === 'none' || readerElement.style.display === '') {
+        readerElement.style.display = 'block';
+
+        const qrCodeSuccessCallback = (decodedText, decodedResult) => {
+            console.log(`QR Code detected: ${decodedText}`);
+            restoreLocalStorageFromQRCode(decodedText);
+            html5QrCode.stop().then(ignore => {
+                readerElement.style.display = 'none';
+                stopCameraStream();
+            }).catch(err => {
+                console.error('Failed to stop scanning:', err);
+            });
+        };
+
+        const config = { fps: 10, qrbox: 250 };
+
+        navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } })
+            .then(mediaStream => {
+                stream = mediaStream;
+                console.log('Camera access granted');
+                html5QrCode.start({ facingMode: "environment" }, config, qrCodeSuccessCallback)
+                    .catch(err => {
+                        console.error('Failed to start scanning:', err);
+                    });
+            })
+            .catch(err => {
+                console.error('Failed to access camera:', err);
+                alert('Не удалось получить доступ к камере. Пожалуйста, проверьте настройки браузера и разрешите доступ к камере.');
+            });
+    } else {
+        readerElement.style.display = 'none';
+        if (html5QrCode.isScanning) {
+            html5QrCode.stop().then(() => {
+                stopCameraStream();
+            }).catch(err => {
+                console.error('Failed to stop scanning:', err);
+            });
+        }
+    }
+}
+
+function stopCameraStream() {
+    if (stream) {
+        stream.getTracks().forEach(track => track.stop());
+        stream = null;
+    }
+}
 
 // Функция для обновления состояния кнопок
 function updateButtonVisibility() {
@@ -768,6 +872,7 @@ document.getElementById('startNewGameButton').addEventListener('click', function
 
 function showStorageModal() {
     document.getElementById('storageModal').style.display = 'block';
+    generateQRCode();
 }
 
 function closeStorageModal() {

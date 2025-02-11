@@ -13,6 +13,9 @@
     <link rel="manifest" href="site.webmanifest" />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pako/2.0.4/pako.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
 </head>
 <body>
@@ -134,6 +137,13 @@
                 <button onclick="document.getElementById('fileInput').click();">Восстановить настройки</button>
                 <button onclick="clearLocalStorage()">Очистить хранилище</button>
             </div>
+            <br>
+            <div class="button-container">
+                <button onclick="toggleQRCode()">Показать QR-код</button>
+                <button onclick="scanQRCode()">Сканировать QR-код</button>
+            </div>
+            <div id="qrCodeContainer" class="qr-code-container hidden"></div>
+            <div id="reader" class="reader"></div>
             <h2 style="margin-top: 60px;">Настройки интерфейса</h3>
             <h3>Отображение кнопок</h3>
             <div class="toggle-container">

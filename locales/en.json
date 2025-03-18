@@ -17,5 +17,21 @@
     "startNewGameButton": "New Game",
     "statsButton": "Players",
     "tournamentsButton": "Tournaments",
-    "settingsButton": "Settings"
+    "settingsButton": "Settings",
+    "sessionsButton": "Sync",
+
+    "backToMenuButton": "Back to Menu",
+    "gameSettingsTitle": "Game Settings",
+    "selectPlayersLabel": "Select players in throwing order",
+    "showCurrentPlayerLabel": "Show current and next player",
+    "saveButton": "Save",
+    "closeButton": "Close",
+    "saveDatabaseButton": "Save DB",
+    "restoreDatabaseButton": "Restore DB",
+    "clearStorageButton": "Clear Storage",
+    "buttonsVisibilityTitle": "Button Visibility",
+    "reportIssueLabel": "Report Issue",
+    "hideInterfaceLabel": "Hide Interface",
+    "changeLanguageLabel": "Change Language",
+    "changeThemeLabel": "Change Theme"
 }

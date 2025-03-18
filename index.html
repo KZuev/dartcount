@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <meta name="apple-mobile-web-app-title" content="DartCount">
     <title>DartCount</title>
     <link rel="stylesheet" href="css/styles.css">
@@ -130,14 +130,13 @@
     <div id="storageModal" class="modal">
         <div class="modal-content">
             <span class="close-modal" onclick="closeStorageModal()">&times;</span>
-            <h2>Управление хранилищем</h2>
+            <h2 style="font-size: 2em; color: var(--accent-color);">⚙️ Настройки</h2>
                 <input type="file" id="fileInput" onchange="restoreLocalStorageFromFile(event)" style="display: none;" /><br>
             <div class="button-container">
-                <button onclick="saveLocalStorageToFile()">Сохранить настройки</button>
-                <button onclick="document.getElementById('fileInput').click();">Восстановить настройки</button>
+                <button onclick="saveLocalStorageToFile()">Сохранить БД</button>
+                <button onclick="document.getElementById('fileInput').click();">Восстановить БД</button>
                 <button onclick="clearLocalStorage()">Очистить хранилище</button>
             </div>
-            <h2 style="margin-top: 60px;">Настройки интерфейса</h3>
             <h3>Отображение кнопок</h3>
             <div class="toggle-container">
                 <label>

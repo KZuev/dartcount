@@ -17,5 +17,21 @@
     "startNewGameButton": "Новая игра",
     "statsButton": "Игроки",
     "tournamentsButton": "Турниры",
-    "settingsButton": "Настройки"
+    "settingsButton": "Настройки",
+    "sessionsButton": "Синхронизация",
+
+    "backToMenuButton": "Вернуться в меню",
+    "gameSettingsTitle": "Настройки игры",
+    "selectPlayersLabel": "Выберите игроков по очередности бросков",
+    "showCurrentPlayerLabel": "Показывать текущего и следующего игрока",
+    "saveButton": "Сохранить",
+    "closeButton": "Закрыть",
+    "saveDatabaseButton": "Сохранить БД",
+    "restoreDatabaseButton": "Восстановить БД",
+    "clearStorageButton": "Очистить хранилище",
+    "buttonsVisibilityTitle": "Отображение кнопок",
+    "reportIssueLabel": "Сообщить об ошибке",
+    "hideInterfaceLabel": "Скрыть интерфейс",
+    "changeLanguageLabel": "Сменить язык",
+    "changeThemeLabel": "Сменить оформление"
 }

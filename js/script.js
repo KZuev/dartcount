@@ -618,44 +618,45 @@ function closeStatsModal() {
     document.getElementById('statsModal').style.display = 'none'; // Скрываем модальное окно
 }
 
-// Функция для обновления временной метки
-async function updateLastModified() {
-    const currentTime = Date.now().toString();
-    localStorage.setItem('lastModified', currentTime);
-    
-    // Обновляем метку на сервере
-    const { sessionId } = sessions.getSessionFromLocalStorage();
-    if (sessionId) {
-        try {
-            await database.ref(`sessions/${sessionId}`).update({
-                lastModified: currentTime
-            });
-        } catch (error) {
-            console.error('Ошибка при обновлении временной метки на сервере:', error);
-        }
-    }
-}
-
-// Добавляем вызов updateLastModified() после каждого изменения данных
-function savePlayers() {
-    localStorage.setItem('players', JSON.stringify(players));
-    updateLastModified();
-}
-
 function saveGameResults() {
-    const results = loadGameResults() || [];
-    results.push({
-        timestamp: Date.now(),
-        players: players.slice(0, playerCount),
-        scores: lastScores,
-        gameType: gameScore,
-        legMode: legMode,
-        legsCount: legsCount,
-        startTime: gameStartTime,
-        endTime: gameEndTime
+    const savedResults = localStorage.getItem('players');
+    let results = savedResults ? JSON.parse(savedResults) : [];
+
+    players.forEach(player => {
+        const existingPlayer = results.find(p => p.name === player.name);
+        if (existingPlayer) {
+            // Суммируем значения
+            existingPlayer.throws += player.throws;
+            existingPlayer.totalPoints += player.totalPoints;
+            existingPlayer.legWins += player.legWins;
+            existingPlayer.gameWins += player.gameWins || 0;
+
+            // Обновляем средний набор
+            const averageScore = existingPlayer.throws > 0 ? (existingPlayer.totalPoints / existingPlayer.throws).toFixed(2) : 0;
+            if (!existingPlayer.averageScores) {
+                existingPlayer.averageScores = []; // Инициализация, если поле отсутствует
+            }
+            existingPlayer.averageScores.push(averageScore); // Добавляем новое значение
+
+            // Обновляем средний набор за подход
+            const approaches = Math.ceil(existingPlayer.throws / 3);
+            const averageApproachScore = approaches > 0 ? (existingPlayer.totalPoints / approaches).toFixed(2) : 0;
+            if (!existingPlayer.averageApproachScores) {
+                existingPlayer.averageApproachScores = [];
+            }
+            existingPlayer.averageApproachScores.push(averageApproachScore);
+
+            // Обновляем лучший бросок
+            if (player.bestNormalScore > existingPlayer.bestNormalScore) {
+                existingPlayer.bestNormalScore = player.bestNormalScore;
+            }
+        } else {
+            // Если игрок новый, добавляем его в результаты
+            results.push({ ...player });
+        }
     });
-    localStorage.setItem('gameResults', JSON.stringify(results));
-    updateLastModified();
+
+    localStorage.setItem('players', JSON.stringify(results));
 }
 
 function loadGameResults() {
@@ -2323,15 +2324,10 @@ function scanSessionQR() {
     const reader = document.getElementById('qrReader');
     reader.innerHTML = '';
     reader.style.display = 'flex';
-    modal.style.display = 'block';
 
-    // Создаем новый экземпляр сканера и сохраняем его глобально
-    window.html5QrCode = new Html5Qrcode('qrReader');
-    const config = { 
-        fps: 10, 
-        qrbox: { width: 200, height: 400 },
-        aspectRatio: 1.0
-    };
+    const html5QrcodeScanner = new Html5QrcodeScanner(
+        "qrReader", { fps: 10, qrbox: 250 }
+    );
 
     const qrCodeSuccessCallback = async (decodedText) => {
         try {
@@ -2339,12 +2335,14 @@ function scanSessionQR() {
             if (data.sessionId && data.password) {
                 await sessions.connect(data.sessionId, data.password);
                 updateSessionStatus();
-                closeScanQRModal(); // Закрываем модальное окно после успешного сканирования
-                addSyncHistory('Подключение к сессии через QR-код');
+                addSyncHistory('Подключено к сессии');
+                html5QrcodeScanner.clear();
+                closeScanQRModal();
+                showWarningModal('Успешно подключено к сессии', 2000);
             }
         } catch (error) {
-            console.error('Ошибка при обработке QR-кода:', error);
-            showWarningModal('Ошибка при сканировании QR-кода', 3000);
+            console.error('Ошибка при подключении к сессии:', error);
+            showWarningModal('Ошибка при подключении к сессии', 2000);
         }
     };
 
@@ -2352,42 +2350,17 @@ function scanSessionQR() {
         console.error('Ошибка сканирования QR-кода:', errorMessage);
     };
 
-    window.html5QrCode.start(
-        { facingMode: "environment" },
-        config,
-        qrCodeSuccessCallback,
-        qrCodeErrorCallback
-    ).catch((err) => {
-        console.error("Ошибка при запуске сканера:", err);
-        showWarningModal('Ошибка при запуске камеры', 3000);
-    });
+    html5QrcodeScanner.render(qrCodeSuccessCallback, qrCodeErrorCallback);
+
+    modal.style.display = 'flex';
 }
 
 function closeScanQRModal() {
     const modal = document.getElementById('scanQRModal');
     const reader = document.getElementById('qrReader');
-    
-    // Проверяем, существует ли экземпляр сканера
-    if (window.html5QrCode) {
-        window.html5QrCode.stop().then(() => {
-            window.html5QrCode = null;
-            modal.style.display = 'none';
-            reader.innerHTML = '';
-            reader.style.display = 'none';
-        }).catch((error) => {
-            console.error("Ошибка при остановке сканера:", error);
-            // Даже если произошла ошибка, все равно закрываем модальное окно
-            window.html5QrCode = null;
-            modal.style.display = 'none';
-            reader.innerHTML = '';
-            reader.style.display = 'none';
-        });
-    } else {
-        // Если сканер не существует, просто закрываем модальное окно
-        modal.style.display = 'none';
-        reader.innerHTML = '';
-        reader.style.display = 'none';
-    }
+    modal.style.display = 'none';
+    reader.innerHTML = '';
+    reader.style.display = 'none';
 }
 
 // Обработчик закрытия модального окна сканирования при клике вне его области
@@ -2399,36 +2372,18 @@ window.addEventListener('click', function(event) {
 });
 
 function updateSessionStatus() {
-    const currentSessionId = document.getElementById('currentSessionId');
-    const currentSessionPassword = document.getElementById('currentSessionPassword');
-    const currentSessionStatus = document.getElementById('currentSessionStatus');
-    const currentDataVersion = document.getElementById('currentDataVersion');
-    const disconnectBtn = document.getElementById('disconnectSessionBtn');
-    
     const { sessionId, password } = sessions.getSessionFromLocalStorage();
-    const lastModified = localStorage.getItem('lastModified');
-    
-    if (sessionId) {
-        currentSessionId.textContent = sessionId;
-        currentSessionPassword.textContent = password;
-        currentSessionStatus.textContent = 'Подключено';
-        currentSessionStatus.style.color = '#4CAF50';
-        disconnectBtn.style.display = 'block';
-        
-        // Форматируем временную метку
-        if (lastModified) {
-            const date = new Date(parseInt(lastModified));
-            currentDataVersion.textContent = date.toLocaleString();
-        } else {
-            currentDataVersion.textContent = 'Нет данных о версии';
-        }
+    const sessionIdElement = document.getElementById('currentSessionId');
+    const sessionStatusElement = document.getElementById('currentSessionStatus');
+
+    if (sessionId && password) {
+        sessionIdElement.textContent = sessionId;
+        sessionStatusElement.textContent = 'Синхронизировано';
+        sessionStatusElement.style.color = '#4CAF50';
     } else {
-        currentSessionId.textContent = '-';
-        currentSessionPassword.textContent = '-';
-        currentSessionStatus.textContent = 'Не синхронизировано';
-        currentSessionStatus.style.color = '';
-        disconnectBtn.style.display = 'none';
-        currentDataVersion.textContent = '-';
+        sessionIdElement.textContent = '-';
+        sessionStatusElement.textContent = 'Не синхронизировано';
+        sessionStatusElement.style.color = '#f44336';
     }
 }
 
@@ -2517,73 +2472,3 @@ window.addEventListener('click', function(event) {
         modal.style.display = 'none';
     }
 });
-
-async function disconnectSession() {
-    try {
-        await sessions.clearSession();
-        updateSessionStatus();
-        addSyncHistory('Отключение от сессии');
-        showWarningModal('Сессия успешно завершена', 2000);
-    } catch (error) {
-        console.error('Ошибка при отключении от сессии:', error);
-        showWarningModal('Ошибка при отключении от сессии', 2000);
-    }
-}
-
-function updateSessionStatus() {
-    const currentSessionId = document.getElementById('currentSessionId');
-    const currentSessionPassword = document.getElementById('currentSessionPassword');
-    const currentSessionStatus = document.getElementById('currentSessionStatus');
-    const currentDataVersion = document.getElementById('currentDataVersion');
-    const disconnectBtn = document.getElementById('disconnectSessionBtn');
-    
-    const { sessionId, password } = sessions.getSessionFromLocalStorage();
-    const lastModified = localStorage.getItem('lastModified');
-    
-    if (sessionId) {
-        currentSessionId.textContent = sessionId;
-        currentSessionPassword.textContent = password;
-        currentSessionStatus.textContent = 'Подключено';
-        currentSessionStatus.style.color = '#4CAF50';
-        disconnectBtn.style.display = 'block';
-        
-        // Форматируем временную метку
-        if (lastModified) {
-            const date = new Date(parseInt(lastModified));
-            currentDataVersion.textContent = date.toLocaleString();
-        } else {
-            currentDataVersion.textContent = 'Нет данных о версии';
-        }
-    } else {
-        currentSessionId.textContent = '-';
-        currentSessionPassword.textContent = '-';
-        currentSessionStatus.textContent = 'Не синхронизировано';
-        currentSessionStatus.style.color = '';
-        disconnectBtn.style.display = 'none';
-        currentDataVersion.textContent = '-';
-    }
-}
-
-async function connectToSession() {
-    const sessionId = document.getElementById('sessionIdInput').value.trim();
-    const password = document.getElementById('sessionPasswordInput').value.trim();
-
-    if (!sessionId || !password) {
-        showWarningModal('Пожалуйста, введите ID и пароль сессии', 2000);
-        return;
-    }
-
-    try {
-        await sessions.connect(sessionId, password);
-        updateSessionStatus();
-        addSyncHistory('Подключение к сессии');
-        showWarningModal('Успешное подключение к сессии', 2000);
-        
-        // Очищаем поля ввода
-        document.getElementById('sessionIdInput').value = '';
-        document.getElementById('sessionPasswordInput').value = '';
-    } catch (error) {
-        console.error('Ошибка при подключении к сессии:', error);
-        showWarningModal('Ошибка при подключении к сессии. Проверьте ID и пароль.', 2000);
-    }
-}

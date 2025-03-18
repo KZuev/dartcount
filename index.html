@@ -294,6 +294,7 @@
                     <h3>Текущая сессия</h3>
                     <div id="currentSessionInfo" class="session-info">
                         <p>ID: <span id="currentSessionId">-</span></p>
+                        <p>Пароль: <span id="currentSessionPassword">-</span></p>
                         <p>Статус: <span id="currentSessionStatus">Не синхронизировано</span></p>
                     </div>
                 </div>
@@ -304,6 +305,15 @@
                         <button onclick="createNewSession()">Создать новую сессию</button>
                         <button onclick="scanSessionQR()">Сканировать QR-код</button>
                         <button onclick="showSessionQR()">Показать QR-код</button>
+                        <button onclick="disconnectSession()" id="disconnectSessionBtn" style="background-color: #ff4444;">Отключиться от сессии</button>
+                    </div>
+                    <div class="manual-connect">
+                        <h4>Подключение к существующей сессии</h4>
+                        <div class="input-group">
+                            <input type="text" id="sessionIdInput" placeholder="ID сессии" />
+                            <input type="password" id="sessionPasswordInput" placeholder="Пароль сессии" />
+                            <button onclick="connectToSession()">Подключиться</button>
+                        </div>
                     </div>
                     <div id="sessionReader" class="reader"></div>
                 </div>
@@ -324,6 +334,9 @@
                         <!-- История будет добавлена через JavaScript -->
                     </div>
                 </div>
+            </div>
+            <div class="button-container" style="margin-top: 20px;">
+                <button onclick="closeSessionsModal()">Закрыть</button>
             </div>
         </div>
     </div>

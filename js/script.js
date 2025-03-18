@@ -2324,10 +2324,15 @@ function scanSessionQR() {
     const reader = document.getElementById('qrReader');
     reader.innerHTML = '';
     reader.style.display = 'flex';
+    modal.style.display = 'block';
 
-    const html5QrcodeScanner = new Html5QrcodeScanner(
-        "qrReader", { fps: 10, qrbox: 250 }
-    );
+    // Создаем новый экземпляр сканера и сохраняем его глобально
+    window.html5QrCode = new Html5Qrcode('qrReader');
+    const config = { 
+        fps: 10, 
+        qrbox: { width: 200, height: 400 },
+        aspectRatio: 1.0
+    };
 
     const qrCodeSuccessCallback = async (decodedText) => {
         try {
@@ -2335,14 +2340,12 @@ function scanSessionQR() {
             if (data.sessionId && data.password) {
                 await sessions.connect(data.sessionId, data.password);
                 updateSessionStatus();
-                addSyncHistory('Подключено к сессии');
-                html5QrcodeScanner.clear();
-                closeScanQRModal();
-                showWarningModal('Успешно подключено к сессии', 2000);
+                closeScanQRModal(); // Закрываем модальное окно после успешного сканирования
+                addSyncHistory('Подключение к сессии через QR-код');
             }
         } catch (error) {
-            console.error('Ошибка при подключении к сессии:', error);
-            showWarningModal('Ошибка при подключении к сессии', 2000);
+            console.error('Ошибка при обработке QR-кода:', error);
+            showWarningModal('Ошибка при сканировании QR-кода', 3000);
         }
     };
 
@@ -2350,17 +2353,42 @@ function scanSessionQR() {
         console.error('Ошибка сканирования QR-кода:', errorMessage);
     };
 
-    html5QrcodeScanner.render(qrCodeSuccessCallback, qrCodeErrorCallback);
-
-    modal.style.display = 'flex';
+    window.html5QrCode.start(
+        { facingMode: "environment" },
+        config,
+        qrCodeSuccessCallback,
+        qrCodeErrorCallback
+    ).catch((err) => {
+        console.error("Ошибка при запуске сканера:", err);
+        showWarningModal('Ошибка при запуске камеры', 3000);
+    });
 }
 
 function closeScanQRModal() {
     const modal = document.getElementById('scanQRModal');
     const reader = document.getElementById('qrReader');
-    modal.style.display = 'none';
-    reader.innerHTML = '';
-    reader.style.display = 'none';
+    
+    // Проверяем, существует ли экземпляр сканера
+    if (window.html5QrCode) {
+        window.html5QrCode.stop().then(() => {
+            window.html5QrCode = null;
+            modal.style.display = 'none';
+            reader.innerHTML = '';
+            reader.style.display = 'none';
+        }).catch((error) => {
+            console.error("Ошибка при остановке сканера:", error);
+            // Даже если произошла ошибка, все равно закрываем модальное окно
+            window.html5QrCode = null;
+            modal.style.display = 'none';
+            reader.innerHTML = '';
+            reader.style.display = 'none';
+        });
+    } else {
+        // Если сканер не существует, просто закрываем модальное окно
+        modal.style.display = 'none';
+        reader.innerHTML = '';
+        reader.style.display = 'none';
+    }
 }
 
 // Обработчик закрытия модального окна сканирования при клике вне его области
@@ -2372,18 +2400,25 @@ window.addEventListener('click', function(event) {
 });
 
 function updateSessionStatus() {
+    const currentSessionId = document.getElementById('currentSessionId');
+    const currentSessionPassword = document.getElementById('currentSessionPassword');
+    const currentSessionStatus = document.getElementById('currentSessionStatus');
+    const disconnectBtn = document.getElementById('disconnectSessionBtn');
+    
     const { sessionId, password } = sessions.getSessionFromLocalStorage();
-    const sessionIdElement = document.getElementById('currentSessionId');
-    const sessionStatusElement = document.getElementById('currentSessionStatus');
-
-    if (sessionId && password) {
-        sessionIdElement.textContent = sessionId;
-        sessionStatusElement.textContent = 'Синхронизировано';
-        sessionStatusElement.style.color = '#4CAF50';
+    
+    if (sessionId) {
+        currentSessionId.textContent = sessionId;
+        currentSessionPassword.textContent = password;
+        currentSessionStatus.textContent = 'Подключено';
+        currentSessionStatus.style.color = '#4CAF50';
+        disconnectBtn.style.display = 'block';
     } else {
-        sessionIdElement.textContent = '-';
-        sessionStatusElement.textContent = 'Не синхронизировано';
-        sessionStatusElement.style.color = '#f44336';
+        currentSessionId.textContent = '-';
+        currentSessionPassword.textContent = '-';
+        currentSessionStatus.textContent = 'Не синхронизировано';
+        currentSessionStatus.style.color = '';
+        disconnectBtn.style.display = 'none';
     }
 }
 
@@ -2472,3 +2507,62 @@ window.addEventListener('click', function(event) {
         modal.style.display = 'none';
     }
 });
+
+async function disconnectSession() {
+    try {
+        await sessions.clearSession();
+        updateSessionStatus();
+        addSyncHistory('Отключение от сессии');
+        showWarningModal('Сессия успешно завершена', 2000);
+    } catch (error) {
+        console.error('Ошибка при отключении от сессии:', error);
+        showWarningModal('Ошибка при отключении от сессии', 2000);
+    }
+}
+
+function updateSessionStatus() {
+    const currentSessionId = document.getElementById('currentSessionId');
+    const currentSessionPassword = document.getElementById('currentSessionPassword');
+    const currentSessionStatus = document.getElementById('currentSessionStatus');
+    const disconnectBtn = document.getElementById('disconnectSessionBtn');
+    
+    const { sessionId, password } = sessions.getSessionFromLocalStorage();
+    
+    if (sessionId) {
+        currentSessionId.textContent = sessionId;
+        currentSessionPassword.textContent = password;
+        currentSessionStatus.textContent = 'Подключено';
+        currentSessionStatus.style.color = '#4CAF50';
+        disconnectBtn.style.display = 'block';
+    } else {
+        currentSessionId.textContent = '-';
+        currentSessionPassword.textContent = '-';
+        currentSessionStatus.textContent = 'Не синхронизировано';
+        currentSessionStatus.style.color = '';
+        disconnectBtn.style.display = 'none';
+    }
+}
+
+async function connectToSession() {
+    const sessionId = document.getElementById('sessionIdInput').value.trim();
+    const password = document.getElementById('sessionPasswordInput').value.trim();
+
+    if (!sessionId || !password) {
+        showWarningModal('Пожалуйста, введите ID и пароль сессии', 2000);
+        return;
+    }
+
+    try {
+        await sessions.connect(sessionId, password);
+        updateSessionStatus();
+        addSyncHistory('Подключение к сессии');
+        showWarningModal('Успешное подключение к сессии', 2000);
+        
+        // Очищаем поля ввода
+        document.getElementById('sessionIdInput').value = '';
+        document.getElementById('sessionPasswordInput').value = '';
+    } catch (error) {
+        console.error('Ошибка при подключении к сессии:', error);
+        showWarningModal('Ошибка при подключении к сессии. Проверьте ID и пароль.', 2000);
+    }
+}

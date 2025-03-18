@@ -2281,11 +2281,13 @@ function showSessionQR(sessionId, password) {
 
     new QRCode(qrContainer, {
         text: JSON.stringify(data),
-        width: 200,
-        height: 200,
+        width: 256,
+        height: 256,
         colorDark: '#000000',
         colorLight: '#ffffff',
-        correctLevel: QRCode.CorrectLevel.H
+        correctLevel: QRCode.CorrectLevel.H,
+        quietZone: 15,
+        quietZoneColor: '#ffffff'
     });
 }
 
@@ -2298,7 +2300,24 @@ function scanSessionQR() {
         fps: 10, 
         qrbox: { width: 250, height: 250 },
         aspectRatio: 1.0,
-        formatsToSupport: [ Html5QrcodeSupportedFormats.QR_CODE ]
+        formatsToSupport: [
+            Html5QrcodeSupportedFormats.QR_CODE,
+            Html5QrcodeSupportedFormats.AZTEC,
+            Html5QrcodeSupportedFormats.CODE_128,
+            Html5QrcodeSupportedFormats.CODE_39,
+            Html5QrcodeSupportedFormats.CODE_93,
+            Html5QrcodeSupportedFormats.CODABAR,
+            Html5QrcodeSupportedFormats.DATA_MATRIX,
+            Html5QrcodeSupportedFormats.MAXICODE,
+            Html5QrcodeSupportedFormats.ITF,
+            Html5QrcodeSupportedFormats.EAN_13,
+            Html5QrcodeSupportedFormats.EAN_8,
+            Html5QrcodeSupportedFormats.UPC_A,
+            Html5QrcodeSupportedFormats.UPC_E
+        ],
+        experimentalFeatures: {
+            useBarCodeDetectorIfSupported: true
+        }
     };
 
     const qrCodeSuccessCallback = async (decodedText) => {

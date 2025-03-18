@@ -2298,59 +2298,51 @@ function scanSessionQR() {
     const html5QrCode = new Html5Qrcode('sessionReader');
     const config = { 
         fps: 10, 
-        qrbox: { width: 250, height: 250 },
-        aspectRatio: 1.0,
-        formatsToSupport: [
-            Html5QrcodeSupportedFormats.QR_CODE,
-            Html5QrcodeSupportedFormats.AZTEC,
-            Html5QrcodeSupportedFormats.CODE_128,
-            Html5QrcodeSupportedFormats.CODE_39,
-            Html5QrcodeSupportedFormats.CODE_93,
-            Html5QrcodeSupportedFormats.CODABAR,
-            Html5QrcodeSupportedFormats.DATA_MATRIX,
-            Html5QrcodeSupportedFormats.MAXICODE,
-            Html5QrcodeSupportedFormats.ITF,
-            Html5QrcodeSupportedFormats.EAN_13,
-            Html5QrcodeSupportedFormats.EAN_8,
-            Html5QrcodeSupportedFormats.UPC_A,
-            Html5QrcodeSupportedFormats.UPC_E
-        ],
-        experimentalFeatures: {
-            useBarCodeDetectorIfSupported: true
-        }
+        qrbox: { width: 300, height: 300 },
+        aspectRatio: 1.0
     };
 
     const qrCodeSuccessCallback = async (decodedText) => {
-        console.log('Session QR Code detected:', decodedText);
+        console.log('QR-код успешно распознан:', decodedText);
         try {
             const data = JSON.parse(decodedText);
-            console.log('Parsed session data:', data);
+            console.log('Данные сессии:', data);
+            
+            if (!data.sessionId || !data.password) {
+                throw new Error('Неверный формат данных сессии');
+            }
+            
+            console.log('Подключение к сессии...');
             await sessions.connect(data.sessionId, data.password);
+            console.log('Успешно подключено к сессии');
+            
             updateSessionStatus();
             addSyncHistory('Подключено к сессии');
+            
             html5QrCode.stop().then(() => {
-                console.log('Session scanner stopped successfully');
+                console.log('Сканер остановлен');
                 reader.style.display = 'none';
             }).catch(err => {
-                console.error('Failed to stop session scanning:', err);
+                console.error('Ошибка при остановке сканера:', err);
             });
         } catch (error) {
-            console.error('Error processing session QR code:', error);
-            showErrorModal('Ошибка при обработке QR-кода сессии. Пожалуйста, попробуйте еще раз.');
+            console.error('Ошибка при обработке QR-кода:', error);
+            showErrorModal('Ошибка при обработке QR-кода сессии: ' + error.message);
         }
     };
 
     const qrCodeErrorCallback = (errorMessage) => {
-        console.log('Session QR Code scanning error:', errorMessage);
+        console.log('Ошибка сканирования QR-кода:', errorMessage);
     };
 
+    console.log('Запуск сканера...');
     html5QrCode.start(
         { facingMode: 'environment' },
         config,
         qrCodeSuccessCallback,
         qrCodeErrorCallback
     ).catch(err => {
-        console.error('Failed to start session scanning:', err);
+        console.error('Ошибка при запуске сканера:', err);
         showErrorModal('Не удалось запустить сканирование. Пожалуйста, проверьте разрешения камеры.');
     });
 }

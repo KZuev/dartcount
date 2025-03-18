@@ -137,13 +137,6 @@
                 <button onclick="document.getElementById('fileInput').click();">Восстановить настройки</button>
                 <button onclick="clearLocalStorage()">Очистить хранилище</button>
             </div>
-            <br>
-            <div class="button-container">
-                <button onclick="toggleQRCode()">Показать QR-код</button>
-                <button onclick="scanQRCode()">Сканировать QR-код</button>
-            </div>
-            <div id="storageQRCodeContainer" class="qr-code-container hidden"></div>
-            <div id="storageReader" class="reader"></div>
             <h2 style="margin-top: 60px;">Настройки интерфейса</h3>
             <h3>Отображение кнопок</h3>
             <div class="toggle-container">
@@ -296,6 +289,7 @@
                         <p>ID: <span id="currentSessionId">-</span></p>
                         <p>Пароль: <span id="currentSessionPassword">-</span></p>
                         <p>Статус: <span id="currentSessionStatus">Не синхронизировано</span></p>
+                        <p>Версия данных: <span id="currentDataVersion">-</span></p>
                     </div>
                 </div>
 

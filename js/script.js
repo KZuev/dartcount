@@ -618,45 +618,44 @@ function closeStatsModal() {
     document.getElementById('statsModal').style.display = 'none'; // Скрываем модальное окно
 }
 
-function saveGameResults() {
-    const savedResults = localStorage.getItem('players');
-    let results = savedResults ? JSON.parse(savedResults) : [];
-
-    players.forEach(player => {
-        const existingPlayer = results.find(p => p.name === player.name);
-        if (existingPlayer) {
-            // Суммируем значения
-            existingPlayer.throws += player.throws;
-            existingPlayer.totalPoints += player.totalPoints;
-            existingPlayer.legWins += player.legWins;
-            existingPlayer.gameWins += player.gameWins || 0;
-
-            // Обновляем средний набор
-            const averageScore = existingPlayer.throws > 0 ? (existingPlayer.totalPoints / existingPlayer.throws).toFixed(2) : 0;
-            if (!existingPlayer.averageScores) {
-                existingPlayer.averageScores = []; // Инициализация, если поле отсутствует
-            }
-            existingPlayer.averageScores.push(averageScore); // Добавляем новое значение
-
-            // Обновляем средний набор за подход
-            const approaches = Math.ceil(existingPlayer.throws / 3);
-            const averageApproachScore = approaches > 0 ? (existingPlayer.totalPoints / approaches).toFixed(2) : 0;
-            if (!existingPlayer.averageApproachScores) {
-                existingPlayer.averageApproachScores = [];
-            }
-            existingPlayer.averageApproachScores.push(averageApproachScore);
-
-            // Обновляем лучший бросок
-            if (player.bestNormalScore > existingPlayer.bestNormalScore) {
-                existingPlayer.bestNormalScore = player.bestNormalScore;
-            }
-        } else {
-            // Если игрок новый, добавляем его в результаты
-            results.push({ ...player });
+// Функция для обновления временной метки
+async function updateLastModified() {
+    const currentTime = Date.now().toString();
+    localStorage.setItem('lastModified', currentTime);
+    
+    // Обновляем метку на сервере
+    const { sessionId } = sessions.getSessionFromLocalStorage();
+    if (sessionId) {
+        try {
+            await database.ref(`sessions/${sessionId}`).update({
+                lastModified: currentTime
+            });
+        } catch (error) {
+            console.error('Ошибка при обновлении временной метки на сервере:', error);
         }
-    });
+    }
+}
 
-    localStorage.setItem('players', JSON.stringify(results));
+// Добавляем вызов updateLastModified() после каждого изменения данных
+function savePlayers() {
+    localStorage.setItem('players', JSON.stringify(players));
+    updateLastModified();
+}
+
+function saveGameResults() {
+    const results = loadGameResults() || [];
+    results.push({
+        timestamp: Date.now(),
+        players: players.slice(0, playerCount),
+        scores: lastScores,
+        gameType: gameScore,
+        legMode: legMode,
+        legsCount: legsCount,
+        startTime: gameStartTime,
+        endTime: gameEndTime
+    });
+    localStorage.setItem('gameResults', JSON.stringify(results));
+    updateLastModified();
 }
 
 function loadGameResults() {
@@ -2403,9 +2402,11 @@ function updateSessionStatus() {
     const currentSessionId = document.getElementById('currentSessionId');
     const currentSessionPassword = document.getElementById('currentSessionPassword');
     const currentSessionStatus = document.getElementById('currentSessionStatus');
+    const currentDataVersion = document.getElementById('currentDataVersion');
     const disconnectBtn = document.getElementById('disconnectSessionBtn');
     
     const { sessionId, password } = sessions.getSessionFromLocalStorage();
+    const lastModified = localStorage.getItem('lastModified');
     
     if (sessionId) {
         currentSessionId.textContent = sessionId;
@@ -2413,12 +2414,21 @@ function updateSessionStatus() {
         currentSessionStatus.textContent = 'Подключено';
         currentSessionStatus.style.color = '#4CAF50';
         disconnectBtn.style.display = 'block';
+        
+        // Форматируем временную метку
+        if (lastModified) {
+            const date = new Date(parseInt(lastModified));
+            currentDataVersion.textContent = date.toLocaleString();
+        } else {
+            currentDataVersion.textContent = 'Нет данных о версии';
+        }
     } else {
         currentSessionId.textContent = '-';
         currentSessionPassword.textContent = '-';
         currentSessionStatus.textContent = 'Не синхронизировано';
         currentSessionStatus.style.color = '';
         disconnectBtn.style.display = 'none';
+        currentDataVersion.textContent = '-';
     }
 }
 
@@ -2524,9 +2534,11 @@ function updateSessionStatus() {
     const currentSessionId = document.getElementById('currentSessionId');
     const currentSessionPassword = document.getElementById('currentSessionPassword');
     const currentSessionStatus = document.getElementById('currentSessionStatus');
+    const currentDataVersion = document.getElementById('currentDataVersion');
     const disconnectBtn = document.getElementById('disconnectSessionBtn');
     
     const { sessionId, password } = sessions.getSessionFromLocalStorage();
+    const lastModified = localStorage.getItem('lastModified');
     
     if (sessionId) {
         currentSessionId.textContent = sessionId;
@@ -2534,12 +2546,21 @@ function updateSessionStatus() {
         currentSessionStatus.textContent = 'Подключено';
         currentSessionStatus.style.color = '#4CAF50';
         disconnectBtn.style.display = 'block';
+        
+        // Форматируем временную метку
+        if (lastModified) {
+            const date = new Date(parseInt(lastModified));
+            currentDataVersion.textContent = date.toLocaleString();
+        } else {
+            currentDataVersion.textContent = 'Нет данных о версии';
+        }
     } else {
         currentSessionId.textContent = '-';
         currentSessionPassword.textContent = '-';
         currentSessionStatus.textContent = 'Не синхронизировано';
         currentSessionStatus.style.color = '';
         disconnectBtn.style.display = 'none';
+        currentDataVersion.textContent = '-';
     }
 }
 

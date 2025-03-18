@@ -29,12 +29,14 @@ const sessions = {
     create: async function() {
         const sessionId = this.generateSessionId();
         const password = this.generatePassword();
+        const currentTime = Date.now().toString();
         
         const sessionData = {
             id: sessionId,
             password: password,
-            createdAt: Date.now(),
-            lastSync: Date.now(),
+            createdAt: currentTime,
+            lastSync: currentTime,
+            lastModified: currentTime,
             data: this.getLocalStorageData()
         };
 
@@ -48,6 +50,7 @@ const sessions = {
             // Сохраняем данные сессии
             await database.ref(`sessions/${sessionId}`).set(sessionData);
             this.saveSessionToLocalStorage(sessionId, password);
+            localStorage.setItem('lastModified', currentTime);
             return { sessionId, password };
         } catch (error) {
             console.error('Ошибка при создании сессии:', error);
@@ -76,6 +79,7 @@ const sessions = {
 
             this.saveSessionToLocalStorage(sessionId, password);
             this.updateLocalStorageData(sessionData.data);
+            localStorage.setItem('lastModified', sessionData.lastModified || Date.now().toString());
             return sessionData;
         } catch (error) {
             console.error('Ошибка при подключении к сессии:', error);
@@ -123,11 +127,29 @@ const sessions = {
                 return;
             }
 
-            const localData = this.getLocalStorageData();
-            await sessionRef.update({
-                data: localData,
-                lastSync: Date.now()
-            });
+            // Получаем локальную временную метку последнего обновления
+            const localLastModified = localStorage.getItem('lastModified') || '0';
+            const serverLastModified = sessionData.lastModified || '0';
+
+            // Если серверные данные новее
+            if (parseInt(serverLastModified) > parseInt(localLastModified)) {
+                console.log('Обновляем локальные данные из сервера');
+                this.updateLocalStorageData(sessionData.data);
+                localStorage.setItem('lastModified', serverLastModified);
+                return;
+            }
+
+            // Если локальные данные новее
+            if (parseInt(localLastModified) > parseInt(serverLastModified)) {
+                console.log('Обновляем данные на сервере');
+                const localData = this.getLocalStorageData();
+                await sessionRef.update({
+                    data: localData,
+                    lastSync: Date.now(),
+                    lastModified: localLastModified
+                });
+            }
+
             console.log('Синхронизация успешно завершена');
         } catch (error) {
             console.error('Ошибка при синхронизации:', error);
@@ -192,13 +214,12 @@ const sessions = {
         const data = {};
         for (let i = 0; i < localStorage.length; i++) {
             const key = localStorage.key(i);
-            // Пропускаем служебные ключи Firebase
-            if (key.startsWith('firebase:') || key.startsWith('_firebase')) {
+            // Пропускаем служебные ключи Firebase и временные метки
+            if (key.startsWith('firebase:') || key.startsWith('_firebase') || key === 'lastModified') {
                 continue;
             }
             try {
                 const value = localStorage.getItem(key);
-                // Проверяем, является ли значение объектом
                 if (value && value.startsWith('{')) {
                     data[key] = JSON.parse(value);
                 } else {
@@ -215,8 +236,8 @@ const sessions = {
     // Обновление данных в localStorage
     updateLocalStorageData: function(data) {
         for (const key in data) {
-            // Пропускаем служебные ключи Firebase
-            if (key.startsWith('firebase:') || key.startsWith('_firebase')) {
+            // Пропускаем служебные ключи Firebase и временные метки
+            if (key.startsWith('firebase:') || key.startsWith('_firebase') || key === 'lastModified') {
                 continue;
             }
             try {

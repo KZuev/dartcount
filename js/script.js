@@ -21,7 +21,7 @@ let stream;
 document.getElementById('confirmDeleteButton').addEventListener('click', confirmDeletePlayer);
 
 function toggleQRCode() {
-    const qrCodeContainer = document.getElementById('qrCodeContainer');
+    const qrCodeContainer = document.getElementById('storageQRCodeContainer');
     if (qrCodeContainer.classList.contains('hidden')) {
         qrCodeContainer.classList.remove('hidden');
         generateQRCode();
@@ -31,7 +31,7 @@ function toggleQRCode() {
 }
 
 function generateQRCode() {
-    const qrCodeContainer = document.getElementById('qrCodeContainer');
+    const qrCodeContainer = document.getElementById('storageQRCodeContainer');
     qrCodeContainer.innerHTML = '';
 
     const data = JSON.stringify(localStorage);
@@ -68,10 +68,10 @@ function restoreLocalStorageFromQRCode(base64Data) {
 }
 
 function scanQRCode() {
-    const readerElement = document.getElementById('reader');
+    const readerElement = document.getElementById('storageReader');
 
     if (!html5QrCode) {
-        html5QrCode = new Html5Qrcode("reader");
+        html5QrCode = new Html5Qrcode("storageReader");
     }
 
     if (readerElement.style.display === 'none' || readerElement.style.display === '') {
@@ -88,21 +88,68 @@ function scanQRCode() {
             });
         };
 
-        const config = { fps: 10, qrbox: 250 };
+        const config = { 
+            fps: 10, 
+            qrbox: { width: 250, height: 250 },
+            aspectRatio: 1.0
+        };
 
-        navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } })
-            .then(mediaStream => {
-                stream = mediaStream;
-                console.log('Camera access granted');
-                html5QrCode.start({ facingMode: "environment" }, config, qrCodeSuccessCallback)
-                    .catch(err => {
-                        console.error('Failed to start scanning:', err);
+        // Специальная обработка для iOS
+        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+        
+        if (isIOS) {
+            // На iOS используем только заднюю камеру
+            const constraints = {
+                video: {
+                    facingMode: { ideal: "environment" },
+                    width: { ideal: 1280 },
+                    height: { ideal: 720 }
+                }
+            };
+
+            navigator.mediaDevices.getUserMedia(constraints)
+                .then(mediaStream => {
+                    stream = mediaStream;
+                    console.log('Camera access granted on iOS');
+                    html5QrCode.start(
+                        { facingMode: "environment" },
+                        config,
+                        qrCodeSuccessCallback,
+                        (errorMessage) => {
+                            // Игнорируем ошибки сканирования
+                        }
+                    ).catch(err => {
+                        console.error('Failed to start scanning on iOS:', err);
+                        showErrorModal('Не удалось запустить сканирование. Пожалуйста, проверьте разрешения камеры.');
                     });
-            })
-            .catch(err => {
-                console.error('Failed to access camera:', err);
-                alert('Не удалось получить доступ к камере. Пожалуйста, проверьте настройки браузера и разрешите доступ к камере.');
-            });
+                })
+                .catch(err => {
+                    console.error('Failed to access camera on iOS:', err);
+                    showErrorModal('Не удалось получить доступ к камере. Пожалуйста, проверьте настройки браузера и разрешите доступ к камере.');
+                });
+        } else {
+            // Для остальных устройств используем стандартный подход
+            navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } })
+                .then(mediaStream => {
+                    stream = mediaStream;
+                    console.log('Camera access granted');
+                    html5QrCode.start(
+                        { facingMode: "environment" },
+                        config,
+                        qrCodeSuccessCallback,
+                        (errorMessage) => {
+                            // Игнорируем ошибки сканирования
+                        }
+                    ).catch(err => {
+                        console.error('Failed to start scanning:', err);
+                        showErrorModal('Не удалось запустить сканирование. Пожалуйста, проверьте разрешения камеры.');
+                    });
+                })
+                .catch(err => {
+                    console.error('Failed to access camera:', err);
+                    showErrorModal('Не удалось получить доступ к камере. Пожалуйста, проверьте настройки браузера и разрешите доступ к камере.');
+                });
+        }
     } else {
         readerElement.style.display = 'none';
         if (html5QrCode.isScanning) {
@@ -458,6 +505,13 @@ function showStatsModal() {
     document.getElementById('statsModal').style.display = 'flex'; // Показываем модальное окно 
 }
 
+// ... existing code ...
+
+// Изменяем обработчик кнопки "Добавить игрока" в модальном окне статистики
+document.getElementById('statsAddPlayerButton').addEventListener('click', function() {
+    closeStatsModal(); // Закрываем модальное окно статистики
+    showPlayersModal(); // Открываем модальное окно управления игроками
+});
 
 function deletePlayer(index) {
     if (index !== -1) {
@@ -715,7 +769,6 @@ function savePlayers() {
     localStorage.setItem('players', JSON.stringify(uniquePlayers));
 }
 
-document.getElementById('playersButton').addEventListener('click', showPlayersModal);
 document.getElementById('closePlayersModal').addEventListener('click', closePlayersModal);
 
 function showPlayersModal() {
@@ -1100,7 +1153,6 @@ function loadTranslations() {
             document.getElementById('undoScoreButton').title = translations.undoButtonTooltip;
             document.getElementById('statisticsTitle').textContent = translations.statistics;
             document.getElementById('startNewGameButton').textContent = `🎯 ${translations.startNewGameButton}`;
-            document.getElementById('playersButton').textContent = `☁️ ${translations.playersButton}`;
             document.getElementById('statsButton').textContent = `👥 ${translations.statsButton}`;
             document.getElementById('tournamentsButton').textContent = `🏆 ${translations.tournamentsButton}`;
             document.getElementById('settingsButton').textContent = `⚙️ ${translations.settingsButton}`;
@@ -2179,3 +2231,167 @@ document.getElementById('legMode').addEventListener('change', updateLegsCountOpt
 document.addEventListener('DOMContentLoaded', function() {
     updateLegsCountOptions();
 });
+
+// Функции для работы с сессиями
+function showSessionsModal() {
+    const modal = document.getElementById('sessionsModal');
+    modal.style.display = 'flex';
+    updateSessionStatus();
+    updateSyncHistory();
+}
+
+function closeSessionsModal() {
+    const modal = document.getElementById('sessionsModal');
+    modal.style.display = 'none';
+}
+
+async function createNewSession() {
+    try {
+        const { sessionId, password } = await sessions.create();
+        showSessionQR(sessionId, password);
+        updateSessionStatus();
+        addSyncHistory('Создана новая сессия');
+    } catch (error) {
+        showErrorModal('Ошибка при создании сессии: ' + error.message);
+    }
+}
+
+function showSessionQR(sessionId, password) {
+    const { sessionId: currentSessionId, password: currentPassword } = sessions.getSessionFromLocalStorage();
+    
+    if (!currentSessionId || !currentPassword) {
+        showErrorModal('Нет активной сессии. Создайте новую сессию или подключитесь к существующей.');
+        return;
+    }
+
+    const data = {
+        sessionId: currentSessionId,
+        password: currentPassword
+    };
+
+    const qrContainer = document.getElementById('sessionQRCodeContainer');
+    qrContainer.innerHTML = '';
+    qrContainer.classList.remove('hidden');
+
+    new QRCode(qrContainer, {
+        text: JSON.stringify(data),
+        width: 200,
+        height: 200,
+        colorDark: '#000000',
+        colorLight: '#ffffff',
+        correctLevel: QRCode.CorrectLevel.H
+    });
+}
+
+function scanSessionQR() {
+    const reader = document.getElementById('sessionReader');
+    reader.style.display = 'block';
+    
+    const html5QrCode = new Html5Qrcode('sessionReader');
+    const config = { fps: 10, qrbox: { width: 250, height: 250 } };
+
+    html5QrCode.start(
+        { facingMode: 'environment' },
+        config,
+        async (decodedText) => {
+            try {
+                const data = JSON.parse(decodedText);
+                await sessions.connect(data.sessionId, data.password);
+                updateSessionStatus();
+                addSyncHistory('Подключено к сессии');
+                html5QrCode.stop();
+                reader.style.display = 'none';
+            } catch (error) {
+                showErrorModal('Ошибка при подключении к сессии: ' + error.message);
+            }
+        },
+        (errorMessage) => {
+            // Игнорируем ошибки сканирования
+        }
+    );
+}
+
+function updateSessionStatus() {
+    const { sessionId, password } = sessions.getSessionFromLocalStorage();
+    const sessionIdElement = document.getElementById('currentSessionId');
+    const sessionStatusElement = document.getElementById('currentSessionStatus');
+
+    if (sessionId && password) {
+        sessionIdElement.textContent = sessionId;
+        sessionStatusElement.textContent = 'Синхронизировано';
+        sessionStatusElement.style.color = '#4CAF50';
+    } else {
+        sessionIdElement.textContent = '-';
+        sessionStatusElement.textContent = 'Не синхронизировано';
+        sessionStatusElement.style.color = '#f44336';
+    }
+}
+
+function updateSyncHistory() {
+    const history = JSON.parse(localStorage.getItem('syncHistory') || '[]');
+    const historyContainer = document.getElementById('syncHistory');
+    historyContainer.innerHTML = '';
+
+    history.forEach(item => {
+        const historyItem = document.createElement('div');
+        historyItem.className = 'sync-history-item';
+        historyItem.textContent = `${new Date(item.timestamp).toLocaleString()} - ${item.action}`;
+        historyContainer.appendChild(historyItem);
+    });
+}
+
+function addSyncHistory(action) {
+    const history = JSON.parse(localStorage.getItem('syncHistory') || '[]');
+    history.unshift({
+        timestamp: Date.now(),
+        action: action
+    });
+    
+    // Оставляем только последние 50 записей
+    if (history.length > 50) {
+        history.pop();
+    }
+    
+    localStorage.setItem('syncHistory', JSON.stringify(history));
+    updateSyncHistory();
+}
+
+// Автоматическая синхронизация
+let autoSyncInterval;
+
+function startAutoSync() {
+    if (autoSyncInterval) return;
+    
+    autoSyncInterval = setInterval(async () => {
+        const { sessionId, password } = sessions.getSessionFromLocalStorage();
+        if (sessionId && password) {
+            try {
+                await sessions.sync();
+                addSyncHistory('Автоматическая синхронизация');
+            } catch (error) {
+                console.error('Ошибка автоматической синхронизации:', error);
+            }
+        }
+    }, 30000); // Синхронизация каждые 30 секунд
+}
+
+function stopAutoSync() {
+    if (autoSyncInterval) {
+        clearInterval(autoSyncInterval);
+        autoSyncInterval = null;
+    }
+}
+
+// Обработчик изменения настройки автоматической синхронизации
+document.getElementById('autoSync').addEventListener('change', function(e) {
+    if (e.target.checked) {
+        startAutoSync();
+    } else {
+        stopAutoSync();
+    }
+});
+
+// Инициализация автоматической синхронизации при загрузке страницы
+if (document.getElementById('autoSync').checked) {
+    startAutoSync();
+}

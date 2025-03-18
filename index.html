@@ -17,6 +17,11 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-auth-compat.js"></script>
+    <script src="js/firebase-config.js"></script>
 </head>
 <body>
     <div class="container">
@@ -47,7 +52,7 @@
             <button class="menu-button" id="startNewGameButton"><span class="emoji">🎯</span> Новая игра</button>
             <button class="menu-button" id="statsButton" onclick="showStatsModal()"><span class="emoji">👥</span> Игроки</button>
             <button class="menu-button" id="tournamentsButton"><span class="emoji">🏆</span> Турниры</button>
-            <button class="menu-button" id="playersButton"><span class="emoji">☁️</span> Онлайн</button>
+            <button class="menu-button" id="sessionsButton" onclick="showSessionsModal()"><span class="emoji">🔄</span> Синхронизация</button>
             <button class="menu-button" id="settingsButton" onclick="showStorageModal()"><span class="emoji">⚙️</span> Настройки</button>
         </div>
             <div class="settings hidden">
@@ -142,8 +147,8 @@
                 <button onclick="toggleQRCode()">Показать QR-код</button>
                 <button onclick="scanQRCode()">Сканировать QR-код</button>
             </div>
-            <div id="qrCodeContainer" class="qr-code-container hidden"></div>
-            <div id="reader" class="reader"></div>
+            <div id="storageQRCodeContainer" class="qr-code-container hidden"></div>
+            <div id="storageReader" class="reader"></div>
             <h2 style="margin-top: 60px;">Настройки интерфейса</h3>
             <h3>Отображение кнопок</h3>
             <div class="toggle-container">
@@ -229,7 +234,7 @@
                 Нет игроков
             </div>
             <div class="button-container">
-                <button id="addPlayerButton"  style="margin-top: 20px; height: 50px;">Добавить игрока</button>
+                <button id="statsAddPlayerButton"  style="margin-top: 20px; height: 50px;">Добавить игрока</button>
                 <button id="closeStatsButton" onclick="closeStatsModal()" style="margin-top: 20px; height: 50px;">Закрыть</button>
             </div>
         </div>
@@ -280,6 +285,51 @@
             <div class="button-container">
                 <button onclick="">Создать новый турнир</button>
                 <button onclick="closeModal()">Закрыть</button>
+            </div>
+        </div>
+    </div>
+    <div id="sessionsModal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeSessionsModal()">&times;</span>
+            <h2 style="font-size: 2em; color: var(--accent-color);">🔄 Синхронизация</h2>
+            <p style="font-size: 1.2em; color: var(--text-color);">Управление синхронизацией данных между устройствами.</p>
+            
+            <div class="sessions-container">
+                <div class="session-status">
+                    <h3>Текущая сессия</h3>
+                    <div id="currentSessionInfo" class="session-info">
+                        <p>ID: <span id="currentSessionId">-</span></p>
+                        <p>Статус: <span id="currentSessionStatus">Не синхронизировано</span></p>
+                    </div>
+                </div>
+
+                <div class="session-actions">
+                    <h3>Действия</h3>
+                    <div class="button-container">
+                        <button onclick="createNewSession()">Создать новую сессию</button>
+                        <button onclick="scanSessionQR()">Сканировать QR-код</button>
+                        <button onclick="showSessionQR()">Показать QR-код</button>
+                    </div>
+                    <div id="sessionQRCodeContainer" class="qr-code-container hidden"></div>
+                    <div id="sessionReader" class="reader"></div>
+                </div>
+
+                <div class="sync-settings">
+                    <h3>Настройки синхронизации</h3>
+                    <div class="toggle-container">
+                        <label>
+                            <input type="checkbox" id="autoSync" checked>
+                            Автоматическая синхронизация
+                        </label>
+                    </div>
+                </div>
+
+                <div class="sync-history">
+                    <h3>История синхронизации</h3>
+                    <div id="syncHistory" class="sync-history-list">
+                        <!-- История будет добавлена через JavaScript -->
+                    </div>
+                </div>
             </div>
         </div>
     </div>

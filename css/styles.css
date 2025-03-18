@@ -1216,3 +1216,103 @@ body.light-theme .info-circle {
         font-size: 0.5em;
     }
 }
+
+.sessions-container {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    margin-top: 20px;
+}
+
+.session-status {
+    background: var(--stats-bg);
+    padding: 15px;
+    border-radius: 10px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.session-info {
+    margin-top: 10px;
+}
+
+.session-info p {
+    margin: 5px 0;
+    font-size: 1.1em;
+}
+
+.session-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.sync-settings {
+    background: var(--stats-bg);
+    padding: 15px;
+    border-radius: 10px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.sync-history {
+    background: var(--stats-bg);
+    padding: 15px;
+    border-radius: 10px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.sync-history-list {
+    max-height: 200px;
+    overflow-y: auto;
+    margin-top: 10px;
+}
+
+.sync-history-item {
+    padding: 8px;
+    border-bottom: 1px solid var(--accent-color);
+    font-size: 0.9em;
+}
+
+.sync-history-item:last-child {
+    border-bottom: none;
+}
+
+@media screen and (max-width: 768px) {
+    .sessions-container {
+        gap: 15px;
+    }
+
+    .session-status,
+    .sync-settings,
+    .sync-history {
+        padding: 12px;
+    }
+
+    .session-info p {
+        font-size: 1em;
+    }
+
+    .sync-history-list {
+        max-height: 150px;
+    }
+}
+
+@media screen and (max-width: 480px) {
+    .sessions-container {
+        gap: 12px;
+    }
+
+    .session-status,
+    .sync-settings,
+    .sync-history {
+        padding: 10px;
+    }
+
+    .session-info p {
+        font-size: 0.9em;
+    }
+
+    .sync-history-item {
+        font-size: 0.8em;
+        padding: 6px;
+    }
+}

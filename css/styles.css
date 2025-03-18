@@ -52,9 +52,20 @@
 
 .qr-code-container {
     display: flex;
+    flex-direction: column;
     justify-content: center;
     align-items: center;
-    margin: 20px;
+    margin: 20px auto;
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    width: fit-content;
+}
+
+.qr-code-container img {
+    max-width: 100%;
+    height: auto;
 }
 
 .reader {
@@ -1315,4 +1326,71 @@ body.light-theme .info-circle {
         font-size: 0.8em;
         padding: 6px;
     }
+}
+
+#sessionQRModal .modal-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    max-width: 500px;
+    width: 90%;
+    padding: 30px;
+}
+
+#sessionQRModal .qr-code-container {
+    margin: 20px auto;
+    padding: 30px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+#sessionQRModal .qr-code-container img {
+    display: block;
+    margin: 0 auto;
+}
+
+#sessionQRModal .button-container {
+    margin-top: 20px;
+    width: 100%;
+}
+
+#sessionQRModal .button-container button {
+    width: 200px;
+    height: 45px;
+    font-size: 1.2em;
+}
+
+#scanQRModal .modal-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    max-width: 500px;
+    width: 90%;
+    padding: 30px;
+}
+
+#scanQRModal .reader {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    max-width: 400px;
+    margin: 20px auto;
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+#scanQRModal .button-container {
+    margin-top: 20px;
+    width: 100%;
+}
+
+#scanQRModal .button-container button {
+    width: 200px;
+    height: 45px;
+    font-size: 1.2em;
 }

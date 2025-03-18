@@ -2274,90 +2274,102 @@ async function createNewSession() {
     }
 }
 
-function showSessionQR(sessionId, password) {
-    const { sessionId: currentSessionId, password: currentPassword } = sessions.getSessionFromLocalStorage();
-    
-    if (!currentSessionId || !currentPassword) {
-        showErrorModal('Нет активной сессии. Создайте новую сессию или подключитесь к существующей.');
+function showSessionQR() {
+    const modal = document.getElementById('sessionQRModal');
+    const container = document.getElementById('sessionQRCodeContainer');
+    container.innerHTML = '';
+    container.classList.remove('hidden');
+
+    // Получаем данные текущей сессии
+    const sessionId = localStorage.getItem('currentSessionId');
+    const password = localStorage.getItem('currentSessionPassword');
+
+    if (!sessionId || !password) {
+        container.innerHTML = '<p style="color: #333; font-size: 1.2em;">Нет активной сессии. Создайте новую сессию.</p>';
+        modal.style.display = 'flex';
         return;
     }
 
-    const data = {
-        sessionId: currentSessionId,
-        password: currentPassword
-    };
-
-    const qrContainer = document.getElementById('sessionQRCodeContainer');
-    qrContainer.innerHTML = '';
-    qrContainer.classList.remove('hidden');
-
-    new QRCode(qrContainer, {
-        text: JSON.stringify(data),
+    const qrData = JSON.stringify({ sessionId, password });
+    const qrCode = new QRCode(container, {
+        text: qrData,
         width: 256,
         height: 256,
-        colorDark: '#000000',
-        colorLight: '#ffffff',
+        colorDark: "#000000",
+        colorLight: "#ffffff",
         correctLevel: QRCode.CorrectLevel.H,
         quietZone: 15,
         quietZoneColor: '#ffffff'
     });
+
+    // Показываем модальное окно
+    modal.style.display = 'flex';
 }
 
+function closeSessionQRModal() {
+    const modal = document.getElementById('sessionQRModal');
+    modal.style.display = 'none';
+}
+
+// Обработчик закрытия модального окна с QR-кодом при клике вне его области
+window.addEventListener('click', function(event) {
+    const modal = document.getElementById('sessionQRModal');
+    if (event.target === modal) {
+        modal.style.display = 'none';
+    }
+});
+
 function scanSessionQR() {
-    const reader = document.getElementById('sessionReader');
-    reader.style.display = 'block';
-    
-    const html5QrCode = new Html5Qrcode('sessionReader');
-    const config = { 
-        fps: 10, 
-        qrbox: { width: 300, height: 300 },
-        aspectRatio: 1.0
-    };
+    const modal = document.getElementById('scanQRModal');
+    const reader = document.getElementById('qrReader');
+    reader.innerHTML = '';
+    reader.style.display = 'flex';
+
+    const html5QrcodeScanner = new Html5QrcodeScanner(
+        "qrReader", { fps: 10, qrbox: 250 }
+    );
 
     const qrCodeSuccessCallback = async (decodedText) => {
-        console.log('QR-код успешно распознан:', decodedText);
         try {
             const data = JSON.parse(decodedText);
-            console.log('Данные сессии:', data);
-            
-            if (!data.sessionId || !data.password) {
-                throw new Error('Неверный формат данных сессии');
+            if (data.sessionId && data.password) {
+                await sessions.connect(data.sessionId, data.password);
+                updateSessionStatus();
+                addSyncHistory('Подключено к сессии');
+                html5QrcodeScanner.clear();
+                closeScanQRModal();
+                showWarningModal('Успешно подключено к сессии', 2000);
             }
-            
-            console.log('Подключение к сессии...');
-            await sessions.connect(data.sessionId, data.password);
-            console.log('Успешно подключено к сессии');
-            
-            updateSessionStatus();
-            addSyncHistory('Подключено к сессии');
-            
-            html5QrCode.stop().then(() => {
-                console.log('Сканер остановлен');
-                reader.style.display = 'none';
-            }).catch(err => {
-                console.error('Ошибка при остановке сканера:', err);
-            });
         } catch (error) {
-            console.error('Ошибка при обработке QR-кода:', error);
-            showErrorModal('Ошибка при обработке QR-кода сессии: ' + error.message);
+            console.error('Ошибка при подключении к сессии:', error);
+            showWarningModal('Ошибка при подключении к сессии', 2000);
         }
     };
 
     const qrCodeErrorCallback = (errorMessage) => {
-        console.log('Ошибка сканирования QR-кода:', errorMessage);
+        console.error('Ошибка сканирования QR-кода:', errorMessage);
     };
 
-    console.log('Запуск сканера...');
-    html5QrCode.start(
-        { facingMode: 'environment' },
-        config,
-        qrCodeSuccessCallback,
-        qrCodeErrorCallback
-    ).catch(err => {
-        console.error('Ошибка при запуске сканера:', err);
-        showErrorModal('Не удалось запустить сканирование. Пожалуйста, проверьте разрешения камеры.');
-    });
+    html5QrcodeScanner.render(qrCodeSuccessCallback, qrCodeErrorCallback);
+
+    modal.style.display = 'flex';
 }
+
+function closeScanQRModal() {
+    const modal = document.getElementById('scanQRModal');
+    const reader = document.getElementById('qrReader');
+    modal.style.display = 'none';
+    reader.innerHTML = '';
+    reader.style.display = 'none';
+}
+
+// Обработчик закрытия модального окна сканирования при клике вне его области
+window.addEventListener('click', function(event) {
+    const modal = document.getElementById('scanQRModal');
+    if (event.target === modal) {
+        closeScanQRModal();
+    }
+});
 
 function updateSessionStatus() {
     const { sessionId, password } = sessions.getSessionFromLocalStorage();
@@ -2447,3 +2459,16 @@ document.getElementById('autoSync').addEventListener('change', function(e) {
 if (document.getElementById('autoSync').checked) {
     startAutoSync();
 }
+
+// Обработчик закрытия модального окна с QR-кодом
+document.querySelector('#sessionModal .close').addEventListener('click', function() {
+    document.getElementById('sessionModal').style.display = 'none';
+});
+
+// Закрытие модального окна при клике вне его области
+window.addEventListener('click', function(event) {
+    const modal = document.getElementById('sessionModal');
+    if (event.target === modal) {
+        modal.style.display = 'none';
+    }
+});

@@ -305,7 +305,6 @@
                         <button onclick="scanSessionQR()">Сканировать QR-код</button>
                         <button onclick="showSessionQR()">Показать QR-код</button>
                     </div>
-                    <div id="sessionQRCodeContainer" class="qr-code-container hidden"></div>
                     <div id="sessionReader" class="reader"></div>
                 </div>
 
@@ -325,6 +324,28 @@
                         <!-- История будет добавлена через JavaScript -->
                     </div>
                 </div>
+            </div>
+        </div>
+    </div>
+    <!-- Модальное окно для QR-кода -->
+    <div id="sessionQRModal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeSessionQRModal()">&times;</span>
+            <h2>QR-код сессии</h2>
+            <div id="sessionQRCodeContainer" class="qr-code-container"></div>
+            <div class="button-container">
+                <button onclick="closeSessionQRModal()">Закрыть</button>
+            </div>
+        </div>
+    </div>
+    <!-- Модальное окно для сканирования QR-кода -->
+    <div id="scanQRModal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeScanQRModal()">&times;</span>
+            <h2>Сканирование QR-кода</h2>
+            <div id="qrReader" class="reader"></div>
+            <div class="button-container">
+                <button onclick="closeScanQRModal()">Закрыть</button>
             </div>
         </div>
     </div>

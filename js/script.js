@@ -18,7 +18,57 @@ let isInterfaceVisible = true;
 let html5QrCode;
 let stream;
 
-document.getElementById('confirmDeleteButton').addEventListener('click', confirmDeletePlayer);
+// Инициализация при загрузке DOM
+document.addEventListener('DOMContentLoaded', function() {
+    // Инициализация обработчика удаления игрока
+    const confirmDeleteButton = document.getElementById('confirmDeleteButton');
+    if (confirmDeleteButton) {
+        confirmDeleteButton.addEventListener('click', confirmDeletePlayer);
+    }
+
+    // Проверяем и загружаем состояние из локального хранилища
+    const isReportIssueVisible = localStorage.getItem('toggleReportIssue');
+    const isToggleInterfaceVisible = localStorage.getItem('toggleToggleInterface');
+    const isLanguageVisible = localStorage.getItem('toggleLanguage');
+    const isThemeToggleVisible = localStorage.getItem('toggleTheme');
+
+    // Устанавливаем состояние переключателей
+    const toggleReportIssue = document.getElementById('toggleReportIssue');
+    const toggleToggleInterface = document.getElementById('toggleToggleInterface');
+    const toggleLanguage = document.getElementById('toggleLanguage');
+    const toggleTheme = document.getElementById('toggleTheme');
+
+    if (toggleReportIssue) toggleReportIssue.checked = (isReportIssueVisible === 'true') || (isReportIssueVisible === null);
+    if (toggleToggleInterface) toggleToggleInterface.checked = (isToggleInterfaceVisible === 'true') || (isToggleInterfaceVisible === null);
+    if (toggleLanguage) toggleLanguage.checked = (isLanguageVisible === 'true') || (isLanguageVisible === null);
+    if (toggleTheme) toggleTheme.checked = (isThemeToggleVisible === 'true') || (isThemeToggleVisible === null);
+
+    // Сохраняем состояние в локальное хранилище, если оно не было установлено
+    if (isReportIssueVisible === null) localStorage.setItem('toggleReportIssue', 'true');
+    if (isToggleInterfaceVisible === null) localStorage.setItem('toggleToggleInterface', 'true');
+    if (isLanguageVisible === null) localStorage.setItem('toggleLanguage', 'true');
+    if (isThemeToggleVisible === null) localStorage.setItem('toggleTheme', 'true');
+
+    // Обновляем видимость кнопок
+    updateButtonVisibility();
+
+    // Обработчики событий для переключателей
+    if (toggleReportIssue) toggleReportIssue.addEventListener('change', updateButtonVisibility);
+    if (toggleToggleInterface) toggleToggleInterface.addEventListener('change', updateButtonVisibility);
+    if (toggleLanguage) toggleLanguage.addEventListener('change', updateButtonVisibility);
+    if (toggleTheme) toggleTheme.addEventListener('change', updateButtonVisibility);
+
+    // Инициализация других элементов
+    const toggleCurrentPlayerName = document.getElementById('toggleCurrentPlayerName');
+    if (toggleCurrentPlayerName) {
+        toggleCurrentPlayerName.addEventListener('change', function() {
+            localStorage.setItem('toggleCurrentPlayerName', toggleCurrentPlayerName.checked);
+        });
+    }
+
+    // Обновляем видимость текущего игрока
+    updateCurrentPlayerNameVisibility();
+});
 
 function toggleQRCode() {
     const qrCodeContainer = document.getElementById('storageQRCodeContainer');
@@ -209,44 +259,6 @@ function updateCurrentPlayerNameVisibility() {
     const isCurrentPlayerNameVisible = document.getElementById('toggleCurrentPlayerName').checked;
     currentPlayerNameDiv.style.display = isCurrentPlayerNameVisible ? 'block' : 'none';
 }
-
-// Инициализация состояния кнопок при загрузке
-document.addEventListener('DOMContentLoaded', function() {
-    // Проверяем и загружаем состояние из локального хранилища
-    const isReportIssueVisible = localStorage.getItem('toggleReportIssue');
-    const isToggleInterfaceVisible = localStorage.getItem('toggleToggleInterface');
-    const isLanguageVisible = localStorage.getItem('toggleLanguage');
-    const isThemeToggleVisible = localStorage.getItem('toggleTheme');
-
-    // Устанавливаем состояние переключателей
-    document.getElementById('toggleReportIssue').checked = (isReportIssueVisible === 'true') || (isReportIssueVisible === null);
-    document.getElementById('toggleToggleInterface').checked = (isToggleInterfaceVisible === 'true') || (isToggleInterfaceVisible === null);
-    document.getElementById('toggleLanguage').checked = (isLanguageVisible === 'true') || (isLanguageVisible === null);
-    document.getElementById('toggleTheme').checked = (isThemeToggleVisible === 'true') || (isThemeToggleVisible === null);
-
-    // Сохраняем состояние в локальное хранилище, если оно не было установлено
-    if (isReportIssueVisible === null) {
-        localStorage.setItem('toggleReportIssue', 'true');
-    }
-    if (isToggleInterfaceVisible === null) {
-        localStorage.setItem('toggleToggleInterface', 'true');
-    }
-    if (isLanguageVisible === null) {
-        localStorage.setItem('toggleLanguage', 'true');
-    }
-    if (isThemeToggleVisible === null) {
-        localStorage.setItem('toggleTheme', 'true');
-    }
-
-    // Обновляем видимость кнопок
-    updateButtonVisibility();
-
-    // Обработчики событий для переключателей
-    document.getElementById('toggleReportIssue').addEventListener('change', updateButtonVisibility);
-    document.getElementById('toggleToggleInterface').addEventListener('change', updateButtonVisibility);
-    document.getElementById('toggleLanguage').addEventListener('change', updateButtonVisibility);
-    document.getElementById('toggleTheme').addEventListener('change', updateButtonVisibility);
-});
 
 function openIssuePage() {
     const repoUrl = 'https://github.com/kzuev/dartcount/issues/new'; // Замените USERNAME и REPO на ваши данные
@@ -2393,22 +2405,26 @@ function addSyncHistory(action) {
 }
 
 // Автоматическая синхронизация
-let autoSyncInterval;
-
 function startAutoSync() {
-    if (autoSyncInterval) return;
-    
-    autoSyncInterval = setInterval(async () => {
-        const { sessionId, password } = sessions.getSessionFromLocalStorage();
-        if (sessionId && password) {
+    const syncInterval = 30000; // 30 секунд
+    let lastSyncTime = 0;
+    let syncInProgress = false;
+
+    setInterval(async () => {
+        const now = Date.now();
+        if (now - lastSyncTime >= syncInterval && !syncInProgress) {
+            syncInProgress = true;
             try {
                 await sessions.sync();
-                addSyncHistory('Автоматическая синхронизация');
+                lastSyncTime = now;
             } catch (error) {
                 console.error('Ошибка автоматической синхронизации:', error);
+                // Не обновляем lastSyncTime при ошибке, чтобы попробовать снова в следующем интервале
+            } finally {
+                syncInProgress = false;
             }
         }
-    }, 30000); // Синхронизация каждые 30 секунд
+    }, 1000); // Проверяем каждую секунду
 }
 
 function stopAutoSync() {

@@ -7,11 +7,21 @@ const firebaseConfig = {
     storageBucket: "dartcount-e63d2.appspot.com",
     messagingSenderId: "329421909163",
     appId: "1:329421909163:web:ae62ea44fb8a3d64075bee"
-  };
+};
 
 // Инициализация Firebase
 firebase.initializeApp(firebaseConfig);
 const database = firebase.database();
+const auth = firebase.auth();
+
+// Проверка состояния аутентификации
+auth.onAuthStateChanged((user) => {
+    if (user) {
+        console.log('Пользователь авторизован:', user.email);
+    } else {
+        console.log('Пользователь не авторизован');
+    }
+});
 
 // Функции для работы с сессиями
 const sessions = {
@@ -29,11 +39,21 @@ const sessions = {
         };
 
         try {
+            // Создаем пользователя с паролем сессии
+            const userCredential = await auth.createUserWithEmailAndPassword(
+                `${sessionId}@dartcount.com`,
+                password
+            );
+
+            // Сохраняем данные сессии
             await database.ref(`sessions/${sessionId}`).set(sessionData);
             this.saveSessionToLocalStorage(sessionId, password);
             return { sessionId, password };
         } catch (error) {
             console.error('Ошибка при создании сессии:', error);
+            if (error.code === 'auth/configuration-not-found') {
+                console.error('Ошибка конфигурации Firebase: не включена аутентификация по email/password');
+            }
             throw error;
         }
     },
@@ -41,14 +61,21 @@ const sessions = {
     // Подключение к существующей сессии
     connect: async function(sessionId, password) {
         try {
+            // Аутентифицируем пользователя
+            await auth.signInWithEmailAndPassword(
+                `${sessionId}@dartcount.com`,
+                password
+            );
+
             const snapshot = await database.ref(`sessions/${sessionId}`).once('value');
             const sessionData = snapshot.val();
 
-            if (!sessionData || sessionData.password !== password) {
-                throw new Error('Неверный ID сессии или пароль');
+            if (!sessionData) {
+                throw new Error('Сессия не найдена');
             }
 
             this.saveSessionToLocalStorage(sessionId, password);
+            this.updateLocalStorageData(sessionData.data);
             return sessionData;
         } catch (error) {
             console.error('Ошибка при подключении к сессии:', error);
@@ -59,16 +86,63 @@ const sessions = {
     // Синхронизация данных
     sync: async function() {
         const { sessionId, password } = this.getSessionFromLocalStorage();
-        if (!sessionId || !password) return;
+        if (!sessionId || !password) {
+            console.log('Нет активной сессии для синхронизации');
+            return;
+        }
 
         try {
+            // Проверяем текущее состояние аутентификации
+            if (!auth.currentUser) {
+                console.log('Попытка повторной аутентификации...');
+                try {
+                    await auth.signInWithEmailAndPassword(
+                        `${sessionId}@dartcount.com`,
+                        password
+                    );
+                    console.log('Аутентификация успешна');
+                } catch (authError) {
+                    console.error('Ошибка аутентификации:', authError);
+                    if (authError.code === 'auth/invalid-login-credentials') {
+                        console.log('Неверные учетные данные, очищаем сессию');
+                        await this.clearSession();
+                        return;
+                    }
+                    throw authError;
+                }
+            }
+
+            // Проверяем существование сессии в базе данных
+            const sessionRef = database.ref(`sessions/${sessionId}`);
+            const snapshot = await sessionRef.once('value');
+            const sessionData = snapshot.val();
+
+            if (!sessionData) {
+                console.log('Сессия не найдена в базе данных, очищаем локальную сессию');
+                await this.clearSession();
+                return;
+            }
+
             const localData = this.getLocalStorageData();
-            await database.ref(`sessions/${sessionId}`).update({
+            await sessionRef.update({
                 data: localData,
                 lastSync: Date.now()
             });
+            console.log('Синхронизация успешно завершена');
         } catch (error) {
             console.error('Ошибка при синхронизации:', error);
+            if (error.code === 'auth/configuration-not-found') {
+                console.error('Ошибка конфигурации Firebase: не включена аутентификация по email/password');
+            } else if (error.code === 'auth/user-not-found') {
+                console.error('Пользователь не найден');
+                await this.clearSession();
+            } else if (error.code === 'auth/wrong-password') {
+                console.error('Неверный пароль');
+                await this.clearSession();
+            } else if (error.code === 'auth/invalid-login-credentials') {
+                console.error('Неверные учетные данные');
+                await this.clearSession();
+            }
             throw error;
         }
     },
@@ -79,11 +153,19 @@ const sessions = {
         if (!sessionId || !password) return;
 
         try {
+            // Проверяем аутентификацию
+            if (!auth.currentUser) {
+                await auth.signInWithEmailAndPassword(
+                    `${sessionId}@dartcount.com`,
+                    password
+                );
+            }
+
             const snapshot = await database.ref(`sessions/${sessionId}`).once('value');
             const sessionData = snapshot.val();
 
-            if (!sessionData || sessionData.password !== password) {
-                throw new Error('Неверный ID сессии или пароль');
+            if (!sessionData) {
+                throw new Error('Сессия не найдена');
             }
 
             this.updateLocalStorageData(sessionData.data);
@@ -164,7 +246,15 @@ const sessions = {
     },
 
     // Очистка информации о сессии
-    clearSession: function() {
+    clearSession: async function() {
+        const { sessionId } = this.getSessionFromLocalStorage();
+        if (sessionId) {
+            try {
+                await auth.signOut();
+            } catch (error) {
+                console.error('Ошибка при выходе из сессии:', error);
+            }
+        }
         localStorage.removeItem('currentSessionId');
         localStorage.removeItem('currentSessionPassword');
     }

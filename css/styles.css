@@ -935,3 +935,284 @@ body.light-theme .info-circle {
 .github-link svg:hover {
     opacity: 0.7;
 }
+
+@media screen and (max-width: 768px) {
+    .container {
+        padding: 15px;
+        margin: 10px;
+        width: calc(100% - 30px);
+        max-width: none;
+        gap: 20px;
+    }
+
+    h1 {
+        font-size: 36px;
+        margin: 45px 0 10px 0;
+        line-height: 1.2;
+    }
+
+    .theme-selection {
+        position: absolute;
+        top: 15px;
+        right: 10px;
+        gap: 3px;
+        z-index: 10;
+        display: flex;
+        flex-wrap: nowrap;
+        justify-content: flex-end;
+        width: auto;
+        max-width: none;
+    }
+
+    .main-menu {
+        min-width: auto;
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .menu-button {
+        font-size: 1.3em;
+        height: auto;
+        min-height: 60px;
+        margin: 5px auto;
+        padding: 12px 20px;
+        width: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 15px;
+    }
+
+    .emoji {
+        width: 30px;
+        height: 30px;
+        margin: 0;
+    }
+
+    .score-board {
+        display: flex;
+        flex-direction: row;
+        gap: 10px;
+        font-size: 3em;
+        width: 100%;
+        justify-content: center;
+    }
+
+    .score-column {
+        min-width: auto;
+        width: 45%;
+        min-height: 120px;
+        padding: 10px;
+        flex-shrink: 1;
+    }
+
+    .checkout-suggestions {
+        font-size: 0.35em;
+    }
+
+    .legs-info {
+        font-size: 0.45em;
+    }
+
+    .language-button, #themeToggle, .info-circle {
+        width: 32px;
+        height: 32px;
+        font-size: 0.85em;
+        padding: 0;
+    }
+
+    .modal-content {
+        width: calc(100% - 30px);
+        max-width: none;
+        padding: 15px;
+        margin: 10px;
+        max-height: 85vh;
+    }
+
+    .players-modal-content {
+        width: calc(100% - 30px);
+        padding: 15px;
+    }
+
+    .throws-buttons {
+        gap: 15px;
+        flex-wrap: wrap;
+    }
+
+    .throw-button {
+        width: 70px;
+        height: 70px;
+        font-size: 1.8em;
+    }
+
+    .player-stat {
+        width: 100%;
+        margin: 5px 0;
+    }
+
+    .game-stats {
+        padding: 10px;
+        gap: 10px;
+    }
+
+    .close-modal {
+        font-size: 24px;
+        right: 10px;
+        top: 10px;
+        padding: 5px;
+    }
+
+    .settings {
+        font-size: 1.2em;
+        gap: 20px;
+        width: 100%;
+    }
+
+    .settings select, 
+    .settings button {
+        width: 100%;
+        max-width: none;
+    }
+
+    .player-count {
+        width: 100%;
+        justify-content: space-between;
+    }
+
+    .score-input {
+        flex-direction: column;
+        align-items: center;
+        gap: 10px;
+        width: 100%;
+        max-width: 250px;
+        margin: 0 auto;
+    }
+
+    .score-input input[type="text"] {
+        width: 100%;
+        max-width: none;
+        height: 50px;
+        font-size: 1.5em;
+        text-align: center;
+    }
+
+    .score-input .button-container {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        gap: 8px;
+        width: 100%;
+    }
+
+    .score-input .button-container button {
+        width: 100%;
+        height: 45px;
+        margin: 0;
+    }
+}
+
+@media screen and (max-width: 480px) {
+    h1 {
+        font-size: 26px;
+        margin: 45px 0 10px 0;
+    }
+
+    .menu-button {
+        font-size: 1.1em;
+        min-height: 50px;
+        padding: 10px 15px;
+    }
+
+    .emoji {
+        width: 25px;
+        height: 25px;
+    }
+
+    .score-board {
+        font-size: 2.5em;
+        gap: 5px;
+    }
+
+    .score-column {
+        width: 48%;
+        min-height: 100px;
+        padding: 8px;
+    }
+
+    .checkout-suggestions {
+        font-size: 0.4em;
+        margin-top: 5px;
+    }
+
+    .legs-info {
+        font-size: 0.5em;
+        margin-top: 5px;
+    }
+
+    .score-input {
+        max-width: 200px;
+        gap: 8px;
+    }
+
+    .score-input input[type="text"] {
+        height: 45px;
+        font-size: 1.3em;
+    }
+
+    .score-input .button-container {
+        gap: 6px;
+    }
+
+    .score-input .button-container button {
+        height: 40px;
+        font-size: 1em;
+    }
+
+    .modal-content {
+        padding: 12px;
+        margin: 8px;
+    }
+
+    .throw-button {
+        width: 55px;
+        height: 55px;
+        font-size: 1.6em;
+    }
+
+    .player-stats {
+        padding: 8px;
+    }
+
+    .stat-item {
+        font-size: 0.85em;
+        padding: 4px;
+    }
+
+    .theme-selection {
+        top: 20px;
+        gap: 2px;
+        width: auto;
+        max-width: none;
+    }
+
+    .language-button, #themeToggle, .info-circle {
+        width: 28px;
+        height: 28px;
+        font-size: 0.8em;
+    }
+
+    .settings {
+        font-size: 1.1em;
+        gap: 15px;
+    }
+
+    .checkout-suggestions {
+        font-size: 0.4em;
+    }
+
+    .legs-info {
+        font-size: 0.5em;
+    }
+}

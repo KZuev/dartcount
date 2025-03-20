@@ -282,6 +282,15 @@ function finishLeg() {
     const player = players[currentPlayer];
     const currentTime = new Date();
 
+    // Сохраняем текущий счет перед его изменением 
+    lastScores.push({
+        playerIndex: currentPlayer,
+        score: player.score,
+        legIndex: player.history.length - 1,
+        throwTimes: [...player.throwTimes], // Сохраняем копию времени бросков
+        totalPoints: player.totalPoints // Сохраняем текущие очки
+    });
+
     // Обновляем данные игрока
     const legScore = player.score;
     player.throws += 1;
@@ -298,6 +307,11 @@ function finishLeg() {
     // Показываем модальное окно с количеством бросков
     showThrowsModal(currentPlayer + 1, player.legWins)
         .then(throwsToFinish => {
+            // Если throwsToFinish равен null, значит бросок был отменен
+            if (throwsToFinish === null) {
+                return;
+            }
+
             // Обновляем статистику игрока на основе данных из модального окна
             player.throws += throwsToFinish - 1; // Учитываем дополнительные броски
 
@@ -1374,7 +1388,6 @@ function showThrowsModal(playerNumber, legWins) {
         const modal = document.getElementById('throwsModal');
         const scoreInput = document.getElementById('score');
         
-        
         scoreInput.disabled = true;
         
         const content = modal.querySelector('.modal-content');
@@ -1388,7 +1401,32 @@ function showThrowsModal(playerNumber, legWins) {
                 <button class="throw-button" data-throws="2">2</button>
                 <button class="throw-button" data-throws="3">3</button>
             </div>
+            <div class="button-container">
+                <button id="cancelThrowButton" style="background-color: #ff4444;">Отменить</button>
+            </div>
         `;
+
+        // Добавляем обработчик для кнопки отмены
+        document.getElementById('cancelThrowButton').onclick = () => {
+            // Отменяем последний бросок
+            const player = players[currentPlayer];
+            player.score = lastScores[lastScores.length - 1].score; // Восстанавливаем предыдущий счет
+            player.history[player.history.length - 1].pop(); // Удаляем последний бросок
+            player.throws -= 3; // Уменьшаем количество бросков
+            player.legWins -= 1; // Уменьшаем количество выигранных легов
+            
+            // Закрываем модальное окно
+            modal.classList.remove('active');
+            scoreInput.disabled = false;
+            scoreInput.value = '';
+            scoreInput.focus();
+            
+            // Обновляем отображение
+            updateScoreBoard();
+            updateStatsBoard();
+            
+            resolve(null); // Резолвим промис с null чтобы показать что бросок был отменен
+        };
 
         function handleThrow(throws) {
             content.innerHTML = `
@@ -1623,35 +1661,22 @@ function undoScore() {
         return;
     }
 
-    const { playerIndex, score, legIndex } = lastScores.pop(); // Извлекаем последний элемент и удаляем его из массива
-    const player = players[playerIndex];
+    const lastScore = lastScores.pop(); // Извлекаем последний элемент
+    const player = players[lastScore.playerIndex];
 
-    // Проверяем, не превышает ли восстановленный счет максимальный
-    if (player.score + score < 0) { 
-        alert('Невозможно отменить этот ход, так как счет не может быть отрицательным.');
-        return;
+    // Восстанавливаем все значения
+    player.score = lastScore.score; 
+    player.throws--; 
+    player.history[lastScore.legIndex].pop();
+    
+    // Если это был закрывающий бросок, также отменяем победу в леге
+    if (player.score === 0) {
+        player.legWins--;
     }
 
-    // Проверяем, не превышает ли восстановленный счет максимальный счет игры
-    if (player.score + score > gameScore) {
-        alert(`Невозможно отменить этот ход, так как счет не может превышать ${gameScore}.`);
-        return;
-    }
-
-    // Восстанавливаем счет игрока
-    player.score += score; // Уменьшаем счет на введенные очки
-    player.throws--; // Уменьшаем количество бросков
-    player.totalPoints -= score; // Уменьшаем общие очки
-    player.history[legIndex].pop(); // Удаляем последний бросок из истории
-
-    // // Если история лега пуста, удаляем лег
-    // if (player.history[legIndex].length === 0 && legIndex > 0) {
-    //     player.history.pop();
-    // }
-
-    currentPlayer = playerIndex; // Устанавливаем текущего игрока
-    updateScoreBoard(); // Обновляем табло счета
-    updateStatsBoard(); // Обновляем статистику
+    currentPlayer = lastScore.playerIndex;
+    updateScoreBoard();
+    updateStatsBoard();
 }
 
 function updateStatsBoard() {

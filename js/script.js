@@ -1573,8 +1573,21 @@ function submitScore() {
         return;
     }
 
-    // Сохраняем текущее состояние перед изменением
-    lastScores.push({ playerIndex: currentPlayer, score: score, legIndex: player.history.length - 1 }); // Сохраняем фактические очки
+    // Сохраняем полное состояние перед изменением
+    lastScores.push({
+        playerIndex: currentPlayer,
+        score: player.score, // Сохраняем текущий счет до изменения
+        legIndex: player.history.length - 1,
+        throwTimes: [...player.throwTimes], // Сохраняем копию времени бросков
+        totalPoints: player.totalPoints // Сохраняем текущие очки
+    });
+
+    // Далее обновляем состояние игрока
+    player.score = remainingScore;
+    player.throws += 3;
+    player.totalPoints += score;
+    player.history[player.history.length - 1].push(score);
+    player.throwTimes.push(new Date());
 
     // Если введенное значение корректное и не превышает оставшиеся очки
     player.score = remainingScore;
@@ -1665,8 +1678,10 @@ function undoScore() {
     const player = players[lastScore.playerIndex];
 
     // Восстанавливаем все значения
-    player.score = lastScore.score; 
-    player.throws--; 
+    player.score = lastScore.score;
+    player.throws = lastScore.throwTimes.length;
+    player.totalPoints = lastScore.totalPoints;
+    player.throwTimes = [...lastScore.throwTimes];
     player.history[lastScore.legIndex].pop();
     
     // Если это был закрывающий бросок, также отменяем победу в леге

@@ -1582,14 +1582,7 @@ function submitScore() {
         totalPoints: player.totalPoints // Сохраняем текущие очки
     });
 
-    // Далее обновляем состояние игрока
-    player.score = remainingScore;
-    player.throws += 3;
-    player.totalPoints += score;
-    player.history[player.history.length - 1].push(score);
-    player.throwTimes.push(new Date());
-
-    // Если введенное значение корректное и не превышает оставшиеся очки
+    // Обновляем состояние игрока
     player.score = remainingScore;
     player.throws += 3;
     player.totalPoints += score;

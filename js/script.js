@@ -1299,33 +1299,46 @@ function handleEnter(event) {
     if (event.key === 'Enter') {
         event.preventDefault();
         const scoreInput = document.getElementById('score');
-        const expression = scoreInput.value;
+        let expression = scoreInput.value.trim().toUpperCase();
         
-        if (expression.includes('+')) {
-            try {
-                
+        try {
+            // Обработка D и T нотации
+            expression = expression.replace(/D(\d+)/g, (match, number) => {
+                const value = parseInt(number);
+                if (value < 1 || value > 20) throw new Error('Сектор должен быть от 1 до 20');
+                return (value * 2).toString();
+            }).replace(/T(\d+)/g, (match, number) => {
+                const value = parseInt(number);
+                if (value < 1 || value > 20) throw new Error('Сектор должен быть от 1 до 20');
+                return (value * 3).toString();
+            });
+
+            if (expression.includes('+')) {
                 const sum = expression.split('+')
-                    .map(num => parseInt(num.trim()))
-                    .reduce((acc, curr) => {
-                        if (isNaN(curr) || curr < 0 || curr > 60) {
-                            throw new Error('Каждое число должно быть от 0 до 60');
-                        }
-                        return acc + curr;
-                    }, 0);
+                    .map(num => {
+                        const value = parseInt(num.trim());
+                        if (isNaN(value)) throw new Error('Некорректное значение');
+                        if (value < 0 || value > 60) throw new Error('Каждое число должно быть от 0 до 60');
+                        return value;
+                    })
+                    .reduce((acc, curr) => acc + curr, 0);
 
                 if (sum > 180) {
-                    showErrorModal('Сумма не может быть больше 180');
-                    return;
+                    throw new Error('Сумма не может быть больше 180');
                 }
 
                 scoreInput.value = sum.toString();
-                submitScore();
-            } catch (error) {
-                showErrorModal(error.message);
+            } else {
+                const value = parseInt(expression);
+                if (isNaN(value)) throw new Error('Некорректное значение');
+                if (value < 0 || value > 180) throw new Error('Значение должно быть от 0 до 180');
+                scoreInput.value = value.toString();
             }
-        } else {
             
             submitScore();
+            
+        } catch (error) {
+            showErrorModal(error.message);
         }
     }
 }

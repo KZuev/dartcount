@@ -89,15 +89,32 @@
         <div class="score-board" id="scoreBoard"></div>
         <div class="score-input" id="scoreInput" style="display: none;">
             <label id="scoreLabel" for="score">Очки:</label>
-            <input type="text" 
-                   id="score" 
-                   pattern="[\d+\s]*" 
-                   inputmode="numeric" 
-                   min="1" 
-                   max="180" 
-                   autofocus 
-                   onkeypress="handleEnter(event)"
-                   style="width: 160px; font-size: 1.5em;">
+            <div class="score-input-container">
+                <input type="text" 
+                       id="score" 
+                       pattern="[\d+\s]*" 
+                       inputmode="numeric" 
+                       min="1" 
+                       max="180" 
+                       autofocus 
+                       onkeypress="handleEnter(event)">
+                <span class="score-info-icon" role="img" aria-label="информация">ℹ️</span>
+                <div class="score-tooltip">
+                    <h4>Как вводить очки:</h4>
+                    <p><strong>Простой ввод:</strong><br>
+                    • Любое число от 0 до 180</p>
+                    <p><strong>Сложение бросков:</strong><br>
+                    • Используйте + между числами<br>
+                    • Пример: 20+20+20</p>
+                    <p><strong>Специальные броски:</strong><br>
+                    • D20 = удвоение (20×2 = 40 очков)<br>
+                    • T20 = утроение (20×3 = 60 очков)</p>
+                    <p><strong>Ограничения:</strong><br>
+                    • Максимум 180 очков за подход<br>
+                    • Только положительные числа<br>
+                    • Нельзя оставлять 1 очко на финише</p>
+                </div>
+            </div>
             <button id="submitScoreButton" onclick="submitScore()">Отправить очки</button>
             <button id="undoScoreButton" title="Отменить ввод (Ctrl + Z)" onclick="undoScore()">Отменить</button>
             <button id="restartBtn" onclick="restartGame()" style="display: none;">↻</button>

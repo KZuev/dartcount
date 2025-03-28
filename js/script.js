@@ -1302,17 +1302,21 @@ function handleEnter(event) {
         let expression = scoreInput.value.trim().toUpperCase();
         
         try {
-            // Обработка D и T нотации
-            expression = expression.replace(/D(\d+)/g, (match, number) => {
-                const value = parseInt(number);
-                if (value < 1 || value > 20) throw new Error('Сектор должен быть от 1 до 20');
-                return (value * 2).toString();
-            }).replace(/T(\d+)/g, (match, number) => {
-                const value = parseInt(number);
-                if (value < 1 || value > 20) throw new Error('Сектор должен быть от 1 до 20');
-                return (value * 3).toString();
-            });
+            // Обработка специальной нотации D и T
+            if (expression.includes('D') || expression.includes('T')) {
+                expression = expression.replace(/D(\d+)/g, (match, number) => {
+                    const value = parseInt(number);
+                    if (value < 1 || value > 20) throw new Error('Сектор должен быть от 1 до 20');
+                    return (value * 2).toString();
+                }).replace(/T(\d+)/g, (match, number) => {
+                    const value = parseInt(number);
+                    if (value < 1 || value > 20) throw new Error('Сектор должен быть от 1 до 20');
+                    return (value * 3).toString();
+                });
+                scoreInput.value = expression;
+            }
 
+            // Обработка сложения
             if (expression.includes('+')) {
                 const sum = expression.split('+')
                     .map(num => {
@@ -1323,16 +1327,8 @@ function handleEnter(event) {
                     })
                     .reduce((acc, curr) => acc + curr, 0);
 
-                if (sum > 180) {
-                    throw new Error('Сумма не может быть больше 180');
-                }
-
+                if (sum > 180) throw new Error('Сумма не может быть больше 180');
                 scoreInput.value = sum.toString();
-            } else {
-                const value = parseInt(expression);
-                if (isNaN(value)) throw new Error('Некорректное значение');
-                if (value < 0 || value > 180) throw new Error('Значение должно быть от 0 до 180');
-                scoreInput.value = value.toString();
             }
             
             submitScore();

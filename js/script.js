@@ -2051,7 +2051,7 @@ function showGameStats() {
     confettiButton.onclick = toggleConfetti;
 
     const closeButton = document.createElement('button');
-    closeButton.textContent = 'Закрыть';
+    closeButton.textContent = 'Сохранить и закрыть';
     closeButton.style.cssText = `
         padding: 8px 15px;
         font-size: 1em;
@@ -2099,7 +2099,7 @@ function closeGameStats() {
     
     document.removeEventListener('keydown', handleGameStatsKeyPress);
     saveGameResults();
-    restartGame();
+    performRestart();
 }
 
 

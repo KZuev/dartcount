@@ -17,6 +17,7 @@ let playerToRemoveIndex = null;
 let isInterfaceVisible = true;
 let html5QrCode;
 let stream;
+let clockInterval;
 
 // Инициализация при загрузке DOM
 document.addEventListener('DOMContentLoaded', function() {
@@ -72,6 +73,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Инициализация настроек заставки
     const settings = {
         isClockVisible: localStorage.getItem('toggleScreensaverClock') === 'true' || localStorage.getItem('toggleScreensaverClock') === null,
+        isClockMoving: localStorage.getItem('toggleClockMovement') === 'true' || localStorage.getItem('toggleClockMovement') === null,
         isDateVisible: localStorage.getItem('toggleScreensaverDate') === 'true' || localStorage.getItem('toggleScreensaverDate') === null,
         isWeekdayVisible: localStorage.getItem('toggleScreensaverWeekday') === 'true' || localStorage.getItem('toggleScreensaverWeekday') === null,
         showSeconds: localStorage.getItem('toggleScreensaverSeconds') === 'true' || localStorage.getItem('toggleScreensaverSeconds') === null,
@@ -82,6 +84,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Установка начальных значений
     document.getElementById('toggleScreensaverClock').checked = settings.isClockVisible;
+    document.getElementById('toggleClockMovement').checked = settings.isClockMoving;
     document.getElementById('toggleScreensaverDate').checked = settings.isDateVisible;
     document.getElementById('toggleScreensaverWeekday').checked = settings.isWeekdayVisible;
     document.getElementById('toggleScreensaverSeconds').checked = settings.showSeconds;
@@ -92,6 +95,15 @@ document.addEventListener('DOMContentLoaded', function() {
     // Обновление отображения значений
     document.getElementById('clockSizeValue').textContent = `${settings.clockSize}em`;
     document.getElementById('dateSizeValue').textContent = `${settings.dateSize}em`;
+
+    document.getElementById('toggleClockMovement').addEventListener('change', function() {
+        localStorage.setItem('toggleClockMovement', this.checked);
+        if (!this.checked) {
+            clearInterval(moveInterval);
+        } else if (!isInterfaceVisible) {
+            moveInterval = setInterval(moveClockRandomly, 50);
+        }
+    });
 
     // Обработчики изменений
     ['toggleScreensaverClock', 'toggleScreensaverDate', 'toggleScreensaverWeekday', 'toggleScreensaverSeconds'].forEach(id => {
@@ -1160,6 +1172,46 @@ function toggleInterface() {
     const isClockEnabled = document.getElementById('toggleScreensaverClock').checked;
     const clockColor = document.getElementById('clockColor').value;
     
+    // Добавляем глобальные переменные для позиции и направления
+    let moveX = 2;
+    let moveY = 2;
+    const clockElement = document.getElementById('floatingClock');
+    const clockRect = clockElement.getBoundingClientRect();
+    // Устанавливаем начальную позицию с учетом размеров часов
+    let posX = Math.random() * (window.innerWidth - clockRect.width);
+    let posY = Math.random() * (window.innerHeight - clockRect.height);
+
+    function moveClockRandomly() {
+        // Получаем актуальные размеры окна и часов
+        const windowWidth = window.innerWidth;
+        const windowHeight = window.innerHeight;
+        const clockElement = document.getElementById('floatingClock');
+        const clockRect = clockElement.getBoundingClientRect();
+        const clockWidth = clockRect.width;
+        const clockHeight = clockRect.height;
+    
+        // Проверяем границы до обновления позиции
+        if (posX <= 0 || posX >= windowWidth - clockWidth) {
+            moveX = -moveX;
+            // Корректируем позицию внутрь границ
+            posX = Math.max(0, Math.min(posX, windowWidth - clockWidth));
+        }
+        
+        if (posY <= 0 || posY >= windowHeight - clockHeight) {
+            moveY = -moveY;
+            // Корректируем позицию внутрь границ
+            posY = Math.max(0, Math.min(posY, windowHeight - clockHeight));
+        }
+    
+        // Обновляем позицию с учетом направления движения
+        posX += moveX;
+        posY += moveY;
+    
+        // Применяем позицию с гарантированными границами
+        clockElement.style.left = `${posX}px`;
+        clockElement.style.top = `${posY}px`;
+    }
+
     isInterfaceVisible = !isInterfaceVisible;
     interfaceElements.forEach(element => {
         element.classList.toggle('hidden', !isInterfaceVisible);
@@ -1175,6 +1227,7 @@ function toggleInterface() {
         body.style.backgroundRepeat = 'no-repeat';
         floatingClock.classList.remove('visible');
         clearInterval(clockInterval);
+        clearInterval(moveInterval);
     } else {
         body.classList.add('hidden-background');
         body.style.backgroundImage = 'none';
@@ -1182,13 +1235,43 @@ function toggleInterface() {
         if (isClockEnabled) {
             floatingClock.classList.add('visible');
             floatingClock.style.color = clockColor;
+            floatingClock.style.position = 'fixed';
+            floatingClock.style.transition = 'left 0.1s linear, top 0.1s linear';
+            
+            // Устанавливаем начальную позицию
+            floatingClock.style.left = `${posX}px`;
+            floatingClock.style.top = `${posY}px`;
+            
             updateClock();
             clockInterval = setInterval(updateClock, 1000);
+            const isClockMoving = document.getElementById('toggleClockMovement').checked;
+            if (isClockMoving) {
+                moveInterval = setInterval(moveClockRandomly, 50);
+            }
         }
     }
 }
 
-let clockInterval;
+window.addEventListener('resize', function() {
+    if (!isInterfaceVisible) {
+        const floatingClock = document.getElementById('floatingClock');
+        const windowWidth = window.innerWidth;
+        const windowHeight = window.innerHeight;
+        const clockWidth = floatingClock.offsetWidth;
+        const clockHeight = floatingClock.offsetHeight;
+
+        // Проверяем, не выходят ли часы за границы после изменения размера окна
+        let currentX = parseFloat(floatingClock.style.left);
+        let currentY = parseFloat(floatingClock.style.top);
+
+        if (currentX > windowWidth - clockWidth) {
+            floatingClock.style.left = `${windowWidth - clockWidth}px`;
+        }
+        if (currentY > windowHeight - clockHeight) {
+            floatingClock.style.top = `${windowHeight - clockHeight}px`;
+        }
+    }
+});
 
 function updateClock() {
     const now = new Date();

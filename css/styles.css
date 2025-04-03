@@ -1765,3 +1765,14 @@ body.modal-open {
     display: flex;
     pointer-events: none;
 }
+
+.floating-clock.visible {
+    opacity: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    pointer-events: none;
+    white-space: nowrap;
+    position: fixed;
+    transform: none;
+}

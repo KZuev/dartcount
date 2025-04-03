@@ -194,6 +194,45 @@
                 <label>
                     <input type="checkbox" id="toggleCurrentPlayerName" checked>Показывать текущего и следующего игрока</label>
             </div> 
+            <h3>Настройки заставки</h3>
+            <div class="toggle-container">
+                <label>
+                    <input type="checkbox" id="toggleScreensaverClock" checked>
+                    Показывать часы при скрытии интерфейса
+                </label>
+            </div>
+            <div class="toggle-container">
+                <label>
+                    <input type="checkbox" id="toggleScreensaverDate" checked>
+                    Показывать дату
+                </label>
+            </div>
+            <div class="toggle-container">
+                <label>
+                    <input type="checkbox" id="toggleScreensaverWeekday" checked>
+                    Показывать день недели
+                </label>
+            </div>
+            <div class="toggle-container">
+                <label>
+                    <input type="checkbox" id="toggleScreensaverSeconds" checked>
+                    Показывать секунды
+                </label>
+            </div>
+            <div class="toggle-container">
+                <input type="color" id="clockColor" value="#3498db">
+                <label for="clockColor">Цвет часов</label>
+            </div>
+            <div class="toggle-container">
+                <label for="clockSize">Размер часов:</label>
+                <input type="range" id="clockSize" min="2" max="25" value=20" step="1">
+                <span id="clockSizeValue">20em</span>
+            </div>
+            <div class="toggle-container">
+                <label for="dateSize">Размер даты:</label>
+                <input type="range" id="dateSize" min="1" max="15" value="10" step="1">
+                <span id="dateSizeValue">10em</span>
+            </div>
             <div class="button-container" style="margin-top: 40px;">
                 <button onclick="closeStorageModal()">Закрыть</button>
             </div>
@@ -372,6 +411,11 @@
             </div>
         </div>
     </div>
+    </div>
+    <div id="floatingClock" class="floating-clock">
+        <div class="time"></div>
+        <div class="weekday"></div>
+        <div class="date"></div>
     </div>
     <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>

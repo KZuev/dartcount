@@ -68,6 +68,70 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Обновляем видимость текущего игрока
     updateCurrentPlayerNameVisibility();
+
+    // Инициализация настроек заставки
+    const settings = {
+        isClockVisible: localStorage.getItem('toggleScreensaverClock') === 'true' || localStorage.getItem('toggleScreensaverClock') === null,
+        isDateVisible: localStorage.getItem('toggleScreensaverDate') === 'true' || localStorage.getItem('toggleScreensaverDate') === null,
+        isWeekdayVisible: localStorage.getItem('toggleScreensaverWeekday') === 'true' || localStorage.getItem('toggleScreensaverWeekday') === null,
+        showSeconds: localStorage.getItem('toggleScreensaverSeconds') === 'true' || localStorage.getItem('toggleScreensaverSeconds') === null,
+        clockColor: localStorage.getItem('clockColor') || '#3498db',
+        clockSize: localStorage.getItem('clockSize') || '20',
+        dateSize: localStorage.getItem('dateSize') || '10'
+    };
+
+    // Установка начальных значений
+    document.getElementById('toggleScreensaverClock').checked = settings.isClockVisible;
+    document.getElementById('toggleScreensaverDate').checked = settings.isDateVisible;
+    document.getElementById('toggleScreensaverWeekday').checked = settings.isWeekdayVisible;
+    document.getElementById('toggleScreensaverSeconds').checked = settings.showSeconds;
+    document.getElementById('clockColor').value = settings.clockColor;
+    document.getElementById('clockSize').value = settings.clockSize;
+    document.getElementById('dateSize').value = settings.dateSize;
+    
+    // Обновление отображения значений
+    document.getElementById('clockSizeValue').textContent = `${settings.clockSize}em`;
+    document.getElementById('dateSizeValue').textContent = `${settings.dateSize}em`;
+
+    // Обработчики изменений
+    ['toggleScreensaverClock', 'toggleScreensaverDate', 'toggleScreensaverWeekday', 'toggleScreensaverSeconds'].forEach(id => {
+        document.getElementById(id).addEventListener('change', function() {
+            localStorage.setItem(id, this.checked);
+            updateClockDisplay();
+        });
+    });
+
+    document.getElementById('clockSize').addEventListener('input', function() {
+        localStorage.setItem('clockSize', this.value);
+        document.getElementById('clockSizeValue').textContent = `${this.value}em`;
+        updateClockDisplay();
+    });
+
+    document.getElementById('dateSize').addEventListener('input', function() {
+        localStorage.setItem('dateSize', this.value);
+        document.getElementById('dateSizeValue').textContent = `${this.value}em`;
+        updateClockDisplay();
+    });
+    
+    if (toggleScreensaverClock) {
+        toggleScreensaverClock.checked = isClockVisible === null ? true : isClockVisible === 'true';
+        toggleScreensaverClock.addEventListener('change', function() {
+            localStorage.setItem('toggleScreensaverClock', this.checked);
+            const floatingClock = document.getElementById('floatingClock');
+            if (!isInterfaceVisible) {
+                floatingClock.style.display = this.checked ? 'block' : 'none';
+            }
+        });
+    }
+    
+    if (clockColorPicker) {
+        clockColorPicker.value = clockColor;
+        clockColorPicker.addEventListener('change', function() {
+            localStorage.setItem('clockColor', this.value);
+            const floatingClock = document.getElementById('floatingClock');
+            floatingClock.style.color = this.value;
+        });
+    }
 });
 
 function toggleQRCode() {
@@ -1092,13 +1156,16 @@ const menuButtons = document.querySelectorAll('.menu button');
 
 function toggleInterface() {
     const interfaceElements = document.querySelectorAll('.container, .modal-content, .confetti');
+    const floatingClock = document.getElementById('floatingClock');
+    const isClockEnabled = document.getElementById('toggleScreensaverClock').checked;
+    const clockColor = document.getElementById('clockColor').value;
     
     isInterfaceVisible = !isInterfaceVisible;
     interfaceElements.forEach(element => {
         element.classList.toggle('hidden', !isInterfaceVisible);
     });
 
-    const body = document.body; 
+    const body = document.body;
 
     if (isInterfaceVisible) {
         body.classList.remove('hidden-background');
@@ -1106,10 +1173,70 @@ function toggleInterface() {
         body.style.backgroundSize = 'cover';
         body.style.backgroundPosition = 'center';
         body.style.backgroundRepeat = 'no-repeat';
+        floatingClock.classList.remove('visible');
+        clearInterval(clockInterval);
     } else {
         body.classList.add('hidden-background');
         body.style.backgroundImage = 'none';
+        body.style.backgroundColor = '#11111a';
+        if (isClockEnabled) {
+            floatingClock.classList.add('visible');
+            floatingClock.style.color = clockColor;
+            updateClock();
+            clockInterval = setInterval(updateClock, 1000);
+        }
     }
+}
+
+let clockInterval;
+
+function updateClock() {
+    const now = new Date();
+    const floatingClock = document.getElementById('floatingClock');
+    const showSeconds = document.getElementById('toggleScreensaverSeconds').checked;
+    const isDateVisible = document.getElementById('toggleScreensaverDate').checked;
+    const isWeekdayVisible = document.getElementById('toggleScreensaverWeekday').checked;
+    const clockSize = document.getElementById('clockSize').value;
+    const dateSize = document.getElementById('dateSize').value;
+    const clockColor = document.getElementById('clockColor').value;
+
+    const timeFormatter = new Intl.DateTimeFormat('ru-RU', {
+        hour: '2-digit',
+        minute: '2-digit',
+        second: showSeconds ? '2-digit' : undefined
+    });
+
+    const weekdayFormatter = new Intl.DateTimeFormat('ru-RU', {
+        weekday: 'long'
+    });
+
+    const dateFormatter = new Intl.DateTimeFormat('ru-RU', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric'
+    });
+
+    const timeElement = floatingClock.querySelector('.time');
+    const weekdayElement = floatingClock.querySelector('.weekday');
+    const dateElement = floatingClock.querySelector('.date');
+
+    timeElement.textContent = timeFormatter.format(now);
+    timeElement.style.fontSize = `${clockSize}em`;
+
+    weekdayElement.style.display = isWeekdayVisible ? 'block' : 'none';
+    dateElement.style.display = isDateVisible ? 'block' : 'none';
+
+    if (isWeekdayVisible) {
+        weekdayElement.textContent = weekdayFormatter.format(now);
+        weekdayElement.style.fontSize = `${dateSize}em`;
+    }
+
+    if (isDateVisible) {
+        dateElement.textContent = dateFormatter.format(now);
+        dateElement.style.fontSize = `${dateSize}em`;
+    }
+
+    floatingClock.style.color = clockColor;
 }
 
 document.getElementById('toggleInterfaceButton').addEventListener('click', toggleInterface);
@@ -1123,6 +1250,7 @@ document.addEventListener('keydown', function(event) {
 
 document.addEventListener('click', function(event) {
     const interfaceElements = document.querySelectorAll('.container, .modal-content, .confetti');
+    const floatingClock = document.getElementById('floatingClock');
     const isClickOnInterface = Array.from(interfaceElements).some(element => element.contains(event.target));
 
     if (!isClickOnInterface && !isInterfaceVisible) {
@@ -1136,6 +1264,8 @@ document.addEventListener('click', function(event) {
         body.style.backgroundSize = 'cover';
         body.style.backgroundPosition = 'center';
         body.style.backgroundRepeat = 'no-repeat';
+        floatingClock.classList.remove('visible');
+        clearInterval(clockInterval);
     }
 });
 
@@ -1752,11 +1882,11 @@ function restartGame() {
         <h5>Текущий прогресс будет потерян</h5>
         <div class="button-container">
             <button onclick="confirmRestart(true)" 
-                    style="font-size: 1.2em; background-color: var(--accent-color);">
+                    style="font-size: 1.2em; background-color: #ff4444;">
                 Да
             </button>
             <button onclick="confirmRestart(false)" 
-                    style="font-size: 1.2em; background-color: #ff4444;">
+                    style="font-size: 1.2em; background-color: var(--accent-color);">
                 Нет
             </button>
         </div>

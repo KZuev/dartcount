@@ -18,6 +18,52 @@ let isInterfaceVisible = true;
 let html5QrCode;
 let stream;
 let clockInterval;
+let moveInterval;
+let currentCalculation = '';
+
+document.addEventListener('keydown', function(event) {
+    const isInputFocused = document.activeElement.tagName === 'INPUT' || 
+                          document.activeElement.tagName === 'TEXTAREA';
+    
+    // Открытие калькулятора по Ctrl+K
+    if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'k') {
+        event.preventDefault();
+        showCalculator();
+        return;
+    }
+
+    // Управление калькулятором когда он открыт
+    const calculatorModal = document.getElementById('calculatorModal');
+    if (calculatorModal.style.display === 'block') {
+        if (event.key === 'Escape') {
+            closeCalculator();
+            return;
+        }
+
+        // Цифры и операторы
+        if (/[0-9]/.test(event.key)) {
+            appendNumber(event.key);
+        } else if (['+', '-', '*', '/'].includes(event.key)) {
+            appendOperator(event.key);
+        }
+
+        // Enter для подсчета результата
+        if (event.key === 'Enter') {
+            calculateResult();
+        }
+
+        // Backspace для удаления последнего символа
+        if (event.key === 'Backspace') {
+            currentCalculation = currentCalculation.slice(0, -1);
+            document.getElementById('calculatorInput').value = currentCalculation;
+        }
+
+        // C для очистки
+        if (event.key.toLowerCase() === 'c') {
+            clearCalculator();
+        }
+    }
+});
 
 // Инициализация при загрузке DOM
 document.addEventListener('DOMContentLoaded', function() {
@@ -2727,3 +2773,61 @@ window.addEventListener('click', function(event) {
         modal.style.display = 'none';
     }
 });
+
+function showCalculator() {
+    document.getElementById('calculatorModal').style.display = 'block';
+    document.getElementById('calculatorInput').focus();
+    currentCalculation = '';
+}
+
+function closeCalculator() {
+    document.getElementById('calculatorModal').style.display = 'none';
+    document.getElementById('score').focus();
+}
+
+function appendNumber(num) {
+    currentCalculation += num;
+    document.getElementById('calculatorInput').value = currentCalculation;
+}
+
+function appendOperator(op) {
+    // Предотвращаем добавление оператора в начале или после другого оператора
+    if (currentCalculation && !/[+\-*/]$/.test(currentCalculation)) {
+        currentCalculation += op;
+        // Заменяем * на × и / на ÷ для отображения
+        const displayValue = currentCalculation.replace(/\*/g, '×').replace(/\//g, '÷');
+        document.getElementById('calculatorInput').value = displayValue;
+    }
+}
+
+function clearCalculator() {
+    currentCalculation = '';
+    document.getElementById('calculatorInput').value = '';
+}
+
+function calculateResult() {
+    try {
+        // Заменяем × на * и ÷ на / перед вычислением
+        const calcExpression = currentCalculation.replace(/×/g, '*').replace(/÷/g, '/');
+        const result = eval(calcExpression);
+        
+        // Проверяем результат на допустимые значения
+        if (result > 180) {
+            alert('Результат не может быть больше 180');
+            return;
+        }
+        if (result < 0) {
+            alert('Результат не может быть отрицательным');
+            return;
+        }
+        if (!Number.isFinite(result)) {
+            alert('Ошибка: деление на ноль');
+            return;
+        }
+        
+        currentCalculation = result.toString();
+        document.getElementById('calculatorInput').value = result;
+    } catch (e) {
+        alert('Ошибка в вычислении');
+    }
+}

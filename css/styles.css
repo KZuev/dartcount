@@ -1776,3 +1776,43 @@ body.modal-open {
     position: fixed;
     transform: none;
 }
+
+.calculator-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 5px;
+    margin-top: 10px;
+}
+
+.calculator-grid button {
+    padding: 15px;
+    font-size: 1.2em;
+    border: 1px solid var(--accent-color);
+    background: var(--bg-color);
+    color: var(--text-color);
+    cursor: pointer;
+}
+
+.calculator-grid button:hover {
+    background: var(--accent-color);
+    color: white;
+}
+
+.calculator-hint {
+    font-size: 0.8em;
+    color: var(--text-color);
+    opacity: 0.8;
+    text-align: center;
+    margin-bottom: 10px;
+}
+
+#calculatorInput {
+    width: 100%;
+    padding: 10px;
+    font-size: 1.5em;
+    margin-bottom: 10px;
+    text-align: right;
+    background: var(--bg-color);
+    color: var(--text-color);
+    border: 1px solid var(--accent-color);
+}

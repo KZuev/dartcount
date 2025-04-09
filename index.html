@@ -395,6 +395,32 @@
             </div>
         </div>
     </div>
+    <div id="calculatorModal" class="modal">
+        <div class="modal-content" style="max-width: 300px;">
+            <span class="close-modal" onclick="closeCalculator()">&times;</span>
+            <h2>Калькулятор (Ctrl+K)</h2>
+            <p class="calculator-hint">ESC - закрыть, Enter - посчитать</p>
+            <input type="text" id="calculatorInput" readonly>
+            <div class="calculator-grid">
+                <button onclick="appendNumber('7')">7</button>
+                <button onclick="appendNumber('8')">8</button>
+                <button onclick="appendNumber('9')">9</button>
+                <button onclick="appendOperator('*')">×</button>
+                <button onclick="appendNumber('4')">4</button>
+                <button onclick="appendNumber('5')">5</button>
+                <button onclick="appendNumber('6')">6</button>
+                <button onclick="appendOperator('/')">÷</button>
+                <button onclick="appendNumber('1')">1</button>
+                <button onclick="appendNumber('2')">2</button>
+                <button onclick="appendNumber('3')">3</button>
+                <button onclick="appendOperator('-')">-</button>
+                <button onclick="appendNumber('0')">0</button>
+                <button onclick="clearCalculator()">C</button>
+                <button onclick="calculateResult()">=</button>
+                <button onclick="appendOperator('+')">+</button>
+            </div>
+        </div>
+    </div>
     <!-- Модальное окно для QR-кода -->
     <div id="sessionQRModal" class="modal">
         <div class="modal-content">

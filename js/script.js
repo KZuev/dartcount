@@ -20,6 +20,26 @@ let stream;
 let clockInterval;
 let moveInterval;
 let currentCalculation = '';
+let clickCount = 0;
+let clickTimer = null;
+
+// Обработчик кликов для поля ввода
+document.getElementById('score').addEventListener('click', function() {
+    clickCount++;
+    
+    // Сбрасываем счетчик через 1 секунду бездействия
+    clearTimeout(clickTimer);
+    clickTimer = setTimeout(() => {
+        clickCount = 0;
+    }, 1000);
+
+    // Открываем калькулятор после 3 кликов
+    if (clickCount >= 3) {
+        clickCount = 0;
+        clearTimeout(clickTimer);
+        showCalculator();
+    }
+});
 
 document.addEventListener('keydown', function(event) {
     const isInputFocused = document.activeElement.tagName === 'INPUT' || 

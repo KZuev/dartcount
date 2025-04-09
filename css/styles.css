@@ -1780,14 +1780,15 @@ body.modal-open {
 .calculator-grid {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
-    gap: 5px;
-    margin-top: 10px;
+    gap: 10px;
+    margin: 20px;
+    padding: 0;
 }
 
 .calculator-grid button {
-    padding: 15px;
-    font-size: 1.2em;
-    border: 1px solid var(--accent-color);
+    padding: 30px;
+    font-size: 2.4em;
+    border: 2px solid var(--accent-color);
     background: var(--bg-color);
     color: var(--text-color);
     cursor: pointer;
@@ -1799,20 +1800,31 @@ body.modal-open {
 }
 
 .calculator-hint {
-    font-size: 0.8em;
+    font-size: 1.2em;
     color: var(--text-color);
     opacity: 0.8;
     text-align: center;
-    margin-bottom: 10px;
+    margin-bottom: 15px;
 }
 
 #calculatorInput {
     width: 100%;
-    padding: 10px;
-    font-size: 1.5em;
-    margin-bottom: 10px;
+    padding: 20px;
+    font-size: 2em;
+    margin: 0 0 20px 0;
     text-align: right;
     background: var(--bg-color);
     color: var(--text-color);
-    border: 1px solid var(--accent-color);
+    border: 2px solid var(--accent-color);
+    box-sizing: border-box;
+}
+
+#calculatorModal .modal-content {
+    padding: 20px;
+    max-width: 600px;
+    width: 90%;
+}
+
+.modal-content[style*="max-width: 300px"] {
+    max-width: 600px !important;
 }
